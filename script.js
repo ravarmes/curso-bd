@@ -10,7 +10,8 @@
 const chapters = [
   {
     id: "cap-1",
-    title: "Introdução a Bancos de Dados e a Necessidade de Estrutura",
+    title: "Introdução",
+    fullTitle: "Introdução a Bancos de Dados e a Necessidade de Estrutura",
     slides: `
       <h3>Slides</h3>
       <iframe class="slides-iframe" src="slides/Cap01-Introducao-Slides.pdf#toolbar=0&navpanes=0&view=FitH" width="100%" style="border:0;" loading="lazy"></iframe>
@@ -128,7 +129,8 @@ const chapters = [
   },
   {
     id: "cap-2",
-    title: "Modelagem Conceitual de Dados: O Blueprint do Banco",
+    title: "Modelagem Conceitual",
+    fullTitle: "Modelagem Conceitual de Dados: O Blueprint do Banco",
     slides: `
       <h3>Slides</h3>
       <iframe class="slides-iframe" src="slides/Cap02-ModeloConceitual-Slides.pdf#toolbar=0&navpanes=0&view=FitH" width="100%" style="border:0;" loading="lazy"></iframe>
@@ -236,7 +238,8 @@ const chapters = [
   },
   {
     id: "cap-3",
-    title: "Modelo Lógico Relacional: A Estrutura Formal do Banco",
+    title: "Modelagem Lógica",
+    fullTitle: "Modelo Lógico Relacional: A Estrutura Formal do Banco",
     slides: `
       <h3>Slides</h3>
       <iframe class="slides-iframe" src="slides/Cap03-ModeloLogico-Slides.pdf#toolbar=0&navpanes=0&view=FitH" width="100%" style="border:0;" loading="lazy"></iframe>
@@ -357,7 +360,8 @@ const chapters = [
   },
   {
     id: "cap-4",
-    title: "Modelo Físico e Linguagem SQL",
+    title: "Modelagem Física",
+    fullTitle: "Modelo Físico e Linguagem SQL",
     slides: `
       <h3>Slides</h3>
       <iframe class="slides-iframe" src="slides/Cap04-ModeloFisico-Slides.pdf#toolbar=0&navpanes=0&view=FitH" width="100%" style="border:0;" loading="lazy"></iframe>
@@ -392,7 +396,8 @@ const chapters = [
   },
   {
     id: "cap-5",
-    title: "Consultas Avançadas em SQL",
+    title: "Consultas Avançadas SQL",
+    fullTitle: "Consultas Avançadas em SQL",
     slides: `
       <h3>Slides</h3>
       <iframe class="slides-iframe" src="slides/Cap05-ConsultasAvancadas-Slides.pdf#toolbar=0&navpanes=0&view=FitH" width="100%" style="border:0;" loading="lazy"></iframe>
@@ -427,7 +432,8 @@ const chapters = [
   },
   {
     id: "cap-6",
-    title: "Otimização e Desempenho de Bancos de Dados",
+    title: "Otimização",
+    fullTitle: "Otimização e Desempenho de Bancos de Dados",
     slides: `
       <h3>Slides</h3>
       <iframe class="slides-iframe" src="slides/Cap06-Otimizacao-Slides.pdf#toolbar=0&navpanes=0&view=FitH" width="100%" style="border:0;" loading="lazy"></iframe>
@@ -462,7 +468,8 @@ const chapters = [
   },
   {
     id: "cap-7",
-    title: "Visualização de Dados com Power BI",
+    title: "Visualização de Dados",
+    fullTitle: "Visualização de Dados com Power BI",
     slides: `
       <h3>Slides</h3>
       <iframe class="slides-iframe" src="slides/Cap07-PowerBI-Slides.pdf#toolbar=0&navpanes=0&view=FitH" width="100%" style="border:0;" loading="lazy"></iframe>
@@ -498,6 +505,7 @@ const chapters = [
   {
     id: "cap-8",
     title: "Trabalhando com Datasets",
+    fullTitle: "Trabalhando com Datasets",
     slides: `
       <h3>Slides</h3>
       <iframe class="slides-iframe" src="slides/Cap08-Datasets-Slides.pdf#toolbar=0&navpanes=0&view=FitH" width="100%" style="border:0;" loading="lazy"></iframe>
@@ -532,7 +540,8 @@ const chapters = [
   },
   {
     id: "cap-9",
-    title: "Inteligência Artificial e Bancos de Dados",
+    title: "IA e Banco de Dados",
+    fullTitle: "Inteligência Artificial e Bancos de Dados",
     slides: `
       <h3>Slides</h3>
       <iframe class="slides-iframe" src="slides/Cap09-IA-Slides.pdf#toolbar=0&navpanes=0&view=FitH" width="100%" style="border:0;" loading="lazy"></iframe>
@@ -596,7 +605,7 @@ function buildSidebar() {
 // Renderização por capítulo com abas
 function renderChapter(chapterId) {
   const chapter = chapters.find((c) => c.id === chapterId) || chapters[0];
-  titleEl.textContent = chapter.title;
+  titleEl.textContent = chapter.fullTitle || chapter.title;
 
   // Atualiza estado active na sidebar
   document.querySelectorAll('.chapter-link').forEach((a) => {
@@ -607,12 +616,12 @@ function renderChapter(chapterId) {
   // 7 abas - Infográficos é a primeira (padrão)
   const tabs = [
     { key: 'infographics', label: 'Infográficos' },
-    { key: 'slides', label: 'Slides' },
     { key: 'contents', label: 'Conteúdos' },
-    { key: 'exercises', label: 'Exercícios' },
+    { key: 'slides', label: 'Slides' },
     { key: 'podcasts', label: 'Podcasts' },
-    { key: 'practices', label: 'Práticas' },
     { key: 'videos', label: 'Vídeos' },
+    { key: 'exercises', label: 'Exercícios' },
+    { key: 'practices', label: 'Práticas' },
   ];
 
   const toolbar = document.createElement('div');
