@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Práticas 3.2 — PK, FK e Integridade Referencial</title>
+  <style>
+    :root { --bg:#f6f8fb; --surface:#fff; --border:#dde2eb; --text:#1f2937; --muted:#6b7280; --hover:#eef2ff; --good:#16a34a; --bad:#dc2626; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color:var(--text); background:var(--bg); }
+    main { padding: 16px; max-width: 1000px; margin: 0 auto; }
+    section { border:1px dashed var(--border); border-radius:10px; padding:12px; margin:14px 0; background:var(--surface); }
+    h3 { margin:0 0 8px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .tbl { border:1px solid var(--border); border-radius:10px; padding:10px; }
+    .tbl h4 { margin:0 0 6px; }
+    .field { display:flex; align-items:center; gap:6px; padding:6px 8px; border-radius:8px; }
+    .field:hover { background:var(--hover); }
+    .badge { font-size:12px; color:var(--muted); }
+    .mark { appearance:none; border:1px solid var(--border); border-radius:6px; background:var(--surface); padding:4px 8px; cursor:pointer; }
+    .mark.active { background:#dcfce7; border-color:#86efac; }
+    .actions { display:flex; gap:8px; margin-top:8px; }
+    .btn { appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:8px 12px; cursor:pointer; }
+    .btn:hover { background:#eef2ff; border-color:#c7d2fe; }
+    .fb { margin-top:8px; color:var(--muted); }
+    .list { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .box { border:1px solid var(--border); border-radius:10px; padding:10px; background:#fafafa; }
+    .ok { color:var(--good); }
+    .err { color:var(--bad); }
+  </style>
+</head>
+<body>
+  <main>
+    <h2>Práticas 3.2 — Chaves e Integridade Referencial</h2>
+
+    <section aria-labelledby="keys-title">
+      <h3 id="keys-title">Mini-lab: Defina as chaves</h3>
+      <p class="badge">Clique para marcar PK e FK.</p>
+      <div class="grid">
+        <div class="tbl" id="tbl-aluno">
+          <h4>Tabela aluno</h4>
+          <div class="field"><button class="mark" data-col="id_aluno">Marcar</button><span>id_aluno</span><span class="badge">— PK?</span></div>
+          <div class="field"><button class="mark" data-col="nome">Marcar</button><span>nome</span></div>
+        </div>
+        <div class="tbl" id="tbl-matricula">
+          <h4>Tabela matricula</h4>
+          <div class="field"><button class="mark" data-col="id_matricula">Marcar</button><span>id_matricula</span><span class="badge">— PK?</span></div>
+          <div class="field"><button class="mark" data-col="id_aluno">Marcar</button><span>id_aluno</span><span class="badge">— FK → aluno</span></div>
+          <div class="field"><button class="mark" data-col="id_curso">Marcar</button><span>id_curso</span><span class="badge">— FK → curso</span></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-validar-keys" type="button">Validar</button>
+        <button class="btn" id="btn-reset-keys" type="button">Reset</button>
+      </div>
+      <div class="fb" id="fb-keys" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="ir-title">
+      <h3 id="ir-title">Simulador: Integridade Referencial</h3>
+      <p class="badge">Escolha uma política e tente excluir uma linha da tabela pai (curso).</p>
+      <div class="list">
+        <div class="box">
+          <h4>Pai: curso</h4>
+          <ul id="list-curso"></ul>
+        </div>
+        <div class="box">
+          <h4>Filha: matricula</h4>
+          <ul id="list-mat"></ul>
+        </div>
+      </div>
+      <div class="actions">
+        <label>Curso para excluir:
+          <select id="sel-curso">
+            <option value="1">id_curso = 1</option>
+            <option value="2">id_curso = 2</option>
+          </select>
+        </label>
+        <label>Política:
+          <select id="sel-policy">
+            <option value="RESTRICT">RESTRICT</option>
+            <option value="CASCADE">CASCADE</option>
+            <option value="SET NULL">SET NULL</option>
+          </select>
+        </label>
+        <button class="btn" id="btn-excluir" type="button">Excluir</button>
+        <button class="btn" id="btn-reset-ir" type="button">Reset</button>
+      </div>
+      <div class="fb" id="fb-ir" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script>
+    // Mini-lab chaves
+    const marks = new Set();
+    document.querySelectorAll('.mark').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const c = btn.getAttribute('data-col');
+        if (marks.has(c)) { marks.delete(c); btn.classList.remove('active'); }
+        else { marks.add(c); btn.classList.add('active'); }
+      });
+    });
+    document.getElementById('btn-reset-keys').addEventListener('click', () => {
+      marks.clear();
+      document.querySelectorAll('.mark').forEach(b => b.classList.remove('active'));
+      document.getElementById('fb-keys').textContent = '';
+    });
+    document.getElementById('btn-validar-keys').addEventListener('click', () => {
+      const need = {
+        pk: ['id_aluno','id_matricula'],
+        fk: ['id_aluno','id_curso']
+      };
+      const ok = need.pk.every(c => marks.has(c)) && need.fk.every(c => marks.has(c));
+      const fb = document.getElementById('fb-keys');
+      fb.innerHTML = ok ? `<span class="ok">Correto! ✅ A PK identifica unicamente e as FKs ligam as tabelas.</span>`
+                        : `<span class="err">Tente novamente. Marque PKs e FKs conforme o esquema.</span>`;
+    });
+
+    // Simulador IR
+    const state = {
+      curso: [ { id_curso:1, titulo:'BD I' }, { id_curso:2, titulo:'Algoritmos' } ],
+      matricula: [ { id_matricula:101, id_aluno:1, id_curso:1 }, { id_matricula:102, id_aluno:2, id_curso:1 }, { id_matricula:103, id_aluno:3, id_curso:2 } ]
+    };
+    function renderIR() {
+      document.getElementById('list-curso').innerHTML = state.curso.map(c => `<li>(${c.id_curso}) ${c.titulo}</li>`).join('');
+      document.getElementById('list-mat').innerHTML = state.matricula.map(m => `<li>#${m.id_matricula} — aluno ${m.id_aluno} → curso ${m.id_curso}</li>`).join('');
+    }
+    function resetIR() {
+      state.curso = [ { id_curso:1, titulo:'BD I' }, { id_curso:2, titulo:'Algoritmos' } ];
+      state.matricula = [ { id_matricula:101, id_aluno:1, id_curso:1 }, { id_matricula:102, id_aluno:2, id_curso:1 }, { id_matricula:103, id_aluno:3, id_curso:2 } ];
+      document.getElementById('fb-ir').textContent = '';
+      renderIR();
+    }
+    document.getElementById('btn-reset-ir').addEventListener('click', resetIR);
+    document.getElementById('btn-excluir').addEventListener('click', () => {
+      const id = Number(document.getElementById('sel-curso').value);
+      const pol = document.getElementById('sel-policy').value;
+      const fb = document.getElementById('fb-ir');
+      const hasDependents = state.matricula.some(m => m.id_curso === id);
+      if (pol === 'RESTRICT' && hasDependents) {
+        fb.innerHTML = `<span class="err">Violação de integridade: registros filhos existentes. Operação RESTRICT bloqueada.</span>`;
+        return;
+      }
+      if (pol === 'CASCADE') {
+        state.matricula = state.matricula.filter(m => m.id_curso !== id);
+      } else if (pol === 'SET NULL') {
+        state.matricula = state.matricula.map(m => m.id_curso === id ? { ...m, id_curso:null } : m);
+      }
+      state.curso = state.curso.filter(c => c.id_curso !== id);
+      renderIR();
+      fb.innerHTML = pol === 'RESTRICT' ? `<span class="ok">Nenhuma dependência encontrada — exclusão permitida.</span>`
+        : `<span class="ok">Política ${pol} aplicada com sucesso.</span>`;
+    });
+    renderIR();
+  </script>
+</body>
+</html>

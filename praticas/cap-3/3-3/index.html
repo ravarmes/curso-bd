@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Práticas 3.3 — Normalização (1FN, 2FN, 3FN)</title>
+  <style>
+    :root { --bg:#f6f8fb; --surface:#fff; --border:#dde2eb; --text:#1f2937; --muted:#6b7280; --hover:#eef2ff; --good:#16a34a; --bad:#dc2626; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color:var(--text); background:var(--bg); }
+    main { padding: 16px; max-width: 1000px; margin: 0 auto; }
+    section { border:1px dashed var(--border); border-radius:10px; padding:12px; margin:14px 0; background:var(--surface); }
+    h3 { margin:0 0 8px; }
+    .btn { appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:8px 12px; cursor:pointer; }
+    .btn:hover { background:#eef2ff; border-color:#c7d2fe; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .box { border:1px solid var(--border); border-radius:10px; padding:10px; background:#fafafa; }
+    .table { border-collapse: collapse; width:100%; }
+    .table th, .table td { border:1px solid var(--border); padding:6px; }
+    .fb { margin-top:8px; color:var(--muted); }
+    .ok { color:var(--good); }
+    .err { color:var(--bad); }
+  </style>
+</head>
+<body>
+  <main>
+    <h2>Práticas 3.3 — Processo de Normalização</h2>
+
+    <section aria-labelledby="anim-title">
+      <h3 id="anim-title">Animação: Da tabela confusa à estrutura limpa</h3>
+      <p class="fb">Clique nos botões para aplicar 1FN, 2FN e 3FN passo a passo.</p>
+      <div class="grid">
+        <div class="box">
+          <h4>Tabela "AlunoCursos" (antes)</h4>
+          <table class="table" id="tab-before">
+            <thead><tr><th>id_aluno</th><th>nome</th><th>cursos</th><th>curso_favorito</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Anna</td><td>BD I; Redes</td><td>BD I</td></tr>
+              <tr><td>2</td><td>Bruno</td><td>BD I; Algoritmos</td><td>Algoritmos</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box">
+          <h4>Resultado</h4>
+          <div id="result"></div>
+        </div>
+      </div>
+      <div style="margin-top:8px; display:flex; gap:8px">
+        <button class="btn" id="btn-1fn" type="button">Aplicar 1FN</button>
+        <button class="btn" id="btn-2fn" type="button">Aplicar 2FN</button>
+        <button class="btn" id="btn-3fn" type="button">Aplicar 3FN</button>
+        <button class="btn" id="btn-reset" type="button">Reset</button>
+      </div>
+      <div class="fb" id="fb-norm" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="challenge-title">
+      <h3 id="challenge-title">Desafio visual: identifique o problema</h3>
+      <p class="fb">Clique no erro de normalização.</p>
+      <div class="grid">
+        <div class="box">
+          <h4>Tabela "Inscricoes"</h4>
+          <table class="table">
+            <thead><tr><th>id_aluno</th><th>nome_aluno</th><th>id_curso</th><th>titulo_curso</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Anna</td><td>10</td><td>BD I</td></tr>
+            </tbody>
+          </table>
+          <p class="fb">Dica: Nome do curso depende de id_curso (não da PK da tabela).</p>
+        </div>
+        <div class="box" id="click-area" style="cursor:pointer">
+          <h4>Área de clique</h4>
+          <p class="fb">Clique aqui se identificou dependência transitiva (3FN).</p>
+        </div>
+      </div>
+      <div class="fb" id="fb-ch" aria-live="polite"></div>
+    </section>
+  </main>
+  <script>
+    // Animação 1FN, 2FN, 3FN
+    const result = document.getElementById('result');
+    const fb = document.getElementById('fb-norm');
+    function reset() { result.innerHTML = ''; fb.textContent = ''; }
+    document.getElementById('btn-reset').addEventListener('click', reset);
+
+    document.getElementById('btn-1fn').addEventListener('click', () => {
+      result.innerHTML = `
+        <h5>1FN aplicada</h5>
+        <p class="fb">Removidos valores multivalorados (cursos) criando tabela associativa.</p>
+        <div class="grid">
+          <div class="box"><h4>aluno</h4><div>id_aluno (PK), nome</div></div>
+          <div class="box"><h4>aluno_curso</h4><div>id_aluno (FK), curso</div></div>
+        </div>`;
+      fb.textContent = '1FN: atributos com valores atômicos (sem listas).';
+    });
+
+    document.getElementById('btn-2fn').addEventListener('click', () => {
+      result.innerHTML = `
+        <h5>2FN aplicada</h5>
+        <p class="fb">Eliminadas dependências parciais em chave composta (se houvesse).</p>
+        <div class="grid">
+          <div class="box"><h4>aluno</h4><div>id_aluno (PK), nome</div></div>
+          <div class="box"><h4>aluno_curso</h4><div>id_aluno (FK), id_curso (FK)</div></div>
+        </div>`;
+      fb.textContent = '2FN: em chave composta, cada atributo depende da chave inteira.';
+    });
+
+    document.getElementById('btn-3fn').addEventListener('click', () => {
+      result.innerHTML = `
+        <h5>3FN aplicada</h5>
+        <p class="fb">Removidas dependências transitivas entre não‑chaves.</p>
+        <div class="grid">
+          <div class="box"><h4>aluno</h4><div>id_aluno (PK), nome</div></div>
+          <div class="box"><h4>curso</h4><div>id_curso (PK), titulo_curso</div></div>
+          <div class="box"><h4>aluno_curso</h4><div>id_aluno (FK), id_curso (FK)</div></div>
+        </div>`;
+      fb.textContent = '3FN: não‑chaves não devem depender de outras não‑chaves (transitividade).';
+    });
+
+    // Desafio visual
+    const chArea = document.getElementById('click-area');
+    const chFb = document.getElementById('fb-ch');
+    chArea.addEventListener('click', () => {
+      chFb.innerHTML = `<span class="ok">Correto! ✅ Há dependência transitiva: titulo_curso depende de id_curso, não da PK de Inscricoes.</span>`;
+    });
+  </script>
+</body>
+</html>

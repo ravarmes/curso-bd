@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Práticas 3.5 — Exportando o Código DDL SQL no brModelo</title>
+  <style>
+    :root { --bg:#f6f8fb; --surface:#fff; --border:#dde2eb; --text:#1f2937; --muted:#6b7280; --hover:#eef2ff; --good:#16a34a; --bad:#dc2626; --accent:#2563eb; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color:var(--text); background:var(--bg); }
+    main { padding: 16px; max-width: 1100px; margin: 0 auto; }
+    section { border:1px dashed var(--border); border-radius:10px; padding:12px; margin:14px 0; background:var(--surface); }
+    h3 { margin:0 0 8px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .box { border:1px solid var(--border); border-radius:10px; padding:10px; background:#fafafa; }
+    .row { display:flex; align-items:center; gap:8px; margin:6px 0; }
+    .btn { appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:8px 12px; cursor:pointer; }
+    .btn:hover { background:var(--hover); border-color:#c7d2fe; }
+    .badge { font-size: 12px; color: var(--muted); }
+    .fb { margin-top:8px; color:var(--muted); }
+    .ok { color:var(--good); }
+    .err { color:var(--bad); }
+
+    /* Diagrama simples */
+    .diagram { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; }
+    .table { border:1px solid var(--border); border-radius:10px; background:#fff; padding:8px; position:relative; }
+    .table h5 { margin:0 0 6px; }
+    .col { font-size: 13px; }
+    .line { position:absolute; height:2px; background:var(--accent); opacity:0.4; }
+    .flash { animation: flash 0.8s ease-in-out 2; }
+    @keyframes flash { 0%{ box-shadow:0 0 0px var(--accent);} 50%{ box-shadow:0 0 12px var(--accent);} 100%{ box-shadow:0 0 0px var(--accent);} }
+
+    /* Código */
+    pre, code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .code { border:1px solid var(--border); border-radius:10px; background:#101827; color:#e5e7eb; padding:10px; min-height:140px; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; max-width: 100%; overflow-x: hidden; }
+    .code .kw { color:#93c5fd; }
+    .code .id { color:#fda4af; }
+    .code .ty { color:#fdba74; }
+    .code .hl { background: rgba(37, 99, 235, 0.18); }
+
+    /* Editor e desafio final */
+    textarea.sql-input { width:100%; min-height:140px; border:1px solid var(--border); border-radius:10px; padding:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .two-cols { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .clickable { cursor:pointer; }
+    .sel { padding:6px 8px; border:1px solid var(--border); border-radius:8px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h2>Práticas 3.5 — Exportando o Código DDL SQL no brModelo</h2>
+
+    <section aria-labelledby="export-title">
+      <h3 id="export-title">Animação de exportação</h3>
+      <p class="badge">Clique em "Gerar SQL" para ver o DDL sincronizado com o diagrama.</p>
+      <div class="grid">
+        <div class="box">
+          <div class="diagram" id="diagram">
+            <div class="table" id="tbl-aluno">
+              <h5>aluno</h5>
+              <div class="col">id_aluno PK</div>
+              <div class="col">nome VARCHAR(50)</div>
+            </div>
+            <div class="table" id="tbl-livro">
+              <h5>livro</h5>
+              <div class="col">id_livro PK</div>
+              <div class="col">titulo VARCHAR(80)</div>
+            </div>
+            <div class="table" id="tbl-reserva">
+              <h5>reserva</h5>
+              <div class="col">id_reserva PK</div>
+              <div class="col">id_aluno FK → aluno</div>
+              <div class="col">id_livro FK → livro</div>
+              <div class="col">data DATE</div>
+            </div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="row"><button class="btn" id="btn-gerar" type="button">Gerar SQL</button><span class="badge">DDL mínimo com PK/FK</span></div>
+          <pre class="code" id="code-out" aria-live="polite"></pre>
+        </div>
+      </div>
+      <div class="fb" id="fb-export"></div>
+    </section>
+
+    <section aria-labelledby="sim-title">
+      <h3 id="sim-title">Simulador de geração de SQL</h3>
+      <div class="row">
+        <label for="ddl-select" class="badge">Escolha um elemento:</label>
+        <select class="sel" id="ddl-select">
+          <option value="aluno">Entidade: aluno</option>
+          <option value="livro">Entidade: livro</option>
+          <option value="reserva">Tabela: reserva</option>
+          <option value="fk-aluno">FK reserva → aluno</option>
+          <option value="fk-livro">FK reserva → livro</option>
+        </select>
+        <button class="btn" id="btn-ver-ddl" type="button">Mostrar trecho DDL</button>
+      </div>
+      <pre class="code" id="code-sim"></pre>
+    </section>
+
+    <section aria-labelledby="compare-title">
+      <h3 id="compare-title">Editor interativo — Compare SQL e Diagrama</h3>
+      <div class="two-cols">
+        <div class="box">
+          <h4>Diagrama ER/Lógico</h4>
+          <div id="diagram-compare" class="diagram">
+            <div class="table clickable" data-map="tbl-aluno"><h5>aluno</h5><div class="col">id_aluno PK</div><div class="col">nome VARCHAR(50)</div></div>
+            <div class="table clickable" data-map="tbl-livro"><h5>livro</h5><div class="col">id_livro PK</div><div class="col">titulo VARCHAR(80)</div></div>
+            <div class="table clickable" data-map="tbl-reserva"><h5>reserva</h5><div class="col">id_reserva PK</div><div class="col">id_aluno FK</div><div class="col">id_livro FK</div><div class="col">data DATE</div></div>
+          </div>
+        </div>
+        <div class="box">
+          <h4>SQL DDL</h4>
+          <pre class="code" id="code-compare"></pre>
+          <div class="fb">Clique no SQL para ver a parte do diagrama correspondente (e vice-versa).</div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="challenge-title">
+      <h3 id="challenge-title">Desafio final do capítulo</h3>
+      <p class="badge">Escreva (ou complete) o DDL de <strong>aluno</strong>, <strong>livro</strong> e <strong>reserva</strong> com PK e FKs corretas.</p>
+      <textarea class="sql-input" id="sql-input" placeholder="Escreva aqui o DDL..."></textarea>
+      <div class="row"><button class="btn" id="btn-validar" type="button">Validar SQL</button><button class="btn" id="btn-exemplo" type="button">Exemplo</button></div>
+      <div class="fb" id="fb-desafio" aria-live="polite"></div>
+      <div class="box" id="diagram-out" style="display:none;">
+        <h4>Diagrama gerado (preview)</h4>
+        <div class="diagram">
+          <div class="table" id="out-aluno"><h5>aluno</h5><div class="col">id_aluno PK</div><div class="col">nome</div></div>
+          <div class="table" id="out-livro"><h5>livro</h5><div class="col">id_livro PK</div><div class="col">titulo</div></div>
+          <div class="table" id="out-reserva"><h5>reserva</h5><div class="col">id_reserva PK</div><div class="col">id_aluno FK</div><div class="col">id_livro FK</div><div class="col">data</div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Utilidades
+    const codeOut = document.getElementById('code-out');
+    const tblAluno = document.getElementById('tbl-aluno');
+    const tblLivro = document.getElementById('tbl-livro');
+    const tblReserva = document.getElementById('tbl-reserva');
+
+    function flash(el) { if (!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+
+    // 1) Animação de exportação
+    document.getElementById('btn-gerar').addEventListener('click', () => {
+      const ddl = [
+        '<span class="kw">CREATE TABLE</span> <span class="id">aluno</span> (\n  <span class="id">id_aluno</span> <span class="ty">INT</span> <span class="kw">PRIMARY KEY</span>,\n  <span class="id">nome</span> <span class="ty">VARCHAR(50)</span>\n);',
+        '<span class="kw">CREATE TABLE</span> <span class="id">livro</span> (\n  <span class="id">id_livro</span> <span class="ty">INT</span> <span class="kw">PRIMARY KEY</span>,\n  <span class="id">titulo</span> <span class="ty">VARCHAR(80)</span>\n);',
+        '<span class="kw">CREATE TABLE</span> <span class="id">reserva</span> (\n  <span class="id">id_reserva</span> <span class="ty">INT</span> <span class="kw">PRIMARY KEY</span>,\n  <span class="id">id_aluno</span> <span class="ty">INT</span>,\n  <span class="id">id_livro</span> <span class="ty">INT</span>,\n  <span class="id">data</span> <span class="ty">DATE</span>,\n  <span class="kw">FOREIGN KEY</span> (<span class="id">id_aluno</span>) <span class="kw">REFERENCES</span> <span class="id">aluno</span>(<span class="id">id_aluno</span>),\n  <span class="kw">FOREIGN KEY</span> (<span class="id">id_livro</span>) <span class="kw">REFERENCES</span> <span class="id">livro</span>(<span class="id">id_livro</span>)\n);'
+      ];
+      codeOut.innerHTML = ddl.map(l => `<div class="hl">${l}</div>`).join('\n');
+      // sincroniza flashes
+      setTimeout(() => flash(tblAluno), 150);
+      setTimeout(() => flash(tblLivro), 600);
+      setTimeout(() => flash(tblReserva), 1050);
+      document.getElementById('fb-export').innerHTML = '<span class="ok">SQL gerado! ✅ Observe PK/FK sincronizando com o diagrama.</span>';
+    });
+
+    // 2) Simulador de geração de SQL
+    const snippets = {
+      aluno: 'CREATE TABLE aluno (\n  id_aluno INT PRIMARY KEY,\n  nome VARCHAR(50)\n);',
+      livro: 'CREATE TABLE livro (\n  id_livro INT PRIMARY KEY,\n  titulo VARCHAR(80)\n);',
+      reserva: 'CREATE TABLE reserva (\n  id_reserva INT PRIMARY KEY,\n  id_aluno INT,\n  id_livro INT,\n  data DATE,\n  FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno),\n  FOREIGN KEY (id_livro) REFERENCES livro(id_livro)\n);',
+      'fk-aluno': 'FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno)',
+      'fk-livro': 'FOREIGN KEY (id_livro) REFERENCES livro(id_livro)'
+    };
+    document.getElementById('btn-ver-ddl').addEventListener('click', () => {
+      const k = document.getElementById('ddl-select').value;
+      const s = snippets[k] || '';
+      document.getElementById('code-sim').textContent = s;
+      // Sinaliza parte do diagrama
+      if (k === 'aluno') flash(tblAluno);
+      else if (k === 'livro') flash(tblLivro);
+      else flash(tblReserva);
+    });
+
+    // 3) Compare SQL e Diagrama
+    const compareLines = [
+      { id:'tbl-aluno', text:'CREATE TABLE aluno (\n  id_aluno INT PRIMARY KEY,\n  nome VARCHAR(50)\n);' },
+      { id:'tbl-livro', text:'CREATE TABLE livro (\n  id_livro INT PRIMARY KEY,\n  titulo VARCHAR(80)\n);' },
+      { id:'tbl-reserva', text:'CREATE TABLE reserva (\n  id_reserva INT PRIMARY KEY,\n  id_aluno INT,\n  id_livro INT,\n  data DATE\n);' },
+      { id:'tbl-reserva', text:'FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno)' },
+      { id:'tbl-reserva', text:'FOREIGN KEY (id_livro) REFERENCES livro(id_livro)' },
+    ];
+    const codeCompareEl = document.getElementById('code-compare');
+    codeCompareEl.innerHTML = compareLines.map((l,i) => `<div class="clickable" data-i="${i}">${l.text}</div>`).join('\n');
+    codeCompareEl.querySelectorAll('.clickable').forEach(el => {
+      el.addEventListener('click', () => {
+        const i = parseInt(el.getAttribute('data-i'), 10);
+        const mapId = compareLines[i].id;
+        flash(document.getElementById(mapId));
+        el.classList.remove('hl'); void el.offsetWidth; el.classList.add('hl');
+      });
+    });
+    document.querySelectorAll('#diagram-compare .table').forEach(el => {
+      el.addEventListener('click', () => {
+        flash(el);
+        const id = el.getAttribute('data-map');
+        const idx = compareLines.findIndex(l => l.id === id);
+        if (idx >= 0) {
+          const codeEl = codeCompareEl.querySelector(`[data-i="${idx}"]`);
+          codeEl.classList.remove('hl'); void codeEl.offsetWidth; codeEl.classList.add('hl');
+        }
+      });
+    });
+
+    // 4) Desafio final — validação simples
+    const input = document.getElementById('sql-input');
+    const fbDesafio = document.getElementById('fb-desafio');
+    const diagramOut = document.getElementById('diagram-out');
+
+    document.getElementById('btn-exemplo').addEventListener('click', () => {
+      input.value = [
+        'CREATE TABLE aluno (id_aluno INT PRIMARY KEY, nome VARCHAR(50));',
+        'CREATE TABLE livro (id_livro INT PRIMARY KEY, titulo VARCHAR(80));',
+        'CREATE TABLE reserva (id_reserva INT PRIMARY KEY, id_aluno INT, id_livro INT, data DATE,',
+        '  FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno),',
+        '  FOREIGN KEY (id_livro) REFERENCES livro(id_livro) );'
+      ].join('\n');
+      fbDesafio.textContent = 'Exemplo carregado. Edite livremente e valide.';
+    });
+
+    document.getElementById('btn-validar').addEventListener('click', () => {
+      const sql = (input.value || '').toLowerCase();
+      const ok = sql.includes('create table aluno')
+        && sql.includes('primary key')
+        && sql.includes('create table livro')
+        && sql.includes('create table reserva')
+        && sql.includes('foreign key (id_aluno)')
+        && sql.includes('references aluno')
+        && sql.includes('foreign key (id_livro)')
+        && sql.includes('references livro');
+      if (ok) {
+        fbDesafio.innerHTML = '<span class="ok">Perfeito! ✅ DDL válido para as 3 tabelas com PK/FK.</span>';
+        diagramOut.style.display = 'block';
+        ['out-aluno','out-livro','out-reserva'].forEach(id => flash(document.getElementById(id)));
+      } else {
+        fbDesafio.innerHTML = '<span class="err">Faltam trechos essenciais. Garanta PKs e FKs corretas.</span>';
+        diagramOut.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang='pt-BR'>
+
+<head>
+    <meta charset='utf-8' />
+    <meta name='viewport' content='width=device-width,initial-scale=1' />
+    <title>Capítulo 3 — Modelo Lógico Relacional: A Estrutura Formal do Banco</title>
+    <link rel='stylesheet' type='text/css' href='../css/style.css' />
+    <meta name='description' content='Transformação ER→Relacional, chaves (PK/FK), integridade referencial, normalização (1FN–3FN), regras de mapeamento, DDL SQL, estudo de caso e exercícios complementares e integrados.' />
+</head>
+
+<body>
+    <div class='container'>
+
+        <header>
+            <h1 id='cap3'>CAPÍTULO 3 – Modelo Lógico Relacional: A Estrutura Formal do Banco</h1>
+            <p class='lead'>Neste capítulo, você aprende o <strong>Modelo Lógico Relacional</strong>, a
+                <strong>transformação</strong> do <strong>Modelo ER</strong> (conceitual) para o <strong>Modelo
+                Lógico</strong>, a definição de <strong>tabelas</strong> e <strong>chaves (PK/FK)</strong>, regras de
+                <strong>integridade referencial</strong> e a <strong>normalização</strong> (1FN–3FN), além do
+                <strong>algoritmo de mapeamento ER → Modelo Lógico</strong> e exemplos de <strong>DDL SQL</strong>.
+                Fechamos com um <strong>Estudo de Caso</strong> e exercícios <strong>Complementares</strong> e
+                <strong>Integrados</strong>.</p>
+        </header>
+        <hr />
+        <nav class='toc' aria-label='Sumário do Capítulo 3'>
+            <strong>Sumário:</strong>
+            <ul>
+                <li><a href='#sec3-1'>3.1 Transformação do Modelo Conceitual em Relacional</a></li>
+                <li><a href='#sec3-2'>3.2 Chaves Primárias, Estrangeiras e Integridade Referencial</a></li>
+                <li><a href='#sec3-3'>3.3 Normalização Detalhada: 1FN, 2FN e 3FN</a></li>
+                <li><a href='#sec3-4'>3.4 Regras de Mapeamento e Convenções</a></li>
+                <li><a href='#sec3-5'>3.5 Exportando o Código DDL SQL</a></li>
+                <li><a href='#sec3-6'>3.6 Estudo de Caso: Modelo Lógico da Biblioteca</a></li>
+                <li><a href='#sec3-7'>3.7 Exercícios Complementares</a></li>
+                <li><a href='#sec3-8'>3.8 Exercícios Integrados</a></li>
+                <li><a href='#sec3-9'>3.9 Gabaritos</a></li>
+            </ul>
+        </nav>
+
+        <!-- Ferramenta utilizada (nota breve) -->
+        <table class='box-table tip-table'>
+            <tr>
+                <td class='box-content tip definition' role='note' aria-labelledby='def-title-3-0'>
+                    <div id='def-title-3-0' class='box-title'><img src='../images/icon-definicao.png' class='icon-img' alt='Definição'><strong>Ferramenta</strong></div>
+                    <div>
+                        <p><strong>brModelo (Web)</strong> — ferramenta CASE para criar <em>Diagramas
+                                ER</em>. É uma ferramenta de modelagem de banco de dados 
+                                100% online e gratuita. Ela permite criar e converter projetos nos níveis conceitual, lógico 
+                                e físico (SQL), sendo fácil de usar e com projetos acessíveis na nuvem. Além disso, é um projeto 
+                                open source.</p>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <section id='sec3-1'>
+            <h2>3.1 Transformação do Modelo Conceitual em Relacional <a class='self-link' href='#sec3-1' aria-label='Link para esta seção'>🔗</a></h2>
+            <p>A conversão do <strong>Modelo Entidade‑Relacionamento (ER)</strong> em <strong>Modelo Relacional</strong>
+                cria uma coleção de <em>tabelas</em> (relações), onde as <em>linhas</em> são <strong>tuplas</strong> e as
+                <em>colunas</em> são <strong>atributos</strong>. Os relacionamentos tornam‑se <strong>chaves
+                    estrangeiras</strong> ou <strong>tabelas associativas</strong> (para N:M).</p>
+            <p>Diretrizes gerais: definir <em>chaves primárias (PK)</em> claras, garantir <em>integridade referencial</em>
+                com <em>chaves estrangeiras (FK)</em> e refinar o esquema pela <strong>normalização</strong> (1FN–3FN).
+                Todos os nomes adotam <strong>snake_case</strong> sem acentos.</p>
+            <figure>
+                <img src='../images/3-1-er_to_relational.svg' alt='Fluxo ER para Relacional com tabelas, PK e FK.' />
+                <figcaption><strong>Figura 3.1 — </strong>Do ER para o Relacional: entidades/relacionamentos → tabelas, PKs e FKs; N:M → tabela associativa.</figcaption>
+            </figure>
+
+            <!-- Bloco Definições chave -->
+            <table class='box-table tip-table'>
+                <tr>
+                    <td class='box-content tip' role='note' aria-labelledby='def-title-3-1'>
+                        <div id='def-title-3-1' class='box-title'><img src='../images/icon-definicao.png' class='icon-img' alt='Definição'><strong>Definição</strong></div>
+                        <div>
+                            <p><strong>tupla</strong>: linha da tabela.</p>
+                            <p><strong>atributo</strong>: coluna da tabela.</p>
+                            <p><strong>esquema</strong>: estrutura da tabela (nome, atributos e restrições).</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+        <section id='sec3-2'>
+            <h2>3.2 Chaves Primárias, Estrangeiras e Integridade Referencial <a class='self-link' href='#sec3-2' aria-label='Link para esta seção'>🔗</a></h2>
+            <p><strong>Chaves</strong> identificam registros e conectam tabelas. A <strong>PK</strong> identifica
+                <em>unicamente</em> cada tupla; a <strong>FK</strong> referencia a PK de outra tabela para <strong>implantar relacionamentos</strong> e <strong>garantir integridade referencial</strong>.</p>
+            <figure>
+                <img src='../images/3-2-keys_fk.svg' alt='Modelo lógico: aluno, reserva e livro com PK/FK e cardinalidades 1:N.' />
+                <figcaption><strong>Figura 3.2 — </strong>Exemplo com <em>aluno</em>, <em>reserva</em> e <em>livro</em>: PKs, FKs e cardinalidades <strong>1:N</strong> conectando tabelas; políticas <code>ON DELETE</code> serão tratadas no Capítulo 4.</figcaption>
+            </figure>
+
+            <table class='box-table tip-table'>
+                <tr>
+                    <td class='box-content tip' role='note' aria-labelledby='def-title-3-2'>
+                        <div id='def-title-3-2' class='box-title'><img src='../images/icon-definicao.png' class='icon-img' alt='Definição'><strong>Definição</strong></div>
+                        <div>
+                            <p><strong>primary key (PK)</strong>: atributo(s) que identificam cada tupla sem repetição e sem <code>NULL</code>.</p>
+                            <p><strong>foreign key (FK)</strong>: atributo(s) que referenciam a PK de outra tabela para manter integridade.</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <table class='box-table warning-table'>
+                <tr>
+                    <td class='box-content warning' role='note' aria-labelledby='imp-title-3-2'>
+                        <div id='imp-title-3-2' class='box-title'><img src='../images/icon-importante.png' class='icon-img' alt='Importante'><strong>Importante</strong></div>
+                        <div>
+                            <p>Defina <strong>PK</strong> e <strong>FK</strong> com clareza para manter <strong>integridade referencial</strong>. As <em>políticas ON DELETE</em> e demais ações serão detalhadas no <strong>Capítulo 4</strong>.</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+        <section id='sec3-3'>
+            <h2>3.3 Normalização Detalhada: 1FN, 2FN e 3FN <a class='self-link' href='#sec3-3' aria-label='Link para esta seção'>🔗</a></h2>
+            <p>A <strong>normalização</strong> minimiza redundância e reduz <em>anomalias</em> (inserção, atualização,
+                exclusão). No conceitual e no lógico, refine até pelo menos <strong>3FN</strong>.</p>
+            <ol>
+                <li><strong>1FN</strong>: somente dados <em>atômicos</em>; evitar compostos/multivalorados.</li>
+                <li><strong>2FN</strong>: em chave composta, remover <em>dependência parcial</em>.</li>
+                <li><strong>3FN</strong>: remover <em>dependência transitiva</em> entre atributos não‑chave.</li>
+            </ol>
+            <figure>
+                <img src='../images/3-3-normalization_overview.svg' alt='Degraus de normalização: 1FN, 2FN e 3FN.' />
+                <figcaption class='tight-caption'><strong>Figura 3.3 — </strong>Resumo das três primeiras formas normais.</figcaption>
+            </figure>
+
+            <div class='normalization-details'>
+                <h3><strong>Primeira Forma Normal (1FN)</strong></h3>
+                <p><strong>Objetivo:</strong> Eliminar atributos multivalorados e compostos</p>
+                <p><strong>Regra:</strong> Todos os dados devem ser atômicos (indivisíveis)</p>
+                <p><strong>Exemplo (não normalizado):</strong></p>
+                <pre class='code text'>ALUNO(matricula, nome, telefones)</pre>
+                <p><strong>Problema:</strong> o atributo <code>telefones</code> armazena vários valores (multivalorado).<br/>
+                Exemplo de dado inválido:<br/>
+                <code>(1001, "Maria Silva", "(27) 99999-1111, (27) 98888-2222")</code></p>
+                <p><strong>Solução (1FN):</strong> separar o atributo multivalorado em outra tabela:</p>
+                <pre class='code text'>ALUNO(matricula, nome)
+TELEFONE_ALUNO(matricula_aluno, telefone)</pre>
+                <p><strong>Resultado:</strong> Cada célula da tabela contém um único valor atômico.<br/>
+                <em>(Este refinamento corresponde exatamente ao trecho do teu script SQL.)</em></p>
+                <hr />
+                <h3><strong>Segunda Forma Normal (2FN)</strong></h3>
+                <p><strong>Objetivo:</strong> Eliminar dependências parciais</p>
+                <p><strong>Regra:</strong> Nenhum atributo não‑chave deve depender de parte de uma chave composta</p>
+                <p><strong>Exemplo (parcialmente normalizado):</strong><br/>
+                Considere a tabela <strong>EMPRESTIMO_DETALHADO</strong> (antes da 2FN):</p>
+                <pre class='code text'>EMPRESTIMO_DETALHADO(id_emprestimo, matricula_aluno, cod_exemplar, nome_aluno, data_emprestimo, data_prevista)</pre>
+                <p><strong>Problema:</strong> <code>nome_aluno</code> depende apenas de <code>matricula_aluno</code>, que é parte da chave composta <code>(id_emprestimo, matricula_aluno, cod_exemplar)</code>.</p>
+                <p><strong>Solução (2FN):</strong> separar os dados do aluno para uma tabela própria:</p>
+                <pre class='code text'>ALUNO(matricula, nome)
+EMPRESTIMO(id_emprestimo, matricula_aluno, cod_exemplar, data_emprestimo, data_prevista)</pre>
+                <p><strong>Resultado:</strong> Agora todos os atributos não‑chave em <code>EMPRESTIMO</code> dependem da chave completa (<code>id_emprestimo</code>).<br/>
+                <em>(Eliminação da dependência parcial.)</em></p>
+                <hr />
+                <h3><strong>Terceira Forma Normal (3FN)</strong></h3>
+                <p><strong>Objetivo:</strong> Eliminar dependências transitivas</p>
+                <p><strong>Regra:</strong> Nenhum atributo não‑chave deve depender de outro atributo não‑chave</p>
+                <p><strong>Exemplo (ainda não em 3FN):</strong></p>
+                <pre class='code text'>AVALIACAO(id_avaliacao, id_emprestimo, matricula_aluno, nota, comentario, nome_aluno)</pre>
+                <p><strong>Problema:</strong> <code>nome_aluno</code> depende de <code>matricula_aluno</code> (atributo não‑chave).<br/>
+                Logo, há uma <strong>dependência transitiva</strong>:</p>
+                <pre class='code text'>id_avaliacao → matricula_aluno → nome_aluno</pre>
+                <p><strong>Solução (3FN):</strong> remover o atributo derivado e manter apenas as chaves necessárias:</p>
+                <pre class='code text'>ALUNO(matricula, nome)
+AVALIACAO(id_avaliacao, id_emprestimo, matricula_aluno, nota, comentario)</pre>
+                <p><strong>Resultado:</strong> Todos os atributos não‑chave em <code>AVALIACAO</code> dependem diretamente da chave primária (<code>id_avaliacao</code>), e não de outros atributos não‑chave.</p>
+                <hr />
+                <h3><strong>Resumo final</strong></h3>
+                <table class='content-table'>
+                    <caption><strong>Tabela 3.1 - </strong>Resumo das três primeiras formas normais.</caption>
+                    <thead>
+                        <tr>
+                            <th>Forma Normal</th>
+                            <th>Objetivo</th>
+                            <th>Exemplo de refinamento (contexto biblioteca)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1FN</strong></td>
+                            <td>Eliminar atributos multivalorados</td>
+                            <td>Separar <code>telefones</code> de <code>ALUNO</code> → criar <code>TELEFONE_ALUNO</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>2FN</strong></td>
+                            <td>Eliminar dependências parciais</td>
+                            <td>Empréstimo com <code>nome_aluno</code> → separar <code>ALUNO</code> e <code>EMPRESTIMO</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>3FN</strong></td>
+                            <td>Eliminar dependências transitivas</td>
+                            <td>Avaliação com <code>nome_aluno</code> → manter <code>AVALIACAO</code> referenciando <code>ALUNO</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <table class='box-table warning-table'>
+                <tr>
+                    <td class='box-content warning' role='note' aria-labelledby='imp-title-3-3'>
+                        <div id='imp-title-3-3' class='box-title'><img src='../images/icon-importante.png' class='icon-img' alt='Importante'><strong>Importante</strong></div>
+                        <div>
+                            <p>Normalizar <strong>não</strong> é um fim em si: busque clareza de chaves e integridade; 3FN costuma ser suficiente para a maioria dos projetos.</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+        <section id='sec3-4'>
+            <h2>3.4 Regras de Mapeamento e Convenções <a class='self-link' href='#sec3-4' aria-label='Link para esta seção'>🔗</a></h2>
+            <table class='box-table tip-table'>
+                <tr>
+                    <td class='box-content tip definition' role='note' aria-labelledby='def-title-3-4'>
+                        <div id='def-title-3-4' class='box-title'><img src='../images/icon-definicao.png' class='icon-img' alt='Definição'><strong>Algoritmo de Mapeamento ER → Modelo Lógico</strong></div>
+                        <div>
+                            <ul>
+                                <li><strong>Regra 1</strong> — Entidade regular: vira tabela com todos os atributos; escolha a PK.</li>
+                                <li><strong>Regra 2</strong> — Entidade fraca: vira tabela contendo PK da proprietária como FK; PK composta.</li>
+                                <li><strong>Regra 3</strong> — Relacionamento 1:1: incluir PK da outra entidade como FK no lado de participação total.</li>
+                                <li><strong>Regra 4</strong> — Relacionamento 1:N: incluir PK do lado 1 como FK na tabela do lado N.</li>
+                                <li><strong>Regra 5</strong> — Relacionamento N:M: criar <strong>tabela associativa</strong> com FKs das entidades; PK composta.</li>
+                                <li><strong>Regra 6</strong> — Atributo multivalorado: criar tabela própria com FK para a entidade.</li>
+                                <li><strong>Regra 7</strong> — Relacionamento n‑ário: criar tabela com FKs de todas as entidades participantes.</li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+        <section id='sec3-5'>
+            <h2>3.5 Exportando o Código DDL SQL <a class='self-link' href='#sec3-5' aria-label='Link para esta seção'>🔗</a></h2>
+            <p>O <strong>brModelo (Web)</strong> permite <strong>gerar o SQL</strong> automaticamente a partir do diagrama ER. Nesta etapa, vamos apenas <strong>mostrar o processo</strong> e um <strong>exemplo mínimo</strong>; o estudo de caso completo com SQL ficará no Capítulo 4.</p>
+            <p><strong>Passo a passo no brModelo</strong> (fluxo correto):</p>
+            <ol>
+                <li><strong>Modelo Conceitual (ER)</strong>: crie/abra o diagrama, valide nomes em <strong>snake_case</strong>, defina <em>PK</em> e cardinalidades e garanta a coerência (1FN–3FN quando necessário).</li>
+                <li><strong>Gerar Modelo Lógico</strong>: ainda no editor conceitual, clique no ícone de <em>tabela</em> para converter automaticamente para o nível <strong>Relacional</strong>; revise <em>tabelas</em>, <em>PK/FK</em> e tabelas associativas.</li>
+                <li><strong>Gerar SQL (DDL)</strong>: no editor lógico, clique no ícone de <em>banco de dados</em> para exportar o script; escolha o <em>dialeto</em> (se disponível), revise tipos e restrições, copie o SQL e teste no SGBD (detalhes no Cap. 4).</li>
+            </ol>
+            <figure class='listing'>
+                <figcaption class='listing-title'><strong>Código 3 — </strong>Exemplo mínimo de DDL (aluno, livro, reserva)</figcaption>
+                <pre class='code sql'>
+CREATE TABLE aluno (
+    matricula INTEGER NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    PRIMARY KEY (matricula)
+);
+
+CREATE TABLE livro (
+    isbn INTEGER NOT NULL,
+    titulo VARCHAR(150) NOT NULL,
+    PRIMARY KEY (isbn)
+);
+
+CREATE TABLE reserva (
+    id_reserva INTEGER NOT NULL,
+    matricula_aluno INTEGER NOT NULL,
+    isbn INTEGER NOT NULL,
+    data_reserva DATE NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    PRIMARY KEY (id_reserva),
+    FOREIGN KEY (matricula_aluno) REFERENCES aluno(matricula),
+    FOREIGN KEY (isbn) REFERENCES livro(isbn)
+);
+</pre>
+            </figure>
+        </section>
+
+        <section id='sec3-6'>
+            <h2>3.6 Estudo de Caso: Modelo Lógico da Biblioteca <a class='self-link' href='#sec3-6' aria-label='Link para esta seção'>🔗</a></h2>
+            <table class='box-table case-table'>
+                <tr>
+                    <td class='box-content case' role='note' aria-labelledby='case-title-3-6'>
+                        <div id='case-title-3-6' class='box-title'><img src='../images/icon-estudodecaso.png' class='icon-img' alt='Estudo de Caso'><strong>Estudo de Caso</strong></div>
+                        <div>
+                            <p><strong>Base</strong>: Use o Estudo de Caso do Capítulo 2 (Modelo ER da Biblioteca) como referência. Considere o conjunto ampliado de entidades e relacionamentos: <em>aluno</em>, <em>endereco</em>, <em>telefone</em>, <em>bibliotecario</em>, <em>livro</em>, <em>exemplar</em>, <em>autor</em>, <em>emprestimo</em>, <em>devolucao</em>, <em>reserva</em>, <em>multa</em>, <em>avaliacao</em>.</p>
+<p><strong>Ênfase</strong>: Mapeie corretamente os relacionamentos <strong>N:N</strong> por meio de <em>tabelas associativas</em>, em especial <code>livro_autor</code> (livro ↔ autor). Considere também <code>emprestimo</code> (aluno ↔ exemplar, com <code>data_emprestimo</code> e <code>data_prevista</code>), <code>devolucao</code> (associada a <code>emprestimo</code>, com <code>data_devolucao</code>), <code>reserva</code> (aluno ↔ livro, com <code>data_reserva</code> e <code>status</code>) e <code>avaliacao</code> (aluno ↔ emprestimo, com <code>nota</code>, <code>data_avaliacao</code>, <code>comentario</code>).</p>
+                            <p><strong>Atividade</strong>:</p>
+                            <ul>
+                                <li>Derive o <strong>esquema relacional</strong> completo a partir do modelo ER: defina <strong>PKs</strong> e <strong>FKs</strong> explícitas.</li>
+                                <li>Crie <strong>tabelas associativas</strong> para cada relacionamento N:N (ex.: <code>livro_autor(isbn FK, id_autor FK)</code> com <strong>PK composta</strong>).</li>
+                                <li>Mapeie <strong>atributos compostos</strong> e <strong>multivalorados</strong> (ex.: <code>telefone_aluno(matricula_aluno FK, telefone)</code>), garantindo <strong>1FN</strong>.</li>
+                                <li>Implemente <strong>restrições de integridade</strong>: <em>NOT NULL</em>, <em>UNIQUE</em> e políticas <em>ON DELETE</em> coerentes (<em>CASCADE</em>, <em>RESTRICT</em>, <em>SET NULL</em>).</li>
+                                <li>Valide <strong>cardinalidades</strong> e <strong>participações</strong> via FKs e colunas obrigatórias; refine até <strong>3FN</strong>.</li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+        <section id='sec3-7'>
+            <h2>3.7 Exercícios Complementares <a class='self-link' href='#sec3-7' aria-label='Link para esta seção'>🔗</a></h2>
+            <table class='box-table complementary-table'>
+                <tr>
+                    <td class='box-content complementary' role='note' aria-labelledby='comp-title-3-7'>
+                        <div id='comp-title-3-7' class='box-title'><img src='../images/icon-complementar.png' class='icon-img' alt='Exercícios Complementares'><strong>Exercícios Complementares</strong></div>
+                        <div>
+                            <p><strong>Objetivo</strong>: Fixar 1FN, 2FN e 3FN em um domínio de varejo.</p>
+                            <p><strong>Contexto</strong>: Varejo — rede de lojas com clientes, itens e compras. Cada compra registra itens e quantidades; clientes podem ter múltiplos telefones e endereço composto; e cada cliente é atendido por um gerente responsável. Este recorte foca normalizar cadastro e compras para reduzir redundâncias e anomalias.</p>
+                            <p><strong>Cenário inicial (não normalizado)</strong>:</p>
+                            <table class='content-table compact narrow'>
+                                <caption><strong>Tabela 3.2 - </strong>Cenário não normalizado (varejo).</caption>
+                                <thead>
+                                    <tr>
+                                        <th>cliente</th>
+                                        <th>nome</th>
+                                        <th>endereco</th>
+                                        <th>tel</th>
+                                        <th>cod_gerente</th>
+                                        <th>gerente</th>
+                                        <th>item</th>
+                                        <th>qtd</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>joao_silva</td>
+                                        <td>rua_a, bairro_x</td>
+                                        <td>9999-1111, 8888-2222</td>
+                                        <td>10</td>
+                                        <td>maria_lima</td>
+                                        <td>50</td>
+                                        <td>2</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p><strong>Tarefas</strong>:</p>
+                            <ul>
+                                <li>Aplicar <strong>1FN</strong>: decompor <code>endereco</code> e criar <code>telefone_cliente</code> com <code>cliente_id</code> como FK.</li>
+                                <li>Aplicar <strong>2FN</strong> (se houver chave composta): separar atributos que dependem apenas de <code>cliente_id</code>.</li>
+                                <li>Aplicar <strong>3FN</strong>: isolar dependência transitiva (<code>codigo_gerente</code> → <code>nome_gerente</code>) em <code>gerente</code>.</li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+        <section id='sec3-8'>
+            <h2>3.8 Exercícios Integrados <a class='self-link' href='#sec3-8' aria-label='Link para esta seção'>🔗</a></h2>
+            <table class='box-table integrated-table'>
+                <tr>
+                    <td class='box-content integrated' role='note' aria-labelledby='int-title-3-8'>
+                        <div id='int-title-3-8' class='box-title'><img src='../images/icon-integrado.png' class='icon-img' alt='Exercícios Integrados'><strong>Exercícios Integrados</strong></div>
+                        <div>
+                            <p><strong>Objetivo</strong>: Mapear frequência de <em>práticas corporais</em> por alunos ao longo do tempo usando regras N:M.</p>
+                            <p><strong>Contexto</strong>: Educação Física — a escola registra as práticas corporais realizadas pelos alunos (corrida, natação, dança, alongamento etc.), com data e duração, para acompanhar frequência, carga de treino e evolução ao longo do tempo. Indicadores agregados por período e tipo de prática ajudam professores a planejar intervenções.</p>
+                            <p><strong>Modelo Conceitual</strong>: entidades <code>aluno</code>, <code>pratica_corporal</code>; relacionamento <code>registra</code> com atributos <code>data</code>, <code>duracao</code>.</p>
+                            <figure>
+                                <img src='../images/3-7-education_practice_mapping.svg' alt='Mapeamento N:M entre aluno e prática via registro_pratica com data e duração.' />
+                                <figcaption><strong>Figura 3.4 — </strong>Registro de práticas: tabela associativa <code>registro_pratica</code> com PK composta e FKs.</figcaption>
+                            </figure>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+        <section id='sec3-9'>
+            <h2>3.9 Gabaritos <a class='self-link' href='#sec3-9' aria-label='Link para esta seção'>🔗</a></h2>
+            <table class='box-table gabarito-table'>
+                <tr>
+                    <td class='box-content gabarito' role='note' aria-labelledby='gab-title-3-9'>
+                        <div id='gab-title-3-9' class='box-title'><img src='../images/icon-gabarito.png' class='icon-img' alt='Gabarito'><strong>Gabaritos</strong></div>
+                        <div>
+                            <p><strong>Estudo de Caso — Biblioteca</strong></p>
+                            <ul>
+                                <li><code>aluno(matricula PK, nome)</code></li>
+                                <li><code>livro(isbn PK, titulo)</code></li>
+                                <li><code>exemplar(cod_exemplar PK, isbn FK)</code></li>
+                                <li><code>emprestimo(id_emprestimo PK, matricula_aluno FK, cod_exemplar FK, data_emprestimo, data_prevista)</code></li>
+                                <li><code>devolucao(id_devolucao PK, id_emprestimo FK, data_devolucao)</code></li>
+                                <li><code>reserva(id_reserva PK, matricula_aluno FK, isbn FK, data_reserva, status)</code></li>
+                                <li><code>autor(id_autor PK, nome)</code></li>
+                                <li><code>livro_autor(isbn FK, id_autor FK) PK composta (isbn, id_autor)</code></li>
+                                <li><code>avaliacao(id_avaliacao PK, id_emprestimo FK, nota, data_avaliacao, comentario)</code></li>
+                                <li><code>telefone_aluno(matricula_aluno FK, telefone) PK composta (matricula_aluno, telefone)</code></li>
+                            </ul>
+                            <p><strong>Nota</strong>: políticas <code>ON DELETE</code> e demais ações serão definidas no Capítulo 4.</p>
+                            <hr />
+                            <p><strong>Exercícios Complementares — Domínio de Varejo</strong></p>
+                            <ul>
+                                <li><code>cliente(cliente_id PK, nome_cliente, rua, bairro, codigo_gerente FK)</code></li>
+                                <li><code>gerente(codigo_gerente PK, nome_gerente)</code></li>
+                                <li><code>telefone_cliente(cliente_id FK, telefone) PK composta (cliente_id, telefone)</code></li>
+                                <li><code>item(item_id PK, descricao)</code></li>
+                                <li><code>compra(cliente_id FK, item_id FK, quantidade) PK composta (cliente_id, item_id)</code></li>
+                            </ul>
+                            <hr />
+                            <p><strong>Exercícios Integrados — Educação Física</strong></p>
+                            <ul>
+                                <li><code>aluno(matricula PK, nome)</code></li>
+                                <li><code>pratica_corporal(id_pratica PK, nome)</code></li>
+                                <li><code>registro_pratica(matricula_aluno FK, id_pratica FK, data, duracao) PK composta (matricula_aluno, id_pratica, data)</code></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </section>
+        <div class='page-foot'>Prof. Rafael Vargas Mesquita — Apostila: Banco de Dados • Capítulo 3</div>
+    </div>
+</body>
+
+</html>

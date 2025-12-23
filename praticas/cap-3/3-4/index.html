@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Práticas 3.4 — Regras de Mapeamento e Convenções</title>
+  <style>
+    :root { --bg:#f6f8fb; --surface:#fff; --border:#dde2eb; --text:#1f2937; --muted:#6b7280; --hover:#eef2ff; --good:#16a34a; --bad:#dc2626; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color:var(--text); background:var(--bg); }
+    main { padding: 16px; max-width: 1000px; margin: 0 auto; }
+    section { border:1px dashed var(--border); border-radius:10px; padding:12px; margin:14px 0; background:var(--surface); }
+    h3 { margin:0 0 8px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .box { border:1px solid var(--border); border-radius:10px; padding:10px; background:#fafafa; }
+    .row { display:flex; align-items:center; gap:8px; margin:6px 0; }
+    .inp { padding:6px 8px; border:1px solid var(--border); border-radius:8px; }
+    .sel { padding:6px 8px; border:1px solid var(--border); border-radius:8px; }
+    .btn { appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:8px 12px; cursor:pointer; }
+    .btn:hover { background:#eef2ff; border-color:#c7d2fe; }
+    .fb { margin-top:8px; color:var(--muted); }
+    .ok { color:var(--good); }
+    .err { color:var(--bad); }
+  </style>
+</head>
+<body>
+  <main>
+    <h2>Práticas 3.4 — Convenções e Mapeamentos</h2>
+
+    <section aria-labelledby="nomen-title">
+      <h3 id="nomen-title">Jogo de correção de nomenclatura</h3>
+      <p class="fb">Aplique convenções: minúsculas, underscores, sem acentos, prefixo <code>id_</code> para chaves.</p>
+      <div class="grid">
+        <div class="box">
+          <h4>Nomes "errados"</h4>
+          <div class="row"><span>AlunoID</span> → <input class="inp" id="fix-1" placeholder="id_aluno" /></div>
+          <div class="row"><span>cursoNome</span> → <input class="inp" id="fix-2" placeholder="nome" /></div>
+          <div class="row"><span>idCurso</span> → <input class="inp" id="fix-3" placeholder="id_curso" /></div>
+        </div>
+        <div class="box">
+          <h4>Regras</h4>
+          <ul class="fb">
+            <li>Use minúsculas e underscores.</li>
+            <li>Evite redundância no nome (ex.: curso_nome → nome).</li>
+            <li>Chaves começam com <code>id_</code>.</li>
+          </ul>
+        </div>
+      </div>
+      <div style="margin-top:8px; display:flex; gap:8px">
+        <button class="btn" id="btn-validar-nomen" type="button">Validar</button>
+        <button class="btn" id="btn-reset-nomen" type="button">Reset</button>
+      </div>
+      <div class="fb" id="fb-nomen" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="types-title">
+      <h3 id="types-title">Mini-lab: tipos de dados</h3>
+      <p class="fb">Escolha o tipo adequado para cada atributo.</p>
+      <div class="box">
+        <div class="row"><span>id_aluno</span> → <select class="sel" id="type-1"><option>VARCHAR</option><option>INTEGER</option><option>DATE</option></select></div>
+        <div class="row"><span>nome</span> → <select class="sel" id="type-2"><option>INTEGER</option><option>VARCHAR</option><option>DATE</option></select></div>
+        <div class="row"><span>data_matricula</span> → <select class="sel" id="type-3"><option>INTEGER</option><option>VARCHAR</option><option>DATE</option></select></div>
+      </div>
+      <div style="margin-top:8px; display:flex; gap:8px">
+        <button class="btn" id="btn-validar-types" type="button">Validar</button>
+        <button class="btn" id="btn-reset-types" type="button">Reset</button>
+      </div>
+      <div class="fb" id="fb-types" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="map-title">
+      <h3 id="map-title">Mapa visual de mapeamento</h3>
+      <p class="fb">Clique em um elemento conceitual para ver como foi mapeado.</p>
+      <div class="grid">
+        <div class="box" id="concept">
+          <h4>Conceitual (ER)</h4>
+          <div class="row"><button class="btn" data-map="aluno">Entidade: Aluno</button></div>
+          <div class="row"><button class="btn" data-map="rel-1n">Relacionamento: Turma (1:N)</button></div>
+          <div class="row"><button class="btn" data-map="rel-nn">Relacionamento: Cursa (N:N)</button></div>
+        </div>
+        <div class="box" id="logical">
+          <h4>Lógico (Relacional)</h4>
+          <div id="map-out" class="fb"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    // Jogo de nomenclatura
+    const expect = { 'fix-1':'id_aluno', 'fix-2':'nome', 'fix-3':'id_curso' };
+    document.getElementById('btn-reset-nomen').addEventListener('click', () => {
+      Object.keys(expect).forEach(id => { const el = document.getElementById(id); el.value = ''; });
+      document.getElementById('fb-nomen').textContent = '';
+    });
+    document.getElementById('btn-validar-nomen').addEventListener('click', () => {
+      const ok = Object.entries(expect).every(([id,val]) => (document.getElementById(id).value || '').trim() === val);
+      document.getElementById('fb-nomen').innerHTML = ok ? '<span class="ok">Correto! ✅ Convenções de nomenclatura aplicadas.</span>' : '<span class="err">Tente novamente. Observe as regras ao lado.</span>';
+    });
+
+    // Tipos de dados
+    function resetTypes() {
+      document.getElementById('type-1').selectedIndex = 1; // INTEGER
+      document.getElementById('type-2').selectedIndex = 1; // VARCHAR
+      document.getElementById('type-3').selectedIndex = 2; // DATE
+      document.getElementById('fb-types').textContent = '';
+    }
+    resetTypes();
+    document.getElementById('btn-reset-types').addEventListener('click', resetTypes);
+    document.getElementById('btn-validar-types').addEventListener('click', () => {
+      const ok = document.getElementById('type-1').value === 'INTEGER'
+        && document.getElementById('type-2').value === 'VARCHAR'
+        && document.getElementById('type-3').value === 'DATE';
+      document.getElementById('fb-types').innerHTML = ok ? '<span class="ok">Correto! ✅ Tipos escolhidos adequadamente.</span>' : '<span class="err">Revise: chaves inteiras, textos em VARCHAR, datas em DATE.</span>';
+    });
+
+    // Mapa de mapeamento
+    const mapOut = document.getElementById('map-out');
+    const mapping = {
+      aluno: 'Entidade forte → Tabela aluno (id_aluno PK, demais atributos como colunas).',
+      'rel-1n': 'Relacionamento 1:N → FK na tabela do lado N (turma.id_aluno → aluno.id_aluno).',
+      'rel-nn': 'Relacionamento N:N → tabela associativa (aluno_curso) com FKs compostas.'
+    };
+    document.querySelectorAll('#concept .btn').forEach(b => {
+      b.addEventListener('click', () => { mapOut.textContent = mapping[b.getAttribute('data-map')] || ''; });
+    });
+  </script>
+</body>
+</html>

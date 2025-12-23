@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1.3 — Arquitetura e Fluxo de Consulta</title>
+  <style>
+    :root { --text:#1f2937; --muted:#6b7280; --accent:#1f4f8b; --good:#0f6b5f; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color: var(--text); }
+    .wrap { padding: 14px 16px; max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 1.15rem; margin: 0 0 10px; }
+    .diagram { display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin: 8px 0 12px; }
+    .box { border:1px solid #e5e7eb; background:#fafafa; border-radius:10px; padding:12px; text-align:center; }
+    .box.active { outline: 3px solid var(--accent); background:#eef4ff; }
+    .pipe { display:flex; justify-content:center; align-items:center; gap:8px; color: var(--muted); font-size:0.92rem; }
+    .controls { display:flex; gap:8px; align-items:center; margin:10px 0; flex-wrap: wrap; }
+    button { border:1px solid #d1d5db; background:#fff; border-radius:8px; padding:8px 12px; cursor:pointer; }
+    button:hover{ background:#f7fafc; }
+    label { display:flex; gap:6px; align-items:center; }
+    .result { border:1px dashed #d1d5db; border-radius:10px; padding:10px; margin-top:8px; background:#fcfcfc; }
+    .plan-good { color: var(--good); font-weight:600; }
+    .metrics { margin-top:8px; font-size:0.95rem; }
+    .matches { font-weight:600; }
+    .data { width:100%; border-collapse: collapse; margin-top:8px; }
+    .data th, .data td { border:1px solid #e5e7eb; padding:6px; text-align:left; }
+    input#filter { flex:1 1 220px; padding:6px; border:1px solid #d1d5db; border-radius:8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>1.3 — SGBD: Funções e Componentes</h1>
+    <div class="diagram" aria-label="Arquitetura">
+      <div class="box" id="parser">Parser SQL</div>
+      <div class="box" id="optimizer">Otimizador</div>
+      <div class="box" id="executor">Executor</div>
+      <div class="box" id="storage">Armazenamento</div>
+    </div>
+    <div class="pipe">Usuário → Aplicação → SGBD → Disco</div>
+    <div class="controls">
+      <button id="run">Executar consulta</button>
+      <label><input type="checkbox" id="hasIndex"> Índice na coluna "nome"</label>
+      <input id="filter" placeholder="Filtro por nome (ex: 'Ca')" />
+    </div>
+    <div id="dataset"></div>
+    <div class="result" id="result" aria-live="polite"></div>
+    <div class="metrics" id="metrics"></div>
+    <p class="note">Fluxo simplificado: Parser valida, Otimizador escolhe plano, Executor executa, Armazenamento lê/grava. O índice pode mudar o plano. Abaixo, um conjunto de dados de exemplo para observar custos.</p>
+  </div>
+
+  <script>
+    const boxes = [
+      document.getElementById('parser'),
+      document.getElementById('optimizer'),
+      document.getElementById('executor'),
+      document.getElementById('storage')
+    ];
+    const res = document.getElementById('result');
+    const metricsEl = document.getElementById('metrics');
+    const datasetEl = document.getElementById('dataset');
+    const hasIndexEl = document.getElementById('hasIndex');
+    const filterEl = document.getElementById('filter');
+
+    const alunos = [
+      {id:1, nome:'Ana'}, {id:2, nome:'André'}, {id:3, nome:'Beatriz'}, {id:4, nome:'Bruno'},
+      {id:5, nome:'Caio'}, {id:6, nome:'Carla'}, {id:7, nome:'Daniel'}, {id:8, nome:'Diana'},
+      {id:9, nome:'Eduardo'}, {id:10, nome:'Elaine'}, {id:11, nome:'Fábio'}, {id:12, nome:'Fernanda'},
+      {id:13, nome:'Gabriel'}, {id:14, nome:'Giulia'}, {id:15, nome:'Hugo'}, {id:16, nome:'Helena'}
+    ];
+
+    function renderDataset() {
+      const rows = alunos.map(a=> `<tr><td>${a.id}</td><td>${a.nome}</td></tr>`).join('');
+      datasetEl.innerHTML = `
+        <table class="data">
+          <thead><tr><th>ID</th><th>Nome</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function clear() { boxes.forEach(b => b.classList.remove('active')); }
+    function pulse(i) { clear(); boxes[i].classList.add('active'); }
+
+    function estimateCosts(total, matches) {
+      const fullScanCost = total;
+      const indexProbeCost = Math.max(1, Math.ceil(Math.log2(total+1)));
+      const indexTraversalCost = matches;
+      const indexCost = indexProbeCost + indexTraversalCost;
+      return { fullScanCost, indexCost, indexProbeCost, indexTraversalCost };
+    }
+
+    function summarize(hasIndex, matches, total) {
+      const {fullScanCost, indexCost, indexProbeCost, indexTraversalCost} = estimateCosts(total, matches);
+      const plan = hasIndex ? '<span class="plan-good">Plano: Index Scan (mais eficiente quando seletivo).</span>' : 'Plano: Full Table Scan (adequado para tabelas pequenas ou sem seletividade).';
+      res.innerHTML += `<p>${plan}</p>`;
+      metricsEl.innerHTML = `
+        <p><strong>Linhas retornadas:</strong> <span class="matches">${matches}</span> de ${total}</p>
+        <p><strong>Custo estimado (Full Table Scan):</strong> ${fullScanCost}</p>
+        <p><strong>Custo estimado (Index Scan):</strong> ${indexCost} = probe ${indexProbeCost} + travessia ${indexTraversalCost}</p>
+      `;
+    }
+
+    function renderMatches(list) {
+      if (!list.length) { res.innerHTML += `<p>Nenhum registro correspondente ao filtro.</p>`; return; }
+      const rows = list.map(a=> `<tr><td>${a.id}</td><td>${a.nome}</td></tr>`).join('');
+      res.innerHTML += `
+        <p><strong>Registros retornados:</strong></p>
+        <table class="data"><thead><tr><th>ID</th><th>Nome</th></tr></thead><tbody>${rows}</tbody></table>
+      `;
+    }
+
+    function runPipeline() {
+      res.innerHTML = '';
+      metricsEl.innerHTML = '';
+      const hasIndex = hasIndexEl.checked;
+      const q = (filterEl.value || '').toLowerCase();
+      const matchesList = alunos.filter(a => a.nome.toLowerCase().includes(q));
+      const total = alunos.length;
+      const matches = matchesList.length;
+
+      const steps = [
+        { i:0, text:'Parser SQL: valida sintaxe.' },
+        { i:1, text: hasIndex ? 'Otimizador: escolhe Index Scan.' : 'Otimizador: escolhe Full Table Scan.' },
+        { i:2, text:'Executor: executa o plano.' },
+        { i:3, text: hasIndex ? 'Armazenamento: acessa o índice e páginas.' : 'Armazenamento: varre a tabela inteira.' }
+      ];
+
+      let k = 0;
+      const timeline = setInterval(() => {
+        const s = steps[k];
+        if (!s) { clearInterval(timeline); summarize(hasIndex, matches, total); renderMatches(matchesList); return; }
+        pulse(s.i);
+        res.innerHTML += `<p>${s.text}</p>`;
+        k++;
+      }, 650);
+    }
+
+    document.getElementById('run').addEventListener('click', runPipeline);
+    renderDataset();
+  </script>
+</body>
+</html>

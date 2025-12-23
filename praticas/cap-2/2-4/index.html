@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2.4 — Construindo o MER no brModelo</title>
+  <style>
+    :root { --text:#1f2937; --muted:#6b7280; --accent:#1f4f8b; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color: var(--text); }
+    .wrap { padding: 14px 16px; max-width: 980px; margin: 0 auto; }
+    h1 { font-size: 1.2rem; margin: 0 0 12px; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; }
+    .tab { border:1px solid #d1d5db; background:#fff; border-radius:10px; padding:8px 12px; cursor:pointer; }
+    .tab.active { background:#eef2ff; border-color:#6366f1; }
+    .panel { display:none; margin-top:12px; }
+    .panel.active { display:block; }
+    .note { color: var(--muted); }
+    .box { border:1px solid #e5e7eb; border-radius:10px; background:#fafafa; padding:10px; }
+    .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+    .svg-wrap { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:6px; }
+    .label { font-size: 12px; fill: #111827; }
+    .shape { fill:#e5e7eb; stroke:#9ca3af; }
+    .hl { stroke:#2563eb; stroke-width:3; }
+    .pill { display:inline-block; border:1px solid #d1d5db; border-radius:999px; padding:4px 10px; margin:4px 6px 0 0; background:#f8fafc; cursor:pointer; }
+    .pill.active { background:#eef2ff; border-color:#6366f1; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>2.4 — Construindo o MER no brModelo</h1>
+    <p class="note">Tour guiado do brModelo e boas práticas de modelagem.</p>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-key="tour" role="tab">Tour</button>
+      <button class="tab" data-key="boas" role="tab">Boas práticas</button>
+    </div>
+
+    <!-- Painel: Tour -->
+    <section class="panel active" data-key="tour" aria-label="Tour">
+      <div class="box">
+        <h3>brModelo (Web)</h3>
+        <p>Abra o brModelo Web para desenhar seu MER:</p>
+        <p><a href="https://brmodeloweb.com/" target="_blank" rel="noopener">brmodeloweb.com</a></p>
+        <ul>
+          <li>Retângulos: entidades</li>
+          <li>Losangos: relacionamentos</li>
+          <li>Elipses: atributos</li>
+          <li>Chaves: primárias e estrangeiras</li>
+        </ul>
+        <figure>
+          <img src="../../../conteudos/images/2-1-er_basics.svg" alt="Formas do MER" style="max-width:100%;" />
+          <figcaption class="note">Formas básicas do MER.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+
+    <!-- Painel: Boas práticas -->
+    <section class="panel" data-key="boas" aria-label="Boas práticas">
+      <div class="box">
+        <ul>
+          <li>Nomeie entidades e atributos claramente.</li>
+          <li>Evite grupos repetidos e use relacionamentos N:N com tabela associativa.</li>
+          <li>Defina chaves primárias e estrangeiras no modelo lógico.</li>
+          <li>Valide cardinalidades e participação conforme regras do domínio.</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Tabs
+    document.querySelector('.tabs').addEventListener('click', (ev) => {
+      const btn = ev.target.closest('.tab'); if (!btn) return;
+      const key = btn.getAttribute('data-key');
+      document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.getAttribute('data-key') === key));
+    });
+
+    // Mini MER: adicionar itens simples
+    const svg = document.getElementById('svg-mini');
+    const pills = document.querySelectorAll('.pill');
+    function addEntity(name='Entidade', x=100+Math.random()*500, y=200+Math.random()*120) {
+      const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      r.setAttribute('class','entity'); r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', 140); r.setAttribute('height', 60); r.setAttribute('rx', 8);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('class','label'); t.setAttribute('x', x+70); t.setAttribute('y', y+35); t.setAttribute('text-anchor','middle'); t.textContent = name;
+      svg.appendChild(r); svg.appendChild(t);
+    }
+    function addAttr(name='atributo', cx=100+Math.random()*500, cy=200+Math.random()*120) {
+      const e = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+      e.setAttribute('class','attr'); e.setAttribute('cx', cx); e.setAttribute('cy', cy); e.setAttribute('rx', 55); e.setAttribute('ry', 22);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('class','label'); t.setAttribute('x', cx); t.setAttribute('y', cy+4); t.setAttribute('text-anchor','middle'); t.textContent = name;
+      svg.appendChild(e); svg.appendChild(t);
+    }
+    function addRel(name='Rel', x=100+Math.random()*500, y=200+Math.random()*120) {
+      const p = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+      p.setAttribute('class','rel'); p.setAttribute('points',`${x},${y} ${x+40},${y+30} ${x},${y+60} ${x-40},${y+30}`);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('class','label'); t.setAttribute('x', x); t.setAttribute('y', y+34); t.setAttribute('text-anchor','middle'); t.textContent = name;
+      svg.appendChild(p); svg.appendChild(t);
+    }
+    function connect(x1=100+Math.random()*500, y1=200+Math.random()*120, x2=x1+160, y2=y1) {
+      const l = document.createElementNS('http://www.w3.org/2000/svg','line');
+      l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+      l.setAttribute('stroke','#6b7280'); l.setAttribute('stroke-width','2'); svg.appendChild(l);
+    }
+    pills.forEach(p => p.addEventListener('click', () => {
+      const type = p.getAttribute('data-add'); p.classList.add('active'); setTimeout(() => p.classList.remove('active'), 350);
+      if (type === 'entidade') {
+        const name = prompt('Nome da entidade?') || 'Entidade'; addEntity(name);
+      } else if (type === 'atributo') {
+        const name = prompt('Nome do atributo?') || 'atributo'; addAttr(name);
+      } else if (type === 'relacionamento') {
+        const name = prompt('Nome do relacionamento?') || 'Rel'; addRel(name);
+      } else if (type === 'conectar') {
+        connect();
+      }
+    }));
+  </script>
+</body>
+</html>

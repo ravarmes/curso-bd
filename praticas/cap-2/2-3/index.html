@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2.3 — Normalização Inicial e Boas Práticas</title>
+  <style>
+    :root { --text:#1f2937; --muted:#6b7280; --accent:#1f4f8b; --ok:#16a34a; --bad:#dc2626; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color: var(--text); }
+    .wrap { padding: 14px 16px; max-width: 980px; margin: 0 auto; }
+    h1 { font-size: 1.2rem; margin: 0 0 12px; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; }
+    .tab { border:1px solid #d1d5db; background:#fff; border-radius:10px; padding:8px 12px; cursor:pointer; }
+    .tab.active { background:#eef2ff; border-color:#6366f1; }
+    .panel { display:none; margin-top:12px; }
+    .panel.active { display:block; }
+    .note { color: var(--muted); }
+    .box { border:1px solid #e5e7eb; border-radius:10px; background:#fafafa; padding:10px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+
+    /* Exemplo */
+    .table { width:100%; border-collapse: collapse; }
+    .table th, .table td { border:1px solid #e5e7eb; padding:6px; text-align:left; }
+    .hit { background:#fef3c7; }
+
+    /* Laboratório */
+    .lab { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .input-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px; }
+    .result { font-weight:600; }
+
+    /* Quiz */
+    .quiz .options { display:flex; flex-wrap:wrap; gap:8px; }
+    .option-btn { border:1px solid #d1d5db; background:#fff; border-radius:10px; padding:6px 10px; cursor:pointer; }
+    .option-btn.correct { background:#ecfdf5; border-color:#16a34a; }
+    .option-btn.incorrect { background:#fee2e2; border-color:#dc2626; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>2.3 — Normalização Inicial e Boas Práticas</h1>
+    <p class="note">Elimine grupos repetidos e separe entidades com relacionamentos para reduzir redundância.</p>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-key="exemplo" role="tab">Exemplo</button>
+      <button class="tab" data-key="laboratorio" role="tab">Laboratório</button>
+      <button class="tab" data-key="quiz" role="tab">Quiz</button>
+    </div>
+
+    <!-- Painel: Exemplo -->
+    <section class="panel active" data-key="exemplo" aria-label="Exemplo">
+      <div class="grid">
+        <div class="box">
+          <h3>Antes (grupo repetido)</h3>
+          <table class="table" id="tbl-before">
+            <thead><tr><th>Livro</th><th>Autor1</th><th>Autor2</th><th>Autor3</th></tr></thead>
+            <tbody>
+              <tr><td>BD Essencial</td><td>Ana</td><td>Bruno</td><td></td></tr>
+              <tr><td>SQL Prático</td><td>Carla</td><td></td><td></td></tr>
+              <tr><td>ER Moderno</td><td>Diego</td><td>Eva</td><td>Fábio</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box">
+          <h3>Depois (tabela Autor + relação N:N)</h3>
+          <table class="table" id="tbl-after">
+            <thead><tr><th>Livro</th><th>Autor</th></tr></thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="input-row">
+        <button id="norm-run" class="tab">Normalizar</button>
+        <span class="note">Transforma colunas Autor1..AutorN em linhas relacionadas.</span>
+      </div>
+    </section>
+
+    <!-- Painel: Laboratório -->
+    <section class="panel" data-key="laboratorio" aria-label="Laboratório">
+      <div class="lab">
+        <div class="box">
+          <h3>Entrada (cadastro simplificado)</h3>
+          <div class="input-row">
+            <label>Livro: <input id="in-book" /></label>
+            <label>Autor1: <input id="in-a1" /></label>
+            <label>Autor2: <input id="in-a2" /></label>
+            <label>Autor3: <input id="in-a3" /></label>
+            <button id="lab-add" class="tab">Adicionar</button>
+          </div>
+          <table class="table" id="lab-before">
+            <thead><tr><th>Livro</th><th>Autor1</th><th>Autor2</th><th>Autor3</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="box">
+          <h3>Resultado normalizado</h3>
+          <table class="table" id="lab-after">
+            <thead><tr><th>Livro</th><th>Autor</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="result" id="lab-result">Aguardando...</div>
+        </div>
+      </div>
+      <div class="input-row">
+        <button id="lab-run" class="tab">Normalizar dados</button>
+        <span class="note">Gera linhas Livro–Autor para cada autor informado.</span>
+      </div>
+    </section>
+
+    <!-- Painel: Quiz -->
+    <section class="panel quiz" data-key="quiz" aria-label="Quiz">
+      <h3>Pergunta rápida</h3>
+      <p>Qual técnica reduz diretamente redundância em cadastros?</p>
+      <div class="options">
+        <button class="option-btn" data-i="0">Desnormalização</button>
+        <button class="option-btn" data-i="1">Normalização</button>
+        <button class="option-btn" data-i="2">Indexação</button>
+      </div>
+      <div class="feedback" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <script>
+    // Tabs
+    document.querySelector('.tabs').addEventListener('click', (ev) => {
+      const btn = ev.target.closest('.tab'); if (!btn) return;
+      const key = btn.getAttribute('data-key');
+      document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.getAttribute('data-key') === key));
+    });
+
+    // Exemplo: normalizar tabela fixa
+    const beforeRows = [
+      { livro:'BD Essencial', autores:['Ana','Bruno',''] },
+      { livro:'SQL Prático', autores:['Carla','',''] },
+      { livro:'ER Moderno', autores:['Diego','Eva','Fábio'] },
+    ];
+    function renderBefore() {
+      const tb = document.querySelector('#tbl-before tbody');
+      tb.innerHTML = beforeRows.map(r => `<tr><td>${r.livro}</td><td>${r.autores[0]}</td><td>${r.autores[1]}</td><td>${r.autores[2]}</td></tr>`).join('');
+    }
+    function runNorm() {
+      const out = [];
+      beforeRows.forEach(r => r.autores.forEach(a => { if (a && a.trim()) out.push({ livro:r.livro, autor:a.trim() }); }));
+      const tb = document.querySelector('#tbl-after tbody');
+      tb.innerHTML = out.map(r => `<tr><td>${r.livro}</td><td>${r.autor}</td></tr>`).join('');
+    }
+    document.getElementById('norm-run').addEventListener('click', runNorm);
+    renderBefore();
+
+    // Laboratório: entrada + normalização
+    const labRows = [];
+    document.getElementById('lab-add').addEventListener('click', () => {
+      const livro = document.getElementById('in-book').value.trim();
+      const a1 = document.getElementById('in-a1').value.trim();
+      const a2 = document.getElementById('in-a2').value.trim();
+      const a3 = document.getElementById('in-a3').value.trim();
+      if (!livro) return;
+      labRows.push({ livro, autores:[a1,a2,a3] });
+      document.getElementById('in-book').value = '';
+      document.getElementById('in-a1').value = '';
+      document.getElementById('in-a2').value = '';
+      document.getElementById('in-a3').value = '';
+      const tb = document.querySelector('#lab-before tbody');
+      tb.innerHTML = labRows.map(r => `<tr><td>${r.livro}</td><td>${r.autores[0]}</td><td>${r.autores[1]}</td><td>${r.autores[2]}</td></tr>`).join('');
+    });
+    document.getElementById('lab-run').addEventListener('click', () => {
+      const out = [];
+      labRows.forEach(r => r.autores.forEach(a => { if (a && a.trim()) out.push({ livro:r.livro, autor:a.trim() }); }));
+      const tb = document.querySelector('#lab-after tbody');
+      tb.innerHTML = out.map(r => `<tr><td>${r.livro}</td><td>${r.autor}</td></tr>`).join('');
+      document.getElementById('lab-result').textContent = out.length ? `Geradas ${out.length} linhas normalizadas.` : 'Nenhuma linha gerada.';
+    });
+
+    // Quiz
+    const fb = document.querySelector('.quiz .feedback');
+    document.querySelectorAll('.quiz .option-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const chosen = Number(btn.getAttribute('data-i'));
+        const correctIdx = 1;
+        document.querySelectorAll('.quiz .option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+        btn.classList.add(chosen === correctIdx ? 'correct' : 'incorrect');
+        fb.textContent = chosen === correctIdx ? 'Correto! ✅' : 'Incorreto. A técnica é normalização.';
+      });
+    });
+  </script>
+</body>
+</html>

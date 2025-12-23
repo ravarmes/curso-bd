@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Práticas 3.1 — Transformação ER → Relacional</title>
+  <style>
+    :root { --bg:#f6f8fb; --surface:#fff; --border:#dde2eb; --text:#1f2937; --muted:#6b7280; --accent:#2563eb; --good:#16a34a; --bad:#dc2626; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color:var(--text); background:var(--bg); }
+    main { padding: 16px; max-width: 960px; margin: 0 auto; }
+    h2 { margin: 0 0 6px; }
+    section { border:1px dashed var(--border); border-radius:10px; padding:12px; margin:14px 0; background:var(--surface); }
+    .btn { appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:8px 12px; cursor:pointer; }
+    .btn:hover { background:#eef2ff; border-color:#c7d2fe; }
+    .diagram { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-start; }
+    .card { border:1px solid var(--border); border-radius:10px; padding:10px; min-width:180px; background:#fcfcff; }
+    .card h4 { margin:0 0 6px; }
+    .mini { font-size: 14px; color: var(--muted); }
+    .arrow { font-size: 20px; margin:0 6px; color: var(--muted); }
+    .tables { display:none; gap:12px; flex-wrap:wrap; }
+    .tables.show { display:flex; animation: fadeIn .25s ease-in; }
+    .tbl { border:1px solid var(--border); border-radius:10px; padding:10px; min-width:220px; background:#f9fafb; }
+    .tbl h4 { margin:0 0 6px; }
+    .map { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .list { border:1px solid var(--border); border-radius:10px; padding:10px; background:#fafafa; }
+    .list h4 { margin:0 0 6px; }
+    .item { padding:6px 8px; border-radius:8px; cursor:pointer; }
+    .item:hover { background:#eef2ff; }
+    .item.active { outline:2px solid #93c5fd; background:#eff6ff; }
+    .item.good { background:rgba(22,163,74,.10); border:1px solid #86efac; }
+    .item.bad { background:rgba(220,38,38,.10); border:1px solid #fecaca; }
+    .hint { margin-top:8px; color: var(--muted); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <main>
+    <h2>Práticas 3.1 — Transformação do Modelo Conceitual em Relacional</h2>
+
+    <section aria-labelledby="anim-title">
+      <h3 id="anim-title">Animação de transformação</h3>
+      <p class="mini">Clique em "Converter" para visualizar como entidades e relacionamentos do ER viram tabelas relacionais.</p>
+      <div class="diagram" id="er-diagram">
+        <div class="card" id="ent-aluno">
+          <h4>Entidade: Aluno</h4>
+          <ul class="mini"><li>id_aluno</li><li>nome</li></ul>
+        </div>
+        <span class="arrow">⇄</span>
+        <div class="card" id="rel-cursa">
+          <h4>Relacionamento: Cursa (N:N)</h4>
+          <ul class="mini"><li>Aluno — Cursa — Curso</li></ul>
+        </div>
+        <span class="arrow">⇄</span>
+        <div class="card" id="ent-curso">
+          <h4>Entidade: Curso</h4>
+          <ul class="mini"><li>id_curso</li><li>titulo</li></ul>
+        </div>
+      </div>
+      <div style="margin-top:8px; display:flex; gap:8px">
+        <button class="btn" id="btn-converter" type="button">Converter para Relacional</button>
+        <button class="btn" id="btn-reset" type="button" aria-label="Reset" title="Reset">Reset</button>
+      </div>
+      <div class="diagram tables" id="rel-diagram" aria-live="polite">
+        <div class="tbl"><h4>Tabela: aluno</h4><div class="mini">id_aluno (PK), nome</div></div>
+        <div class="tbl"><h4>Tabela: curso</h4><div class="mini">id_curso (PK), titulo</div></div>
+        <div class="tbl"><h4>Tabela: aluno_curso</h4><div class="mini">id_aluno (FK), id_curso (FK), data</div></div>
+      </div>
+      <p class="hint" id="anim-hint">Entidades fortes → tabelas. Relacionamentos N:N → tabela associativa com FKs.</p>
+    </section>
+
+    <section aria-labelledby="map-title">
+      <h3 id="map-title">Visualizador de equivalência ER ↔ Relacional</h3>
+      <p class="mini">Clique em um elemento do ER e veja o correspondente no modelo relacional piscar.</p>
+      <div class="map" id="map">
+        <div class="list" id="map-er">
+          <h4>Modelo ER</h4>
+          <div class="item" data-map="aluno">Entidade: Aluno</div>
+          <div class="item" data-map="curso">Entidade: Curso</div>
+          <div class="item" data-map="cursa">Rel. Cursa (N:N)</div>
+          <div class="item" data-map="pk-aluno">Atributo: id_aluno</div>
+          <div class="item" data-map="pk-curso">Atributo: id_curso</div>
+        </div>
+        <div class="list" id="map-rel">
+          <h4>Modelo Relacional</h4>
+          <div class="item" data-id="aluno">Tabela aluno</div>
+          <div class="item" data-id="curso">Tabela curso</div>
+          <div class="item" data-id="aluno_curso">Tabela aluno_curso (associativa)</div>
+          <div class="item" data-id="pk-aluno">PK: aluno.id_aluno</div>
+          <div class="item" data-id="pk-curso">PK: curso.id_curso</div>
+          <div class="item" data-id="fk-aluno">FK: aluno_curso.id_aluno → aluno.id_aluno</div>
+          <div class="item" data-id="fk-curso">FK: aluno_curso.id_curso → curso.id_curso</div>
+        </div>
+      </div>
+      <p class="hint">Relacionamentos 1:N mapeiam FKs; relacionamentos N:N viram tabela intermediária.</p>
+    </section>
+  </main>
+  <script>
+    // Animação de transformação
+    const btnConv = document.getElementById('btn-converter');
+    const btnReset = document.getElementById('btn-reset');
+    const rel = document.getElementById('rel-diagram');
+    const er = document.getElementById('er-diagram');
+    btnConv.addEventListener('click', () => {
+      er.style.opacity = '0.25';
+      er.style.filter = 'grayscale(0.4)';
+      rel.classList.add('show');
+    });
+    btnReset.addEventListener('click', () => {
+      er.style.opacity = '1';
+      er.style.filter = 'none';
+      rel.classList.remove('show');
+    });
+
+    // Visualizador de equivalência
+    const idsByMap = {
+      aluno: ['aluno'],
+      curso: ['curso'],
+      cursa: ['aluno_curso','fk-aluno','fk-curso'],
+      'pk-aluno': ['pk-aluno'],
+      'pk-curso': ['pk-curso'],
+    };
+    document.querySelectorAll('#map-er .item').forEach((it) => {
+      it.addEventListener('click', () => {
+        document.querySelectorAll('#map-rel .item').forEach(x => x.classList.remove('active'));
+        const targetIds = idsByMap[it.getAttribute('data-map')] || [];
+        targetIds.forEach(id => {
+          const el = document.querySelector(`#map-rel .item[data-id="${id}"]`);
+          if (el) { el.classList.add('active'); el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2.2 — Cardinalidade, Participação e Integridade</title>
+  <style>
+    :root { --text:#1f2937; --muted:#6b7280; --accent:#1f4f8b; --ok:#16a34a; --bad:#dc2626; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color: var(--text); }
+    .wrap { padding: 14px 16px; max-width: 980px; margin: 0 auto; }
+    h1 { font-size: 1.2rem; margin: 0 0 12px; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; }
+    .tab { border:1px solid #d1d5db; background:#fff; border-radius:10px; padding:8px 12px; cursor:pointer; }
+    .tab.active { background:#eef2ff; border-color:#6366f1; }
+    .panel { display:none; margin-top:12px; }
+    .panel.active { display:block; }
+    .note { color: var(--muted); }
+    .box { border:1px solid #e5e7eb; border-radius:10px; background:#fafafa; padding:10px; }
+    .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+
+    /* Animações */
+    .svg-wrap { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:6px; }
+    .label { font-size: 12px; fill: #111827; }
+    .shape { fill:#e5e7eb; stroke:#9ca3af; }
+    .hl { stroke:#2563eb; stroke-width:3; }
+
+    /* Simulador */
+    .sim-grid { display:grid; grid-template-columns: 2fr 1fr; gap:12px; }
+    .sim-table { width:100%; border-collapse: collapse; }
+    .sim-table th, .sim-table td { border:1px solid #e5e7eb; padding:6px; text-align:left; }
+    .status { font-weight:600; }
+
+    /* Desafios */
+    .challenge { border:1px solid #e5e7eb; border-radius:10px; padding:10px; background:#fff; margin-top:8px; }
+    .challenge .options { display:flex; gap:8px; flex-wrap:wrap; }
+    .option-btn { border:1px solid #d1d5db; background:#fff; border-radius:10px; padding:6px 10px; cursor:pointer; }
+    .option-btn.correct { background:#ecfdf5; border-color:#16a34a; }
+    .option-btn.incorrect { background:#fee2e2; border-color:#dc2626; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>2.2 — Cardinalidade, Participação e Integridade</h1>
+    <p class="note">Visualize 1:1, 1:N, N:N; marque participação obrigatória e simule regras de integridade.</p>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-key="animacao" role="tab">Animações</button>
+      <button class="tab" data-key="simulador" role="tab">Simulador</button>
+      <button class="tab" data-key="desafios" role="tab">Desafios</button>
+    </div>
+
+    <!-- Painel: Animações -->
+    <section class="panel active" data-key="animacao" aria-label="Animações">
+      <div class="controls">
+        <label><input type="radio" name="card" value="1:1" checked /> 1:1</label>
+        <label><input type="radio" name="card" value="1:N" /> 1:N</label>
+        <label><input type="radio" name="card" value="N:N" /> N:N</label>
+        <label style="margin-left:10px;"><input type="checkbox" id="part-obrig" /> Participação obrigatória</label>
+      </div>
+      <div class="svg-wrap">
+        <svg id="svg-card" viewBox="0 0 700 260" style="width:100%; height:auto;" aria-label="Cardinalidade">
+          <rect class="shape" x="60" y="80" width="160" height="60" rx="8"></rect>
+          <text class="label" x="140" y="115" text-anchor="middle">Usuário</text>
+          <rect class="shape" x="480" y="80" width="160" height="60" rx="8"></rect>
+          <text class="label" x="560" y="115" text-anchor="middle">Empréstimo</text>
+          <polygon class="shape" points="340,80 380,110 340,140 300,110"></polygon>
+          <text class="label" x="340" y="114" text-anchor="middle">Rel</text>
+          <!-- linhas com marcas -->
+          <line id="line-left" x1="220" y1="110" x2="300" y2="110" stroke="#6b7280" stroke-width="2"></line>
+          <line id="line-right" x1="380" y1="110" x2="480" y2="110" stroke="#6b7280" stroke-width="2"></line>
+          <text id="mark-left" class="label" x="260" y="95" text-anchor="middle">1</text>
+          <text id="mark-right" class="label" x="430" y="95" text-anchor="middle">N</text>
+          <text id="particip" class="label" x="340" y="170" text-anchor="middle" fill="#dc2626" style="display:none;">Participação obrigatória</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- Painel: Simulador -->
+    <section class="panel" data-key="simulador" aria-label="Simulador">
+      <div class="sim-grid">
+        <div class="box">
+          <div class="controls">
+            <label>Usuários: <input type="number" id="sim-users" value="3" min="1" style="width:80px;" /></label>
+            <label>Empréstimos por usuário: <input type="number" id="sim-loans-per" value="2" min="0" style="width:80px;" /></label>
+            <label><input type="checkbox" id="sim-mandatory" /> Usuário deve ter ao menos 1 empréstimo</label>
+            <button id="sim-run" class="tab">Gerar</button>
+          </div>
+          <table class="sim-table">
+            <thead><tr><th>Usuário</th><th>Qtd Empréstimos</th></tr></thead>
+            <tbody id="sim-body"></tbody>
+          </table>
+        </div>
+        <div class="box">
+          <h3>Integridade</h3>
+          <p class="status" id="sim-status">Aguardando simulação...</p>
+          <ul id="sim-issues"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Painel: Desafios -->
+    <section class="panel" data-key="desafios" aria-label="Desafios">
+      <div class="challenge">
+        <h3>Escolha a cardinalidade correta</h3>
+        <p>Usuário — Empréstimo</p>
+        <div class="options">
+          <button class="option-btn" data-i="0">1:1</button>
+          <button class="option-btn" data-i="1">1:N</button>
+          <button class="option-btn" data-i="2">N:N</button>
+        </div>
+        <div class="feedback" aria-live="polite"></div>
+      </div>
+      <div class="challenge">
+        <h3>Marque participação</h3>
+        <p>Empréstimo requer um Usuário válido. Participação do Usuário no relacionamento é...</p>
+        <div class="options">
+          <button class="option-btn" data-i="0">Opcional</button>
+          <button class="option-btn" data-i="1">Obrigatória</button>
+        </div>
+        <div class="feedback" aria-live="polite"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Tabs
+    document.querySelector('.tabs').addEventListener('click', (ev) => {
+      const btn = ev.target.closest('.tab'); if (!btn) return;
+      const key = btn.getAttribute('data-key');
+      document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.getAttribute('data-key') === key));
+    });
+
+    // Animações: alterna cardinalidade e participação
+    const marks = { left: document.getElementById('mark-left'), right: document.getElementById('mark-right'), particip: document.getElementById('particip') };
+    function setCard(value) {
+      if (value === '1:1') { marks.left.textContent = '1'; marks.right.textContent = '1'; }
+      else if (value === '1:N') { marks.left.textContent = '1'; marks.right.textContent = 'N'; }
+      else { marks.left.textContent = 'N'; marks.right.textContent = 'N'; }
+    }
+    document.querySelectorAll('input[name="card"]').forEach(r => r.addEventListener('change', () => setCard(r.value)));
+    setCard('1:N'); // estado inicial
+    document.getElementById('part-obrig').addEventListener('change', (e) => {
+      marks.particip.style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    // Simulador
+    const simUsers = document.getElementById('sim-users');
+    const simLoansPer = document.getElementById('sim-loans-per');
+    const simMandatory = document.getElementById('sim-mandatory');
+    const simBody = document.getElementById('sim-body');
+    const simStatus = document.getElementById('sim-status');
+    const simIssues = document.getElementById('sim-issues');
+    function runSim() {
+      const n = Math.max(1, Number(simUsers.value) || 1);
+      const per = Math.max(0, Number(simLoansPer.value) || 0);
+      simBody.innerHTML = '';
+      simIssues.innerHTML = '';
+      let ok = true;
+      for (let i=1;i<=n;i++) {
+        const loans = Math.max(0, Math.round(per + (Math.random()*2-1))); // varia levemente
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>U${i}</td><td>${loans}</td>`;
+        simBody.appendChild(tr);
+        if (simMandatory.checked && loans < 1) {
+          ok = false;
+          const li = document.createElement('li');
+          li.textContent = `Violação: U${i} sem empréstimos (participação obrigatória).`;
+          simIssues.appendChild(li);
+        }
+      }
+      simStatus.textContent = ok ? 'Integridade OK ✅' : 'Há violações ❌';
+      simStatus.style.color = ok ? '#16a34a' : '#dc2626';
+    }
+    document.getElementById('sim-run').addEventListener('click', runSim);
+    runSim();
+
+    // Desafios
+    document.querySelectorAll('.challenge').forEach((ch, idx) => {
+      const fb = ch.querySelector('.feedback');
+      ch.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const chosen = Number(btn.getAttribute('data-i'));
+          const correctIdx = idx === 0 ? 1 : 1; // 1:N e Obrigatória
+          ch.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+          btn.classList.add(chosen === correctIdx ? 'correct' : 'incorrect');
+          fb.textContent = chosen === correctIdx ? 'Correto! ✅' : 'Tente novamente.';
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1.4 — Três Esquemas</title>
+  <style>
+    :root { --text:#1f2937; --muted:#6b7280; --accent:#1f4f8b; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color: var(--text); }
+    .wrap { padding: 14px 16px; max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 1.15rem; margin: 0 0 10px; }
+    .stack { display:grid; grid-template-rows: auto auto auto; gap:10px; }
+    .layer { border:1px solid #e5e7eb; border-radius:10px; padding:12px; background:#fafafa; }
+    .layer h2 { margin:0 0 6px; font-size:1rem; }
+    .content { display:none; margin-top:6px; }
+    .layer.active .content { display:block; }
+    .toggle { border:1px solid #d1d5db; background:#fff; border-radius:8px; padding:6px 10px; cursor:pointer; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { border:1px solid #e5e7eb; padding:6px; text-align:left; }
+    .note { color: var(--muted); font-size: 0.92rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>1.4 — Modelos de Dados e Arquitetura de Três Esquemas</h1>
+    <div class="stack">
+      <div class="layer" id="layer-external">
+        <h2>Externo <button class="toggle" data-target="external">Expandir</button></h2>
+        <div class="content">
+          <p class="note">Visão do usuário: relatório de alunos.</p>
+          <table>
+            <thead><tr><th>Nome</th><th>Média</th></tr></thead>
+            <tbody>
+              <tr><td>Bruna</td><td>8.2</td></tr>
+              <tr><td>Caio</td><td>7.5</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="layer" id="layer-conceptual">
+        <h2>Conceitual <button class="toggle" data-target="conceptual">Expandir</button></h2>
+        <div class="content">
+          <p class="note">Entidades e relacionamentos:</p>
+          <div class="grid">
+            <div>
+              <h3>Entidades</h3>
+              <ul>
+                <li>Aluno(id, nome)</li>
+                <li>Disciplina(id, nome)</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Relacionamentos</h3>
+              <ul>
+                <li>Matrícula(Aluno ↔ Disciplina)</li>
+                <li>Avaliação(Aluno ↔ Disciplina)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="layer" id="layer-internal">
+        <h2>Interno <button class="toggle" data-target="internal">Expandir</button></h2>
+        <div class="content">
+          <p class="note">Estrutura física: tabelas, índices e páginas.</p>
+          <table>
+            <thead><tr><th>Tabela</th><th>Índices</th></tr></thead>
+            <tbody>
+              <tr><td>alunos</td><td>idx_alunos_nome</td></tr>
+              <tr><td>matriculas</td><td>idx_matriculas_aluno_id</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('.toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = `layer-${btn.dataset.target}`;
+        const layer = document.getElementById(id);
+        layer.classList.toggle('active');
+        btn.textContent = layer.classList.contains('active') ? 'Recolher' : 'Expandir';
+      });
+    });
+  </script>
+</body>
+</html>

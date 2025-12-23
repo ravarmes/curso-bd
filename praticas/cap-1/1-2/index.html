@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1.2 — Redundância e Inconsistência</title>
+  <style>
+    :root { --text:#1f2937; --muted:#6b7280; --warn:#d23f3f; --ok:#0f6b5f; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color: var(--text); }
+    .wrap { padding: 14px 16px; max-width: 860px; margin: 0 auto; }
+    h1 { font-size: 1.15rem; margin: 0 0 10px; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { border:1px solid #e5e7eb; padding:8px; text-align:left; }
+    input { width: 100%; box-sizing: border-box; padding:6px; }
+    .row-warn td { background: #fee2e2; }
+    .note { color: var(--muted); font-size: 0.92rem; margin-top: 8px; }
+    .controls { display:flex; gap:8px; margin:10px 0; }
+    button { border:1px solid #d1d5db; background:#fff; border-radius:8px; padding:8px 12px; cursor:pointer; }
+    button:hover{ background:#f7fafc; }
+    .result { margin-top:8px; }
+    .ok { color: var(--ok); }
+    .warn { color: var(--warn); }
+    .tabs { display:flex; gap:8px; margin:10px 0; }
+    .tab { border:1px solid #d1d5db; background:#fff; border-radius:999px; padding:6px 10px; cursor:pointer; }
+    .tab.active { background:#eef4ff; border-color:#cfe0ff; }
+    .blink { animation: blink 0.6s alternate 6; }
+    @keyframes blink { from { background:#fee2e2; } to { background:#ffd1d1; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>1.2 — Da Planilha ao SGBD: Redundância</h1>
+    <div class="tabs">
+      <button class="tab active" data-mode="sim">Simulação</button>
+      <button class="tab" data-mode="anim">Animação</button>
+      <button class="tab" data-mode="comp">Comparação</button>
+    </div>
+    <div id="sec-sim">
+      <p class="note">Edite telefones. Linhas duplicadas de mesmo cliente podem ficar inconsistentes (destacadas). Depois, aplique uma “chave única” para normalizar.</p>
+      <table id="tbl">
+        <thead>
+          <tr><th>ID</th><th>Nome</th><th>Telefone</th></tr>
+        </thead>
+        <tbody>
+          <tr data-id="j1"><td>j1</td><td>João</td><td><input value="(11) 99999-1111"/></td></tr>
+          <tr data-id="m1"><td>m1</td><td>Maria</td><td><input value="(21) 88888-2222"/></td></tr>
+          <tr data-id="j1"><td>j1</td><td>João</td><td><input value="(11) 99999-1111"/></td></tr>
+          <tr data-id="p1"><td>p1</td><td>Pedro</td><td><input value="(31) 77777-4444"/></td></tr>
+        </tbody>
+      </table>
+      <div class="controls">
+        <button id="applyUnique">Aplicar chave única</button>
+        <button id="reset">Reiniciar</button>
+      </div>
+      <div class="result" id="result"></div>
+    </div>
+    <div id="sec-anim" style="display:none">
+      <p class="note">Animação: alteração em uma linha pode deixar duplicatas desatualizadas.</p>
+      <div id="anim-sheet"></div>
+      <div class="controls">
+        <button id="animRun">Animar</button>
+      </div>
+    </div>
+    <div id="sec-comp" style="display:none">
+      <div class="note">Comparação: planilha simples vs banco relacional.</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div>
+          <h3>Planilha</h3>
+          <table>
+            <thead><tr><th>ID</th><th>Nome</th><th>Telefone</th></tr></thead>
+            <tbody>
+              <tr><td>j1</td><td>João</td><td>(11) 99999-1111</td></tr>
+              <tr><td>j1</td><td>João</td><td>(11) 99999-0000</td></tr>
+              <tr><td>m1</td><td>Maria</td><td>(21) 88888-2222</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <h3>Banco Relacional</h3>
+          <table>
+            <thead><tr><th>Clientes</th><th>Contatos</th></tr></thead>
+            <tbody>
+              <tr><td>ID: j1, Nome: João</td><td>Telefone: (11) 99999-1111</td></tr>
+              <tr><td>ID: m1, Nome: Maria</td><td>Telefone: (21) 88888-2222</td></tr>
+            </tbody>
+          </table>
+          <p class="note">Separação por chaves reduz redundância e mantém consistência.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tabs
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    const views = { sim: document.getElementById('sec-sim'), anim: document.getElementById('sec-anim'), comp: document.getElementById('sec-comp') };
+    function setMode(m){ tabs.forEach(t=>t.classList.toggle('active', t.dataset.mode===m)); Object.keys(views).forEach(k=> views[k].style.display = (k===m?'':'none')); }
+    tabs.forEach(t=> t.addEventListener('click', ()=> setMode(t.dataset.mode)));
+
+    // Simulação interativa (existente)
+    const tbl = document.getElementById('tbl');
+    const result = document.getElementById('result');
+    function analyze() {
+      const groups = {};
+      tbl.querySelectorAll('tbody tr').forEach(tr => {
+        const id = tr.getAttribute('data-id');
+        const tel = tr.querySelector('input').value.trim();
+        groups[id] = groups[id] || new Set();
+        groups[id].add(tel);
+      });
+      let inconsist = 0;
+      tbl.querySelectorAll('tbody tr').forEach(tr => {
+        const id = tr.getAttribute('data-id');
+        const set = groups[id];
+        const warn = set.size > 1; // valores divergentes para o mesmo cliente
+        tr.classList.toggle('row-warn', warn);
+        if (warn) inconsist++;
+      });
+      if (inconsist) {
+        result.innerHTML = `<p class="warn">Inconsistência detectada: ${inconsist} linha(s) com dados divergentes do mesmo cliente.</p>`;
+      } else {
+        result.innerHTML = `<p class="ok">Sem inconsistência no momento. Cada cliente possui dados consistentes.</p>`;
+      }
+    }
+    tbl.addEventListener('input', (e) => { if (e.target.tagName === 'INPUT') analyze(); });
+    document.getElementById('applyUnique').addEventListener('click', () => {
+      const lastValues = {};
+      tbl.querySelectorAll('tbody tr').forEach(tr => { const id = tr.getAttribute('data-id'); lastValues[id] = tr.querySelector('input').value.trim(); });
+      tbl.querySelectorAll('tbody tr').forEach(tr => { const id = tr.getAttribute('data-id'); tr.querySelector('input').value = lastValues[id]; });
+      analyze();
+      result.innerHTML += `<p>Chave única aplicada: valores sincronizados entre duplicatas (simulando restrição/normalização).</p>`;
+    });
+    document.getElementById('reset').addEventListener('click', () => {
+      tbl.querySelectorAll('tbody tr').forEach(tr => {
+        const id = tr.getAttribute('data-id');
+        const def = id === 'j1' ? '(11) 99999-1111' : id === 'm1' ? '(21) 88888-2222' : id === 'p1' ? '(31) 77777-4444' : '';
+        tr.querySelector('input').value = def;
+      });
+      analyze(); result.textContent = '';
+    });
+
+    // Animação de redundância
+    const animSheet = document.getElementById('anim-sheet');
+    function renderAnimSheet(){
+      animSheet.innerHTML = `
+        <table><thead><tr><th>ID</th><th>Nome</th><th>Telefone</th></tr></thead>
+        <tbody>
+          <tr class="dup" data-id="j1"><td>j1</td><td>João</td><td>(11) 99999-1111</td></tr>
+          <tr class="dup" data-id="j1"><td>j1</td><td>João</td><td>(11) 99999-0000</td></tr>
+          <tr data-id="m1"><td>m1</td><td>Maria</td><td>(21) 88888-2222</td></tr>
+        </tbody></table>`;
+    }
+    document.getElementById('animRun').addEventListener('click', ()=>{
+      renderAnimSheet();
+      const dups = Array.from(animSheet.querySelectorAll('.dup'));
+      let i = 0; const t = setInterval(()=>{
+        dups.forEach((row,idx)=> row.classList.toggle('blink', idx===i));
+        i = (i+1)%dups.length;
+      }, 500);
+      setTimeout(()=>{ clearInterval(t); dups.forEach(r=> r.classList.remove('blink')); }, 6000);
+    });
+
+    // Inicialização
+    setMode('sim'); analyze(); renderAnimSheet();
+  </script>
+</body>
+</html>

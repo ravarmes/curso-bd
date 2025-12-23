@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2.1 — Entidades, Relacionamentos e Atributos</title>
+  <style>
+    :root { --text:#1f2937; --muted:#6b7280; --accent:#1f4f8b; --ok:#16a34a; --bad:#dc2626; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color: var(--text); }
+    .wrap { padding: 14px 16px; max-width: 980px; margin: 0 auto; }
+    h1 { font-size: 1.2rem; margin: 0 0 12px; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; }
+    .tab { border:1px solid #d1d5db; background:#fff; border-radius:10px; padding:8px 12px; cursor:pointer; }
+    .tab.active { background:#eef2ff; border-color:#6366f1; }
+    .panel { display:none; margin-top:12px; }
+    .panel.active { display:block; }
+    .note { color: var(--muted); }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .box { border:1px solid #e5e7eb; border-radius:10px; background:#fafafa; padding:10px; }
+    .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+
+    /* Animação */
+    .svg-wrap { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:6px; }
+    .highlight-entity rect { stroke:#2563eb; stroke-width:3; }
+    .highlight-attr ellipse { stroke:#16a34a; stroke-width:3; }
+    .highlight-rel polygon { stroke:#dc2626; stroke-width:3; }
+
+    /* Laboratório DnD */
+    .dnd { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; align-items:start; }
+    .bucket { min-height:140px; border:2px dashed #cbd5e1; border-radius:10px; padding:6px; background:#fff; }
+    .bucket h3 { margin:0 0 6px; font-size:1rem; }
+    .card { display:inline-block; border:1px solid #cbd5e1; border-radius:8px; padding:6px 10px; margin:6px; background:#ffffff; cursor:grab; }
+    .card.correct { border-color: #16a34a; background:#ecfdf5; }
+    .card.incorrect { border-color:#dc2626; background:#fee2e2; }
+    .result { margin-top:8px; font-weight:600; }
+
+    /* Quiz */
+    .quiz .options { display:flex; flex-wrap:wrap; gap:8px; }
+    .option-btn { border:1px solid #d1d5db; background:#fff; border-radius:10px; padding:6px 10px; cursor:pointer; }
+    .option-btn.correct { background:#ecfdf5; border-color:#16a34a; }
+    .option-btn.incorrect { background:#fee2e2; border-color:#dc2626; }
+
+    /* Exploração */
+    .explore-grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .list { border:1px solid #e5e7eb; border-radius:10px; padding:8px; background:#fff; }
+    .list h3 { margin:0 0 6px; font-size:1rem; }
+    .list ul { margin:6px 0 0; padding-left:18px; }
+    .pill { display:inline-block; border:1px solid #d1d5db; border-radius:999px; padding:4px 10px; margin:4px 6px 0 0; background:#f8fafc; cursor:pointer; }
+    .pill.active { background:#eef2ff; border-color:#6366f1; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>2.1 — Entidades, Relacionamentos e Atributos</h1>
+    <p class="note">Diferencie entidades, atributos e relacionamentos com exemplos práticos e exercícios rápidos.</p>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-key="animacao" role="tab">Animação</button>
+      <button class="tab" data-key="laboratorio" role="tab">Laboratório</button>
+      <button class="tab" data-key="quiz" role="tab">Quiz</button>
+      <button class="tab" data-key="exploracao" role="tab">Exploração</button>
+    </div>
+
+    <!-- Painel: Animação -->
+    <section class="panel active" data-key="animacao" aria-label="Animação">
+      <div class="controls">
+        <label><input type="checkbox" id="hl-entity" /> Destacar entidades</label>
+        <label><input type="checkbox" id="hl-attr" /> Destacar atributos</label>
+        <label><input type="checkbox" id="hl-rel" /> Destacar relacionamentos</label>
+        <button id="bt-before" class="tab">Antes</button>
+        <button id="bt-after" class="tab">Depois</button>
+      </div>
+      <div class="svg-wrap">
+        <figure>
+          <img id="img-before" src="../../../conteudos/images/2-1-der_before_after.svg" alt="DER antes/depois" style="max-width:100%; display:none;" />
+          <svg id="svg-basic" viewBox="0 0 700 280" aria-label="ER básico" style="width:100%; height:auto;">
+            <defs>
+              <style>
+                .shape { fill:#e5e7eb; stroke:#9ca3af; }
+                .label { font-size: 12px; fill: #111827; }
+              </style>
+            </defs>
+            <!-- Entidades -->
+            <rect class="shape entity" x="40" y="40" width="140" height="60" rx="8"></rect>
+            <text class="label" x="110" y="75" text-anchor="middle">Usuário</text>
+
+            <rect class="shape entity" x="520" y="40" width="140" height="60" rx="8"></rect>
+            <text class="label" x="590" y="75" text-anchor="middle">Livro</text>
+
+            <!-- Relacionamento -->
+            <polygon class="shape rel" points="330,40 370,70 330,100 290,70" ></polygon>
+            <text class="label" x="330" y="74" text-anchor="middle">Empréstimo</text>
+
+            <!-- Conexões -->
+            <line x1="180" y1="70" x2="290" y2="70" stroke="#6b7280" stroke-width="2"></line>
+            <line x1="370" y1="70" x2="520" y2="70" stroke="#6b7280" stroke-width="2"></line>
+
+            <!-- Atributos -->
+            <ellipse class="shape attr" cx="110" cy="130" rx="55" ry="22"></ellipse>
+            <text class="label" x="110" y="134" text-anchor="middle">cpf</text>
+
+            <ellipse class="shape attr" cx="590" cy="130" rx="55" ry="22"></ellipse>
+            <text class="label" x="590" y="134" text-anchor="middle">isbn</text>
+          </svg>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Painel: Laboratório (drag-and-drop) -->
+    <section class="panel" data-key="laboratorio" aria-label="Laboratório">
+      <p class="note">Arraste cada cartão para o balde correto: Entidade, Atributo ou Relacionamento.</p>
+      <div class="dnd">
+        <div class="bucket" data-type="entidade" aria-label="Entidade"><h3>Entidade</h3><div class="drop"></div></div>
+        <div class="bucket" data-type="atributo" aria-label="Atributo"><h3>Atributo</h3><div class="drop"></div></div>
+        <div class="bucket" data-type="relacionamento" aria-label="Relacionamento"><h3>Relacionamento</h3><div class="drop"></div></div>
+      </div>
+      <div id="cards" aria-label="Cartas">
+        <span class="card" draggable="true" data-type="entidade">Usuário</span>
+        <span class="card" draggable="true" data-type="atributo">cpf</span>
+        <span class="card" draggable="true" data-type="relacionamento">Empréstimo</span>
+        <span class="card" draggable="true" data-type="entidade">Autor</span>
+        <span class="card" draggable="true" data-type="atributo">isbn</span>
+        <span class="card" draggable="true" data-type="relacionamento">Livro–Autor</span>
+      </div>
+      <div class="result" id="lab-result"></div>
+    </section>
+
+    <!-- Painel: Quiz -->
+    <section class="panel quiz" data-key="quiz" aria-label="Quiz">
+      <h3>Pergunta rápida</h3>
+      <p>Em um MER, qual elemento conecta duas entidades?</p>
+      <div class="options">
+        <button class="option-btn" data-i="0">Atributo</button>
+        <button class="option-btn" data-i="1">Relacionamento</button>
+        <button class="option-btn" data-i="2">Chave primária</button>
+      </div>
+      <div class="feedback" aria-live="polite"></div>
+    </section>
+
+    <!-- Painel: Exploração -->
+    <section class="panel" data-key="exploracao" aria-label="Exploração">
+      <div class="explore-grid">
+        <div class="list">
+          <h3>Entidades</h3>
+          <ul id="expl-ents">
+            <li>Usuário</li>
+            <li>Livro</li>
+            <li>Autor</li>
+          </ul>
+          <div class="pill" data-add="entidade">+ Adicionar Entidade</div>
+        </div>
+        <div class="list">
+          <h3>Atributos</h3>
+          <ul id="expl-attrs">
+            <li>Usuário.cpf</li>
+            <li>Livro.isbn</li>
+          </ul>
+          <div class="pill" data-add="atributo">+ Adicionar Atributo</div>
+        </div>
+      </div>
+      <div class="list" style="margin-top:10px;">
+        <h3>Relacionamentos</h3>
+        <ul id="expl-rels">
+          <li>Usuário — Empréstimo — Livro</li>
+          <li>Livro — Autor (N:N)</li>
+        </ul>
+        <div class="pill" data-add="relacionamento">+ Adicionar Relacionamento</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Tabs
+    document.querySelector('.tabs').addEventListener('click', (ev) => {
+      const btn = ev.target.closest('.tab');
+      if (!btn) return;
+      const key = btn.getAttribute('data-key');
+      document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.getAttribute('data-key') === key));
+    });
+
+    // Animação: destacar tipos e alternar antes/depois
+    const svg = document.getElementById('svg-basic');
+    const imgBefore = document.getElementById('img-before');
+    const hlEntity = document.getElementById('hl-entity');
+    const hlAttr = document.getElementById('hl-attr');
+    const hlRel = document.getElementById('hl-rel');
+    function applyHighlights() {
+      svg.classList.toggle('highlight-entity', hlEntity.checked);
+      svg.classList.toggle('highlight-attr', hlAttr.checked);
+      svg.classList.toggle('highlight-rel', hlRel.checked);
+    }
+    [hlEntity, hlAttr, hlRel].forEach(el => el.addEventListener('change', applyHighlights));
+    applyHighlights();
+    document.getElementById('bt-before').addEventListener('click', () => {
+      imgBefore.style.display = 'block';
+      svg.style.display = 'none';
+    });
+    document.getElementById('bt-after').addEventListener('click', () => {
+      imgBefore.style.display = 'none';
+      svg.style.display = 'block';
+    });
+
+    // Laboratório DnD
+    let correct = 0, total = 0;
+    const cards = Array.from(document.querySelectorAll('#cards .card'));
+    total = cards.length;
+    const buckets = document.querySelectorAll('.bucket');
+    cards.forEach(card => {
+      card.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', card.getAttribute('data-type'));
+        e.dataTransfer.setData('text/cardId', cards.indexOf(card));
+      });
+    });
+    buckets.forEach(bucket => {
+      bucket.addEventListener('dragover', (e) => e.preventDefault());
+      bucket.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const type = e.dataTransfer.getData('text/plain');
+        const idx = Number(e.dataTransfer.getData('text/cardId'));
+        const card = cards[idx];
+        const expected = bucket.getAttribute('data-type');
+        const dropZone = bucket.querySelector('.drop');
+        if (!card) return;
+        card.classList.remove('correct','incorrect');
+        if (type === expected) {
+          correct++;
+          card.classList.add('correct');
+        } else {
+          card.classList.add('incorrect');
+        }
+        dropZone.appendChild(card);
+        document.getElementById('lab-result').textContent = `Acertos: ${correct}/${total}`;
+      });
+    });
+
+    // Quiz
+    const quizFb = document.querySelector('.quiz .feedback');
+    document.querySelectorAll('.quiz .option-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const chosen = Number(btn.getAttribute('data-i'));
+        const correctIdx = 1;
+        document.querySelectorAll('.quiz .option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+        btn.classList.add(chosen === correctIdx ? 'correct' : 'incorrect');
+        quizFb.textContent = chosen === correctIdx ? 'Correto! ✅' : 'Incorreto. O relacionamento conecta entidades.';
+      });
+    });
+
+    // Exploração: adicionar itens
+    function addItem(listId, text) {
+      const ul = document.getElementById(listId);
+      const li = document.createElement('li');
+      li.textContent = text;
+      ul.appendChild(li);
+    }
+    document.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const type = pill.getAttribute('data-add');
+        if (type === 'entidade') {
+          const name = prompt('Nome da entidade?');
+          if (name) addItem('expl-ents', name);
+        } else if (type === 'atributo') {
+          const name = prompt('Atributo (ex.: Entidade.atributo)?');
+          if (name) addItem('expl-attrs', name);
+        } else if (type === 'relacionamento') {
+          const name = prompt('Relacionamento (ex.: Entidade — Rel — Entidade)?');
+          if (name) addItem('expl-rels', name);
+        }
+        pill.classList.add('active');
+        setTimeout(() => pill.classList.remove('active'), 350);
+      });
+    });
+  </script>
+</body>
+</html>

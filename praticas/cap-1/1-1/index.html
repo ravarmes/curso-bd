@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1.1 — Pipeline D → I → C</title>
+  <style>
+    :root { --bg:#ffffff; --text:#1f2937; --muted:#6b7280; --accent:#0f6b5f; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .wrap { padding: 14px 16px; max-width: 860px; margin: 0 auto; }
+    h1 { font-size: 1.15rem; margin: 0 0 10px; }
+    .stage { border:1px solid #e5e7eb; border-radius:10px; padding:12px; min-height: 220px; background:#fafafa; }
+    .controls { display:flex; gap:8px; margin-top:10px; }
+    button { border:1px solid #d1d5db; background:#fff; border-radius:8px; padding:8px 12px; cursor:pointer; }
+    button:hover{ background:#f7fafc; }
+    .note { color: var(--muted); font-size: 0.92rem; margin-top: 6px; }
+    .data-row { display:flex; gap:8px; flex-wrap: wrap; }
+    .pill { padding:6px 10px; border-radius:999px; background:#eef2f7; border:1px solid #dbe2ea; }
+    table { width:100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border:1px solid #e5e7eb; padding:8px; text-align:left; }
+    .chart { display:flex; align-items:flex-end; gap:8px; height:140px; margin-top:8px; }
+    .bar { width:40px; background:#7fc6a7; border:1px solid #58a686; border-radius:6px 6px 0 0; }
+    .bar span { display:block; text-align:center; font-size:0.85rem; padding-top:4px; color:#0b2b2b; }
+    .conclusion { margin-top:10px; font-weight:600; }
+    .progress { display:flex; gap:6px; margin:10px 0; }
+    .dot { width:10px; height:10px; border-radius:50%; background:#e5e7eb; }
+    .dot.active { background: var(--accent); }
+    .tabs { display:flex; gap:8px; margin:10px 0; }
+    .tab { border:1px solid #d1d5db; background:#fff; border-radius:999px; padding:6px 10px; cursor:pointer; }
+    .tab.active { background:#eef4ff; border-color:#cfe0ff; }
+    .simulate-controls { display:flex; gap:8px; align-items:center; margin:8px 0; }
+    #tempsInput { flex:1 1 260px; padding:6px; border:1px solid #d1d5db; border-radius:8px; }
+    .quiz-wrap { display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:8px; }
+    .draggable { border:1px solid #d1d5db; border-radius:8px; padding:8px; background:#fff; cursor:grab; }
+    .dropzone { border:2px dashed #d1d5db; border-radius:10px; padding:12px; min-height:60px; text-align:center; }
+    .dropzone.ok { border-color:#0f6b5f; background:#eefaf7; }
+    .dropzone.err { border-color:#d23f3f; background:#fdecec; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>1.1 — Dados → Informação → Conhecimento</h1>
+    <div class="tabs">
+      <button class="tab active" data-mode="transform">Transformação</button>
+      <button class="tab" data-mode="simulate">Simulação</button>
+      <button class="tab" data-mode="quiz">Quiz</button>
+    </div>
+    <div id="section-transform">
+      <div class="progress" id="progress">
+        <div class="dot" aria-label="Dado"></div>
+        <div class="dot" aria-label="Informação"></div>
+        <div class="dot" aria-label="Conhecimento"></div>
+      </div>
+      <div class="stage" id="stage" aria-live="polite"></div>
+      <div class="controls" id="ctrl-transform">
+        <button id="prevBtn">Voltar</button>
+        <button id="nextBtn">Próximo</button>
+        <button id="resetBtn">Reiniciar</button>
+      </div>
+    </div>
+    <div id="section-simulate" style="display:none">
+      <div class="simulate-controls">
+        <input id="tempsInput" placeholder="Temperaturas (ex: 22,23,25,27,29,31)" />
+        <button id="genSim">Gerar</button>
+      </div>
+      <div id="simulateOut"></div>
+    </div>
+    <div id="section-quiz" style="display:none">
+      <div class="quiz-wrap">
+        <div class="items">
+          <div class="draggable" draggable="true" data-type="dado">34</div>
+          <div class="draggable" draggable="true" data-type="informacao">Tabela de idades</div>
+          <div class="draggable" draggable="true" data-type="conhecimento">Média etária e conclusões</div>
+        </div>
+        <div class="zones">
+          <div class="dropzone" data-zone="dado">Dado</div>
+          <div class="dropzone" data-zone="informacao">Informação</div>
+          <div class="dropzone" data-zone="conhecimento">Conhecimento</div>
+        </div>
+      </div>
+      <div id="quizMsg" class="note"></div>
+    </div>
+    <p class="note">Explore cada modo: transformação, simulação e quiz para consolidar o entendimento.</p>
+  </div>
+  <script>
+    // Tabs handling
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    const sections = {
+      transform: document.getElementById('section-transform'),
+      simulate: document.getElementById('section-simulate'),
+      quiz: document.getElementById('section-quiz')
+    };
+    let mode = 'transform';
+    function setMode(m){
+      mode = m;
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.mode === m));
+      Object.keys(sections).forEach(k => sections[k].style.display = (k===m?'':'none'));
+    }
+    tabs.forEach(t => t.addEventListener('click', ()=> setMode(t.dataset.mode)));
+
+    // Transformação (existente)
+    const stageEl = document.getElementById('stage');
+    const dots = Array.from(document.querySelectorAll('#progress .dot'));
+    let step = 0;
+    const people = [
+      { nome: 'Alice', idade: 34 },
+      { nome: 'Bruno', idade: 19 },
+      { nome: 'Carla', idade: 28 }
+    ];
+    function renderTransform() {
+      dots.forEach((d,i)=> d.classList.toggle('active', i <= step));
+      if (step === 0) {
+        stageEl.innerHTML = `
+          <h2>Dado</h2>
+          <p>Valores brutos, sem contexto:</p>
+          <div class="data-row">
+            ${people.map(p => `<span class="pill">${p.idade}</span>`).join('')}
+          </div>
+        `;
+      } else if (step === 1) {
+        stageEl.innerHTML = `
+          <h2>Informação</h2>
+          <p>Os valores ganham contexto (unidade e entidade):</p>
+          <table>
+            <thead><tr><th>Nome</th><th>Idade (anos)</th></tr></thead>
+            <tbody>
+              ${people.map(p => `<tr><td>${p.nome}</td><td>${p.idade}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        `;
+      } else {
+        const media = (people.reduce((a,b)=> a + b.idade, 0) / people.length).toFixed(1);
+        const maxIdade = Math.max(...people.map(p=>p.idade));
+        stageEl.innerHTML = `
+          <h2>Conhecimento</h2>
+          <p>Interpretação: a média etária do grupo é <strong>${media}</strong>.</p>
+          <div class="chart">
+            ${people.map(p => `<div class="bar" style="height:${(p.idade/maxIdade)*120+20}px" title="${p.nome}: ${p.idade}"><span>${p.idade}</span></div>`).join('')}
+          </div>
+          <p class="conclusion">Conclusão: a comunicação deve considerar perfis etários variados.</p>
+        `;
+      }
+    }
+    function clampStep() { if (step < 0) step = 0; if (step > 2) step = 2; }
+    document.getElementById('nextBtn').addEventListener('click', () => { step++; clampStep(); renderTransform(); });
+    document.getElementById('prevBtn').addEventListener('click', () => { step--; clampStep(); renderTransform(); });
+    document.getElementById('resetBtn').addEventListener('click', () => { step = 0; renderTransform(); });
+
+    // Simulação: temperaturas → tabela → gráfico → interpretação
+    const tempsInput = document.getElementById('tempsInput');
+    const genSimBtn = document.getElementById('genSim');
+    const simulateOut = document.getElementById('simulateOut');
+    genSimBtn.addEventListener('click', () => {
+      const raw = (tempsInput.value || '22,23,25,27,29,31').split(',').map(s=>parseFloat(s.trim())).filter(n=>!isNaN(n));
+      const rows = raw.map((t,i)=>`<tr><td>${i+1}h</td><td>${t}°C</td></tr>`).join('');
+      const max = Math.max(...raw);
+      const chart = raw.map(t=>`<div class="bar" style="height:${(t/max)*120+20}px"><span>${t}</span></div>`).join('');
+      const trend = raw[raw.length-1] > raw[0] ? 'aumentaram' : raw[raw.length-1] < raw[0] ? 'diminuíram' : 'se mantiveram estáveis';
+      simulateOut.innerHTML = `
+        <h2>Informação</h2>
+        <table><thead><tr><th>Hora</th><th>Temperatura</th></tr></thead><tbody>${rows}</tbody></table>
+        <h2>Conhecimento</h2>
+        <div class="chart">${chart}</div>
+        <p class="conclusion">Interpretação: as temperaturas ${trend} ao longo do dia → conhecimento.</p>
+      `;
+    });
+
+    // Quiz: arrastar/soltar
+    const draggables = Array.from(document.querySelectorAll('.draggable'));
+    const zones = Array.from(document.querySelectorAll('.dropzone'));
+    draggables.forEach(el => {
+      el.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', el.dataset.type));
+    });
+    zones.forEach(z => {
+      z.addEventListener('dragover', e=> e.preventDefault());
+      z.addEventListener('drop', e=> {
+        e.preventDefault();
+        const type = e.dataTransfer.getData('text/plain');
+        const ok = type === z.dataset.zone;
+        z.classList.remove('ok','err');
+        z.classList.add(ok ? 'ok' : 'err');
+        document.getElementById('quizMsg').textContent = ok ? 'Correto!' : 'Tente novamente.';
+      });
+    });
+
+    // Inicialização
+    renderTransform();
+    setMode('transform');
+  </script>
+</body>
+</html>
