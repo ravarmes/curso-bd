@@ -1,89 +1,570 @@
 <!doctype html>
 <html lang="pt-br">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>1.4 — Três Esquemas</title>
+  <title>1.4 — Modelagem: Conceitual, Lógico e Físico</title>
   <style>
-    :root { --text:#1f2937; --muted:#6b7280; --accent:#1f4f8b; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color: var(--text); }
-    .wrap { padding: 14px 16px; max-width: 960px; margin: 0 auto; }
-    h1 { font-size: 1.15rem; margin: 0 0 10px; }
-    .stack { display:grid; grid-template-rows: auto auto auto; gap:10px; }
-    .layer { border:1px solid #e5e7eb; border-radius:10px; padding:12px; background:#fafafa; }
-    .layer h2 { margin:0 0 6px; font-size:1rem; }
-    .content { display:none; margin-top:6px; }
-    .layer.active .content { display:block; }
-    .toggle { border:1px solid #d1d5db; background:#fff; border-radius:8px; padding:6px 10px; cursor:pointer; }
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-    table { width:100%; border-collapse: collapse; }
-    th, td { border:1px solid #e5e7eb; padding:6px; text-align:left; }
-    .note { color: var(--muted); font-size: 0.92rem; }
+    :root {
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #1f4f8b;
+      --good: #0f6b5f;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+      color: var(--text);
+    }
+
+    .wrap {
+      padding: 14px 16px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.15rem;
+      margin: 0 0 10px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .tab {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      border-radius: 999px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: #eef4ff;
+      border-color: #cfe0ff;
+    }
+
+    .progress {
+      display: flex;
+      gap: 6px;
+      margin: 10px 0;
+      align-items: center;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      background: #fafafa;
+      transition: all 0.3s;
+    }
+
+    .circle.active {
+      border-color: var(--accent);
+      background: #eef4ff;
+    }
+
+    .circle.done {
+      border-color: var(--good);
+      background: #e6f7f3;
+    }
+
+    .arrow {
+      font-size: 1.2rem;
+      color: #d1d5db;
+      margin: 0 4px;
+    }
+
+    .stage {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px;
+      min-height: 200px;
+      background: #fafafa;
+      margin: 10px 0;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    button {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #f7fafc;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-top: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+    }
+
+    th,
+    td {
+      border: 1px solid #e5e7eb;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .entity {
+      display: inline-block;
+      border: 2px solid #3b82f6;
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin: 6px;
+      background: #eff6ff;
+    }
+
+    .relationship {
+      display: inline-block;
+      border: 2px solid #f59e0b;
+      transform: rotate(45deg);
+      width: 60px;
+      height: 60px;
+      margin: 6px 20px;
+      background: #fef3c7;
+    }
+
+    .relationship span {
+      display: block;
+      transform: rotate(-45deg);
+      text-align: center;
+      line-height: 60px;
+      font-size: 0.85rem;
+    }
+
+    .er-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    pre {
+      background: #f1f5f9;
+      padding: 10px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 8px 0;
+      font-size: 0.9rem;
+    }
+
+    .drag-area {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .draggable {
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 10px 14px;
+      background: #fff;
+      cursor: grab;
+    }
+
+    .dropzone {
+      border: 2px dashed #d1d5db;
+      border-radius: 10px;
+      padding: 14px;
+      min-height: 80px;
+      text-align: center;
+    }
+
+    .dropzone.ok {
+      border-color: var(--good);
+      background: #e6f7f3;
+    }
+
+    .dropzone.err {
+      border-color: #d23f3f;
+      background: #fdecec;
+    }
+
+    .grid-zones {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .quiz-result {
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    .quiz-result.correct {
+      color: var(--good);
+    }
+
+    .quiz-result.incorrect {
+      color: #d23f3f;
+    }
   </style>
 </head>
+
 <body>
   <div class="wrap">
-    <h1>1.4 — Modelos de Dados e Arquitetura de Três Esquemas</h1>
-    <div class="stack">
-      <div class="layer" id="layer-external">
-        <h2>Externo <button class="toggle" data-target="external">Expandir</button></h2>
-        <div class="content">
-          <p class="note">Visão do usuário: relatório de alunos.</p>
-          <table>
-            <thead><tr><th>Nome</th><th>Média</th></tr></thead>
-            <tbody>
-              <tr><td>Bruna</td><td>8.2</td></tr>
-              <tr><td>Caio</td><td>7.5</td></tr>
-            </tbody>
-          </table>
+    <h1>1.4 — Modelagem de Dados: Conceitual → Lógico → Físico</h1>
+    <div class="tabs">
+      <button class="tab active" data-mode="explore">Explorar Níveis</button>
+      <button class="tab" data-mode="biblioteca">Estudo de Caso</button>
+      <button class="tab" data-mode="quiz">Quiz Interativo</button>
+    </div>
+
+    <!-- Modo Explorar -->
+    <div id="sec-explore">
+      <div class="progress">
+        <div class="step">
+          <div class="circle" id="c1">1</div><span>Conceitual</span>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step">
+          <div class="circle" id="c2">2</div><span>Lógico</span>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step">
+          <div class="circle" id="c3">3</div><span>Físico</span>
         </div>
       </div>
-      <div class="layer" id="layer-conceptual">
-        <h2>Conceitual <button class="toggle" data-target="conceptual">Expandir</button></h2>
-        <div class="content">
-          <p class="note">Entidades e relacionamentos:</p>
-          <div class="grid">
-            <div>
-              <h3>Entidades</h3>
-              <ul>
-                <li>Aluno(id, nome)</li>
-                <li>Disciplina(id, nome)</li>
-              </ul>
-            </div>
-            <div>
-              <h3>Relacionamentos</h3>
-              <ul>
-                <li>Matrícula(Aluno ↔ Disciplina)</li>
-                <li>Avaliação(Aluno ↔ Disciplina)</li>
-              </ul>
-            </div>
-          </div>
+      <div class="stage" id="stage"></div>
+      <div class="controls">
+        <button id="prevBtn">← Anterior</button>
+        <button id="nextBtn">Próximo →</button>
+        <button id="resetBtn">Reiniciar</button>
+      </div>
+      <p class="note">Navegue pelos 3 níveis de modelagem: Conceitual (MER), Lógico (Relacional), Físico (SQL).</p>
+    </div>
+
+    <!-- Modo Biblioteca -->
+    <div id="sec-biblioteca" style="display:none">
+      <h2>Estudo de Caso: Sistema de Biblioteca</h2>
+      <div class="progress">
+        <div class="step">
+          <div class="circle active" id="b1">1</div><span>Conceitual</span>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step">
+          <div class="circle" id="b2">2</div><span>Lógico</span>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step">
+          <div class="circle" id="b3">3</div><span>Físico</span>
         </div>
       </div>
-      <div class="layer" id="layer-internal">
-        <h2>Interno <button class="toggle" data-target="internal">Expandir</button></h2>
-        <div class="content">
-          <p class="note">Estrutura física: tabelas, índices e páginas.</p>
-          <table>
-            <thead><tr><th>Tabela</th><th>Índices</th></tr></thead>
-            <tbody>
-              <tr><td>alunos</td><td>idx_alunos_nome</td></tr>
-              <tr><td>matriculas</td><td>idx_matriculas_aluno_id</td></tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="stage" id="stage-bib"></div>
+      <div class="controls">
+        <button id="prevBib">← Anterior</button>
+        <button id="nextBib">Próximo →</button>
       </div>
     </div>
+
+    <!-- Modo Quiz -->
+    <div id="sec-quiz" style="display:none">
+      <h2>Classifique os Artefatos</h2>
+      <p class="note">Arraste cada artefato para o nível de modelagem correspondente.</p>
+      <div class="drag-area" id="items">
+        <div class="draggable" draggable="true" data-type="conceitual">Diagrama ER</div>
+        <div class="draggable" draggable="true" data-type="fisico">CREATE TABLE</div>
+        <div class="draggable" draggable="true" data-type="logico">tabela(pk, fk, atributos)</div>
+        <div class="draggable" draggable="true" data-type="conceitual">Entidades e Relacionamentos</div>
+        <div class="draggable" draggable="true" data-type="fisico">VARCHAR(100)</div>
+        <div class="draggable" draggable="true" data-type="logico">Chaves primárias e estrangeiras</div>
+      </div>
+      <div class="grid-zones">
+        <div class="dropzone" data-zone="conceitual"><strong>Conceitual</strong><br><span class="items"></span></div>
+        <div class="dropzone" data-zone="logico"><strong>Lógico</strong><br><span class="items"></span></div>
+        <div class="dropzone" data-zone="fisico"><strong>Físico</strong><br><span class="items"></span></div>
+      </div>
+      <div id="quiz-result" class="quiz-result"></div>
+      <button id="checkQuiz">Verificar Respostas</button>
+      <button id="resetQuiz">Reiniciar Quiz</button>
+    </div>
   </div>
+
   <script>
-    document.querySelectorAll('.toggle').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = `layer-${btn.dataset.target}`;
-        const layer = document.getElementById(id);
-        layer.classList.toggle('active');
-        btn.textContent = layer.classList.contains('active') ? 'Recolher' : 'Expandir';
+    // Tabs
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    const sections = {
+      explore: document.getElementById('sec-explore'),
+      biblioteca: document.getElementById('sec-biblioteca'),
+      quiz: document.getElementById('sec-quiz')
+    };
+    function setMode(m) {
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.mode === m));
+      Object.keys(sections).forEach(k => sections[k].style.display = (k === m ? '' : 'none'));
+    }
+    tabs.forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
+
+    // === EXPLORAR NÍVEIS ===
+    const stageEl = document.getElementById('stage');
+    const circles = [document.getElementById('c1'), document.getElementById('c2'), document.getElementById('c3')];
+    let step = 0;
+
+    const levels = [
+      {
+        title: 'Modelo Conceitual',
+        content: `
+          <h3>Modelo Conceitual (MER - Entidade-Relacionamento)</h3>
+          <p>Representa <strong>o que existe no mundo real</strong>, sem detalhes técnicos.</p>
+          <ul>
+            <li>Descreve <strong>entidades</strong> (objetos), <strong>atributos</strong> (propriedades) e <strong>relacionamentos</strong>.</li>
+            <li>Fácil entendimento para usuários não técnicos.</li>
+            <li>Foco no <strong>"O quê?"</strong> — o que precisa ser armazenado.</li>
+          </ul>
+          <div class="er-diagram">
+            <div class="entity">ALUNO</div>
+            <div class="relationship"><span>reserva</span></div>
+            <div class="entity">LIVRO</div>
+          </div>
+        `
+      },
+      {
+        title: 'Modelo Lógico',
+        content: `
+          <h3>Modelo Lógico (Relacional)</h3>
+          <p>Transforma o modelo conceitual em <strong>estrutura de tabelas</strong>.</p>
+          <ul>
+            <li>Define <strong>tabelas</strong>, <strong>colunas</strong>, <strong>PK</strong> (chave primária) e <strong>FK</strong> (chave estrangeira).</li>
+            <li>Estrutura mais próxima da implementação, mas ainda independente do SGBD.</li>
+            <li>Foco no <strong>"Como organizar?"</strong></li>
+          </ul>
+          <table>
+            <thead><tr><th>Tabela</th><th>Estrutura</th></tr></thead>
+            <tbody>
+              <tr><td>aluno</td><td>(matricula PK, nome, turma)</td></tr>
+              <tr><td>livro</td><td>(isbn PK, titulo, autor)</td></tr>
+              <tr><td>reserva</td><td>(id PK, aluno_matricula FK, livro_isbn FK, data)</td></tr>
+            </tbody>
+          </table>
+        `
+      },
+      {
+        title: 'Modelo Físico',
+        content: `
+          <h3>Modelo Físico (SQL)</h3>
+          <p>Refinamento do modelo lógico <strong>dependente do SGBD</strong>.</p>
+          <ul>
+            <li>Define <strong>tipos de dados</strong> exatos (VARCHAR, INTEGER, DATE).</li>
+            <li>Inclui <strong>CREATE TABLE</strong>, índices, constraints.</li>
+            <li>Foco no <strong>"Como implementar?"</strong></li>
+          </ul>
+          <pre>CREATE TABLE aluno (
+  matricula CHAR(11) PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL,
+  turma VARCHAR(50)
+);
+
+CREATE TABLE livro (
+  isbn CHAR(17) PRIMARY KEY,
+  titulo VARCHAR(200) NOT NULL
+);
+
+CREATE TABLE reserva (
+  id SERIAL PRIMARY KEY,
+  aluno_matricula CHAR(11) REFERENCES aluno(matricula),
+  livro_isbn CHAR(17) REFERENCES livro(isbn),
+  data_reserva DATE NOT NULL
+);</pre>
+        `
+      }
+    ];
+
+    function renderExplore() {
+      circles.forEach((c, i) => {
+        c.classList.remove('active', 'done');
+        if (i < step) c.classList.add('done');
+        if (i === step) c.classList.add('active');
+      });
+      const lvl = levels[step];
+      stageEl.innerHTML = lvl.content;
+    }
+
+    function clampStep() { if (step < 0) step = 0; if (step > 2) step = 2; }
+    document.getElementById('nextBtn').addEventListener('click', () => { step++; clampStep(); renderExplore(); });
+    document.getElementById('prevBtn').addEventListener('click', () => { step--; clampStep(); renderExplore(); });
+    document.getElementById('resetBtn').addEventListener('click', () => { step = 0; renderExplore(); });
+
+    // === BIBLIOTECA CASE ===
+    const stageBib = document.getElementById('stage-bib');
+    const bibCircles = [document.getElementById('b1'), document.getElementById('b2'), document.getElementById('b3')];
+    let bibStep = 0;
+
+    const bibLevels = [
+      {
+        content: `
+          <h3>Conceitual: Diagrama ER da Biblioteca</h3>
+          <div class="er-diagram">
+            <div class="entity">ALUNO<br><small>matricula, nome, turma</small></div>
+            <div class="relationship"><span>reserva</span></div>
+            <div class="entity">LIVRO<br><small>isbn, titulo</small></div>
+          </div>
+          <p class="note">Cardinalidade N:M — um aluno pode reservar vários livros; um livro pode ser reservado por vários alunos.</p>
+        `
+      },
+      {
+        content: `
+          <h3>Lógico: Tabelas do Sistema</h3>
+          <table>
+            <thead><tr><th>Tabela</th><th>Atributos</th></tr></thead>
+            <tbody>
+              <tr><td>aluno</td><td>matricula (PK), nome, turma</td></tr>
+              <tr><td>livro</td><td>isbn (PK), titulo</td></tr>
+              <tr><td>reserva</td><td>id (PK), aluno_matricula (FK), livro_isbn (FK), data_reserva</td></tr>
+            </tbody>
+          </table>
+          <p class="note">PK = Primary Key (identifica único). FK = Foreign Key (referência a outra tabela).</p>
+        `
+      },
+      {
+        content: `
+          <h3>Físico: Scripts SQL</h3>
+          <pre>CREATE TABLE aluno (
+  matricula CHAR(11) PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL,
+  turma VARCHAR(50)
+);
+
+CREATE TABLE livro (
+  isbn CHAR(17) PRIMARY KEY,
+  titulo VARCHAR(200) NOT NULL
+);
+
+CREATE TABLE reserva (
+  id SERIAL PRIMARY KEY,
+  aluno_matricula CHAR(11) REFERENCES aluno(matricula),
+  livro_isbn CHAR(17) REFERENCES livro(isbn),
+  data_reserva DATE DEFAULT CURRENT_DATE
+);
+
+CREATE INDEX idx_reserva_data ON reserva(data_reserva);</pre>
+          <p class="note">Tipos específicos: CHAR(11), VARCHAR(200), DATE. Índice em data_reserva para performance.</p>
+        `
+      }
+    ];
+
+    function renderBib() {
+      bibCircles.forEach((c, i) => {
+        c.classList.remove('active', 'done');
+        if (i < bibStep) c.classList.add('done');
+        if (i === bibStep) c.classList.add('active');
+      });
+      stageBib.innerHTML = bibLevels[bibStep].content;
+    }
+
+    document.getElementById('nextBib').addEventListener('click', () => { bibStep = Math.min(2, bibStep + 1); renderBib(); });
+    document.getElementById('prevBib').addEventListener('click', () => { bibStep = Math.max(0, bibStep - 1); renderBib(); });
+
+    // === QUIZ ===
+    const draggables = document.querySelectorAll('.draggable');
+    const dropzones = document.querySelectorAll('.dropzone');
+    const quizResult = document.getElementById('quiz-result');
+    const itemsContainer = document.getElementById('items');
+    let dropped = { conceitual: [], logico: [], fisico: [] };
+
+    draggables.forEach(el => {
+      el.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', el.textContent);
+        e.dataTransfer.setData('application/type', el.dataset.type);
       });
     });
+
+    dropzones.forEach(z => {
+      z.addEventListener('dragover', e => e.preventDefault());
+      z.addEventListener('drop', e => {
+        e.preventDefault();
+        const text = e.dataTransfer.getData('text/plain');
+        const type = e.dataTransfer.getData('application/type');
+        const zone = z.dataset.zone;
+        if (!dropped[zone].includes(text)) {
+          dropped[zone].push(text);
+          z.querySelector('.items').innerHTML += `<div class="draggable" data-type="${type}">${text}</div>`;
+          // Remove from source
+          itemsContainer.querySelectorAll('.draggable').forEach(d => {
+            if (d.textContent === text) d.remove();
+          });
+        }
+      });
+    });
+
+    document.getElementById('checkQuiz').addEventListener('click', () => {
+      let correct = 0, total = 0;
+      dropzones.forEach(z => {
+        const zone = z.dataset.zone;
+        z.querySelectorAll('.draggable').forEach(d => {
+          total++;
+          if (d.dataset.type === zone) {
+            correct++;
+            d.style.borderColor = '#0f6b5f';
+          } else {
+            d.style.borderColor = '#d23f3f';
+          }
+        });
+      });
+      quizResult.textContent = `Resultado: ${correct}/${total} corretos`;
+      quizResult.className = 'quiz-result ' + (correct === total ? 'correct' : 'incorrect');
+    });
+
+    document.getElementById('resetQuiz').addEventListener('click', () => {
+      dropped = { conceitual: [], logico: [], fisico: [] };
+      dropzones.forEach(z => z.querySelector('.items').innerHTML = '');
+      quizResult.textContent = '';
+      itemsContainer.innerHTML = `
+        <div class="draggable" draggable="true" data-type="conceitual">Diagrama ER</div>
+        <div class="draggable" draggable="true" data-type="fisico">CREATE TABLE</div>
+        <div class="draggable" draggable="true" data-type="logico">tabela(pk, fk, atributos)</div>
+        <div class="draggable" draggable="true" data-type="conceitual">Entidades e Relacionamentos</div>
+        <div class="draggable" draggable="true" data-type="fisico">VARCHAR(100)</div>
+        <div class="draggable" draggable="true" data-type="logico">Chaves primárias e estrangeiras</div>
+      `;
+      draggables.forEach(el => {
+        el.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', el.textContent);
+          e.dataTransfer.setData('application/type', el.dataset.type);
+        });
+      });
+    });
+
+    // Init
+    renderExplore();
+    renderBib();
+    setMode('explore');
   </script>
 </body>
+
 </html>
