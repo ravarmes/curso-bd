@@ -772,7 +772,56 @@ const chapters = [
       </div>
     `,
     contentUrl: "https://ravarmes.github.io/book-bd/OEBPS/text/cap08_dataset.html",
-    sections: [],
+    sections: [
+      {
+        id: "8.1",
+        title: "BD como Fonte de Datasets (CSV)",
+        practiceUrl: "praticas/cap-8/8-1/index.html",
+        practice: `
+          <p>Exporte um dataset de empréstimos usando SELECT/JOIN e salve em CSV.</p>
+        `,
+        content: `
+          <p>Pipeline: SELECT → FROM → WHERE → ORDER BY → EXPORT CSV. BD garante dados estruturados e validados. pandas.read_csv() para análise.</p>
+        `,
+        exerciseUrl: "exercicios/cap-8/8-1/index.html",
+      },
+      {
+        id: "8.2",
+        title: "Conceito de Dataset para ML",
+        practiceUrl: "praticas/cap-8/8-2/index.html",
+        practice: `
+          <p>Carregue um CSV em pandas.DataFrame e explore com df.describe().</p>
+        `,
+        content: `
+          <p>Dataset traduz lógica relacional para formato vetorial. Caminho: SELECT/JOIN → CSV → DataFrame → vetorização → treino.</p>
+        `,
+        exerciseUrl: "exercicios/cap-8/8-2/index.html",
+      },
+      {
+        id: "8.3",
+        title: "Fontes de Dados e Qualidade",
+        practiceUrl: "praticas/cap-8/8-3/index.html",
+        practice: `
+          <p>Compare dados de BD (integridade) com dados externos (Kaggle) que precisam limpeza.</p>
+        `,
+        content: `
+          <p>BD: integridade referencial, tipos definidos. Externos (Kaggle): podem ter duplicatas, nulos, viés. Validar antes de usar.</p>
+        `,
+        exerciseUrl: "exercicios/cap-8/8-3/index.html",
+      },
+      {
+        id: "8.4",
+        title: "Pré-processamento e Limpeza",
+        practiceUrl: "praticas/cap-8/8-4/index.html",
+        practice: `
+          <p>Aplique fillna, One-Hot Encoding e Min-Max scaling em um dataset.</p>
+        `,
+        content: `
+          <p>1FN: atomicidade. 2FN/3FN: redundância. NULL: fillna/dropna. Outliers: IQR. Codificação: One-Hot. Escala: Min-Max, Z-score.</p>
+        `,
+        exerciseUrl: "exercicios/cap-8/8-4/index.html",
+      },
+    ],
   },
   {
     id: "cap-9",
