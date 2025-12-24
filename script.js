@@ -60,11 +60,6 @@ const chapters = [
           <p>Em sistemas, a transformação de dado → informação → conhecimento ocorre via organização, agregação e regras.</p>
         `,
         exerciseUrl: "exercicios/cap-1/1-1/index.html",
-        exercises: [
-          { type: "mc", prompt: "Qual opção representa conhecimento?", options: ["Valor: 15", "Relatório: média semanal 15°C", "Recomendação: leve casaco amanhã"], answerIndex: 2 },
-          { type: "mc", prompt: "Qual alternativa melhor representa informação?", options: ["21", "Temperatura média do dia: 21°C", "Leve casaco amanhã"], answerIndex: 1 },
-          { type: "mc", prompt: "Metadado é...", options: ["dados sobre dados", "visualização dos dados", "regra de interface"], answerIndex: 0 },
-        ],
       },
       {
         id: "1.2",
@@ -82,11 +77,6 @@ const chapters = [
           <p>Um <strong>SGBD</strong> centraliza armazenamento, impõe regras e reduz redundâncias por meio de normalização e integridade.</p>
         `,
         exerciseUrl: "exercicios/cap-1/1-2/index.html",
-        exercises: [
-          { type: "mc", prompt: "Qual risco direto da redundância em planilhas?", options: ["Alta performance", "Inconsistência de dados", "Melhor segurança"], answerIndex: 1 },
-          { type: "mc", prompt: "Quando migrar para um SGBD?", options: ["Um único usuário editando raramente", "Múltiplos usuários simultâneos e necessidade de auditoria", "Sem necessidade de segurança"], answerIndex: 1 },
-          { type: "mc", prompt: "Qual benefício típico de um SGBD?", options: ["Forte acoplamento com arquivos", "Integridade e controle transacional", "Duplicação de esforço"], answerIndex: 1 },
-        ],
       },
       {
         id: "1.3",
@@ -101,11 +91,6 @@ const chapters = [
           <p>O otimizador analisa consultas e escolhe planos eficientes com base em índices e estatísticas.</p>
         `,
         exerciseUrl: "exercicios/cap-1/1-3/index.html",
-        exercises: [
-          { type: "mc", prompt: "O que evita conflitos entre transações?", options: ["Controle de concorrência", "Camada física", "View externa"], answerIndex: 0 },
-          { type: "mc", prompt: "Em ACID, qual propriedade garante persistência após falhas?", options: ["Atomicidade", "Isolamento", "Durabilidade"], answerIndex: 2 },
-          { type: "mc", prompt: "Qual componente escolhe planos de execução eficientes?", options: ["Otimização de consultas", "Buffer/Cache", "Catálogo de metadados"], answerIndex: 0 },
-        ],
       },
       {
         id: "1.4",
@@ -119,11 +104,6 @@ const chapters = [
           <p>O <em>esquema externo</em> define visões específicas para cada grupo de usuários.</p>
         `,
         exerciseUrl: "exercicios/cap-1/1-4/index.html",
-        exercises: [
-          { type: "mc", prompt: "Qual esquema define visões de usuários?", options: ["Conceitual", "Lógico", "Externo"], answerIndex: 2 },
-          { type: "mc", prompt: "O esquema conceitual representa...", options: ["Tabelas físicas do banco", "Modelo ER de alto nível", "Índices e arquivos"], answerIndex: 1 },
-          { type: "mc", prompt: "O esquema lógico descreve...", options: ["Implementação em arquivos", "Tabelas e chaves do modelo relacional", "Visões de usuários"], answerIndex: 1 },
-        ],
       },
     ],
   },

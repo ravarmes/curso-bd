@@ -1,30 +1,117 @@
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Exercícios 1.2 — Dataset vs SGBD</title>
   <style>
-    :root { --bg:#f6f8fb; --surface:#fff; --border:#dde2eb; --text:#1f2937; --muted:#6b7280; --hover:#e6ecf5; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color:var(--text); background:var(--bg); }
-    main { padding: 14px; }
-    h3 { margin:0 0 10px; }
-    .exercise { border:1px dashed var(--border); border-radius:10px; padding:12px; margin:12px 0; }
-    .options { display:grid; gap:8px; }
-    .option-btn { appearance:none; border:1px solid var(--border); background:var(--surface); padding:10px 12px; border-radius:10px; cursor:pointer; text-align:left; transition: background-color .15s, border-color .15s, box-shadow .15s; }
-    .option-btn:hover { background:var(--hover); }
-    .option-btn:focus { outline:2px solid transparent; box-shadow:0 0 0 3px rgba(94,129,172,.35); }
-    .option-btn.correct { border-color:#2a9d8f; background:rgba(42,157,143,.10); }
-    .option-btn.incorrect { border-color:#e76f51; background:rgba(231,111,81,.10); }
-    .exercise-actions { display:flex; gap:8px; margin-top:8px; }
-    .redo-btn { appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:8px 12px; cursor:pointer; }
-    .redo-btn:hover { background:var(--hover); }
-    .feedback { margin-top:6px; color:var(--muted); }
-    .why { margin-top:6px; }
-    .why summary { cursor:pointer; color:var(--muted); }
-    .explanation { margin-top:6px; }
+    :root {
+      --bg: #f6f8fb;
+      --surface: #fff;
+      --border: #dde2eb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --hover: #e6ecf5;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    main {
+      padding: 14px;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+    }
+
+    .exercise {
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 12px 0;
+    }
+
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .option-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color .15s, border-color .15s, box-shadow .15s;
+    }
+
+    .option-btn:hover {
+      background: var(--hover);
+    }
+
+    .option-btn:focus {
+      outline: 2px solid transparent;
+      box-shadow: 0 0 0 3px rgba(94, 129, 172, .35);
+    }
+
+    .option-btn.correct {
+      border-color: #2a9d8f;
+      background: rgba(42, 157, 143, .10);
+    }
+
+    .option-btn.incorrect {
+      border-color: #e76f51;
+      background: rgba(231, 111, 81, .10);
+    }
+
+    .exercise-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .redo-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .redo-btn:hover {
+      background: var(--hover);
+    }
+
+    .feedback {
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .why {
+      margin-top: 6px;
+    }
+
+    .why summary {
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .explanation {
+      margin-top: 6px;
+    }
   </style>
 </head>
+
 <body>
   <main>
     <h3>Exercícios 1.2 — O Problema do Armazenamento</h3>
@@ -33,26 +120,26 @@
   <script>
     const QUESTIONS = [
       {
-        prompt: "Qual risco direto da redundância em planilhas?",
-        options: ["Alta performance", "Inconsistência de dados", "Melhor segurança"],
+        prompt: "Qual problema principal da redundância em planilhas?",
+        options: ["Alta performance de consulta", "Inconsistência entre cópias dos dados", "Melhor controle de acesso"],
         answerIndex: 1,
-        explanation: "Redundâncias levam a divergências entre cópias e versões, causando inconsistência."
+        explanation: "Redundância leva a divergências entre versões, causando inconsistência quando dados são alterados em um lugar mas não em outros."
       },
       {
-        prompt: "Quando migrar para um SGBD?",
-        options: ["Um único usuário editando raramente", "Múltiplos usuários simultâneos e necessidade de auditoria", "Sem necessidade de segurança"],
+        prompt: "Quando migrar de planilha para SGBD?",
+        options: ["Um único usuário editando raramente", "Múltiplos usuários simultâneos e necessidade de auditoria", "Quando não há necessidade de segurança"],
         answerIndex: 1,
-        explanation: "SGBD ajuda quando há concorrência, auditoria e integridade necessárias."
+        explanation: "Migre para SGBD quando houver múltiplos usuários, necessidade de histórico/auditoria, acesso granular ou conflitos nas planilhas."
       },
       {
-        prompt: "Qual benefício típico de um SGBD?",
-        options: ["Forte acoplamento com arquivos", "Integridade e controle transacional", "Duplicação de esforço"],
+        prompt: "O que significa 'controle de redundância' ou 'normalização'?",
+        options: ["Duplicar dados para backup", "Armazenar cada item lógico em apenas um lugar", "Criar múltiplas planilhas"],
         answerIndex: 1,
-        explanation: "SGBD garante integridade, transações, segurança e centralização do dado." 
+        explanation: "O objetivo é armazenar cada item lógico de dado em apenas um lugar, eliminando duplicações desnecessárias."
       }
     ];
 
-    function shuffle(arr) { return arr.map(v => ({ v, r: Math.random() })).sort((a,b)=>a.r-b.r).map(o=>o.v); }
+    function shuffle(arr) { return arr.map(v => ({ v, r: Math.random() })).sort((a, b) => a.r - b.r).map(o => o.v); }
 
     function render() {
       const list = document.getElementById('ex-list');
@@ -74,7 +161,7 @@
           btn.addEventListener('click', () => {
             const chosen = Number(btn.getAttribute('data-i'));
             const correct = chosen === q.answerIndex;
-            ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+            ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct', 'incorrect'));
             btn.classList.add(correct ? 'correct' : 'incorrect');
             fb.innerHTML = correct ? `Correto! ✅${q.explanation ? `<div class="explanation">${q.explanation}</div>` : ''}` : `Incorreto. <details class="why"><summary>Por quê?</summary><div class="explanation">${q.explanation || 'Releia os conceitos desta subseção.'}</div></details>`;
           });
@@ -87,7 +174,7 @@
             btn.addEventListener('click', () => {
               const chosen = Number(btn.getAttribute('data-i'));
               const correct = chosen === q.answerIndex;
-              ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+              ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct', 'incorrect'));
               btn.classList.add(correct ? 'correct' : 'incorrect');
               fb.innerHTML = correct ? `Correto! ✅${q.explanation ? `<div class=\"explanation\">${q.explanation}</div>` : ''}` : `Incorreto. <details class=\"why\"><summary>Por quê?</summary><div class=\"explanation\">${q.explanation || 'Releia os conceitos desta subseção.'}</div></details>`;
             });
@@ -100,4 +187,5 @@
     render();
   </script>
 </body>
+
 </html>

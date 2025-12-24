@@ -1,30 +1,117 @@
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Exercícios 1.1 — Dados, Informação e Conhecimento</title>
   <style>
-    :root { --bg:#f6f8fb; --surface:#fff; --border:#dde2eb; --text:#1f2937; --muted:#6b7280; --hover:#e6ecf5; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color:var(--text); background:var(--bg); }
-    main { padding: 14px; }
-    h3 { margin:0 0 10px; }
-    .exercise { border:1px dashed var(--border); border-radius:10px; padding:12px; margin:12px 0; }
-    .options { display:grid; gap:8px; }
-    .option-btn { appearance:none; border:1px solid var(--border); background:var(--surface); padding:10px 12px; border-radius:10px; cursor:pointer; text-align:left; transition: background-color .15s, border-color .15s, box-shadow .15s; }
-    .option-btn:hover { background:var(--hover); }
-    .option-btn:focus { outline:2px solid transparent; box-shadow:0 0 0 3px rgba(94,129,172,.35); }
-    .option-btn.correct { border-color:#2a9d8f; background:rgba(42,157,143,.10); }
-    .option-btn.incorrect { border-color:#e76f51; background:rgba(231,111,81,.10); }
-    .exercise-actions { display:flex; gap:8px; margin-top:8px; }
-    .redo-btn { appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:8px 12px; cursor:pointer; }
-    .redo-btn:hover { background:var(--hover); }
-    .feedback { margin-top:6px; color:var(--muted); }
-    .why { margin-top:6px; }
-    .why summary { cursor:pointer; color:var(--muted); }
-    .explanation { margin-top:6px; }
+    :root {
+      --bg: #f6f8fb;
+      --surface: #fff;
+      --border: #dde2eb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --hover: #e6ecf5;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    main {
+      padding: 14px;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+    }
+
+    .exercise {
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 12px 0;
+    }
+
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .option-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color .15s, border-color .15s, box-shadow .15s;
+    }
+
+    .option-btn:hover {
+      background: var(--hover);
+    }
+
+    .option-btn:focus {
+      outline: 2px solid transparent;
+      box-shadow: 0 0 0 3px rgba(94, 129, 172, .35);
+    }
+
+    .option-btn.correct {
+      border-color: #2a9d8f;
+      background: rgba(42, 157, 143, .10);
+    }
+
+    .option-btn.incorrect {
+      border-color: #e76f51;
+      background: rgba(231, 111, 81, .10);
+    }
+
+    .exercise-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .redo-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .redo-btn:hover {
+      background: var(--hover);
+    }
+
+    .feedback {
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .why {
+      margin-top: 6px;
+    }
+
+    .why summary {
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .explanation {
+      margin-top: 6px;
+    }
   </style>
 </head>
+
 <body>
   <main>
     <h3>Exercícios 1.1 — Dados, Informação e Conhecimento</h3>
@@ -34,25 +121,25 @@
     const QUESTIONS = [
       {
         prompt: "Qual opção representa conhecimento?",
-        options: ["Valor: 15", "Relatório: média semanal 15°C", "Recomendação: leve casaco amanhã"],
+        options: ["Valor: 2013, Brasil, Copa das Confederações", "O Brasil foi campeão da Copa das Confederações em 2013", "Planejar campanha de marketing baseado no histórico de vitórias"],
         answerIndex: 2,
-        explanation: "Conhecimento orienta decisão/ação; informação é contexto; dado é valor bruto."
+        explanation: "Conhecimento envolve evidência + ação: padrões observados que orientam decisões. Dado é valor bruto; informação é o resultado processado."
       },
       {
-        prompt: "Qual alternativa melhor representa informação?",
-        options: ["21", "Temperatura média do dia: 21°C", "Leve casaco amanhã"],
+        prompt: "A cadeia dados → informação → conhecimento envolve...",
+        options: ["Armazenamento bruto sem contexto", "Dados organizados que geram sentido e orientam ações", "Apenas processamento matemático"],
         answerIndex: 1,
-        explanation: "Informação agrega contexto interpretável aos dados, como unidades e período." 
+        explanation: "Dados isolados não são informação. A interpretação e o contexto transformam dados em informação útil, e padrões observados geram conhecimento para ação."
       },
       {
         prompt: "Metadado é...",
-        options: ["dados sobre dados", "visualização dos dados", "regra de interface"],
+        options: ["Dados sobre dados (descrição de características)", "Visualização gráfica dos dados", "Regra de interface do sistema"],
         answerIndex: 0,
-        explanation: "Metadados descrevem os dados (ex.: tipo, origem, formato)."
+        explanation: "Metadado é um dado sobre dado, fornecendo descrição das características e relacionamentos que o ligam aos demais dados no BD."
       }
     ];
 
-    function shuffle(arr) { return arr.map(v => ({ v, r: Math.random() })).sort((a,b)=>a.r-b.r).map(o=>o.v); }
+    function shuffle(arr) { return arr.map(v => ({ v, r: Math.random() })).sort((a, b) => a.r - b.r).map(o => o.v); }
 
     function render() {
       const list = document.getElementById('ex-list');
@@ -74,7 +161,7 @@
           btn.addEventListener('click', () => {
             const chosen = Number(btn.getAttribute('data-i'));
             const correct = chosen === q.answerIndex;
-            ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+            ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct', 'incorrect'));
             btn.classList.add(correct ? 'correct' : 'incorrect');
             fb.innerHTML = correct ? `Correto! ✅${q.explanation ? `<div class=\"explanation\">${q.explanation}</div>` : ''}` : `Incorreto. <details class=\"why\"><summary>Por quê?</summary><div class=\"explanation\">${q.explanation || 'Releia os conceitos desta subseção.'}</div></details>`;
           });
@@ -87,7 +174,7 @@
             btn.addEventListener('click', () => {
               const chosen = Number(btn.getAttribute('data-i'));
               const correct = chosen === q.answerIndex;
-              ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+              ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct', 'incorrect'));
               btn.classList.add(correct ? 'correct' : 'incorrect');
               fb.innerHTML = correct ? `Correto! ✅${q.explanation ? `<div class=\"explanation\">${q.explanation}</div>` : ''}` : `Incorreto. <details class=\"why\"><summary>Por quê?</summary><div class=\"explanation\">${q.explanation || 'Releia os conceitos desta subseção.'}</div></details>`;
             });
@@ -100,4 +187,5 @@
     render();
   </script>
 </body>
+
 </html>
