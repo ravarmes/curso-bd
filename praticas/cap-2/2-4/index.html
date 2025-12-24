@@ -1,69 +1,365 @@
 <!doctype html>
 <html lang="pt-br">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>2.4 — Construindo o MER no brModelo</title>
   <style>
-    :root { --text:#1f2937; --muted:#6b7280; --accent:#1f4f8b; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color: var(--text); }
-    .wrap { padding: 14px 16px; max-width: 980px; margin: 0 auto; }
-    h1 { font-size: 1.2rem; margin: 0 0 12px; }
-    .tabs { display:flex; gap:8px; flex-wrap:wrap; }
-    .tab { border:1px solid #d1d5db; background:#fff; border-radius:10px; padding:8px 12px; cursor:pointer; }
-    .tab.active { background:#eef2ff; border-color:#6366f1; }
-    .panel { display:none; margin-top:12px; }
-    .panel.active { display:block; }
-    .note { color: var(--muted); }
-    .box { border:1px solid #e5e7eb; border-radius:10px; background:#fafafa; padding:10px; }
-    .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
-    .svg-wrap { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:6px; }
-    .label { font-size: 12px; fill: #111827; }
-    .shape { fill:#e5e7eb; stroke:#9ca3af; }
-    .hl { stroke:#2563eb; stroke-width:3; }
-    .pill { display:inline-block; border:1px solid #d1d5db; border-radius:999px; padding:4px 10px; margin:4px 6px 0 0; background:#f8fafc; cursor:pointer; }
-    .pill.active { background:#eef2ff; border-color:#6366f1; }
+    :root {
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #1f4f8b;
+      --ok: #16a34a;
+      --bad: #dc2626;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+      color: var(--text);
+    }
+
+    .wrap {
+      padding: 14px 16px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      margin: 0 0 12px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: #eef2ff;
+      border-color: #6366f1;
+    }
+
+    .panel {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .box {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #fafafa;
+      padding: 12px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .list {
+      margin: 0 0 8px;
+      padding-left: 18px;
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .checklist li {
+      padding: 6px 0;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checklist input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+
+    .checklist .done {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .progress-bar {
+      height: 20px;
+      background: #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      transition: width 0.3s;
+    }
+
+    .progress-text {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    /* Canvas MER */
+    .canvas-wrap {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 6px;
+      min-height: 300px;
+      position: relative;
+    }
+
+    .canvas-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .canvas-btn {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    .canvas-btn:hover {
+      background: #f0f0f0;
+    }
+
+    .canvas-btn.active {
+      background: #eef2ff;
+      border-color: #6366f1;
+    }
+
+    svg.mer-canvas {
+      width: 100%;
+      height: 320px;
+      background: #fefefe;
+      border-radius: 8px;
+    }
+
+    .entity {
+      fill: #e0e7ff;
+      stroke: #4f46e5;
+      stroke-width: 2;
+      cursor: move;
+    }
+
+    .relationship {
+      fill: #fef3c7;
+      stroke: #d97706;
+      stroke-width: 2;
+      cursor: move;
+    }
+
+    .attribute {
+      fill: #d1fae5;
+      stroke: #059669;
+      stroke-width: 2;
+      cursor: move;
+    }
+
+    .label {
+      font-size: 11px;
+      fill: #111827;
+      pointer-events: none;
+    }
+
+    /* Quiz */
+    .quiz-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 8px 0;
+      background: #fff;
+    }
+
+    .options {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .option-btn {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      border-radius: 10px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    .option-btn.correct {
+      background: #ecfdf5;
+      border-color: #16a34a;
+    }
+
+    .option-btn.incorrect {
+      background: #fee2e2;
+      border-color: #dc2626;
+    }
+
+    .feedback {
+      margin-top: 6px;
+      font-weight: 500;
+    }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <h1>2.4 — Construindo o MER no brModelo</h1>
-    <p class="note">Tour guiado do brModelo e boas práticas de modelagem.</p>
+    <p class="note">Aprenda a usar ferramentas de modelagem e siga o checklist de boas práticas.</p>
 
     <div class="tabs" role="tablist">
-      <button class="tab active" data-key="tour" role="tab">Tour</button>
-      <button class="tab" data-key="boas" role="tab">Boas práticas</button>
+      <button class="tab active" data-key="tour" role="tab">Tour brModelo</button>
+      <button class="tab" data-key="canvas" role="tab">Mini-Canvas</button>
+      <button class="tab" data-key="checklist" role="tab">Checklist</button>
+      <button class="tab" data-key="quiz" role="tab">Quiz</button>
     </div>
 
     <!-- Painel: Tour -->
     <section class="panel active" data-key="tour" aria-label="Tour">
-      <div class="box">
-        <h3>brModelo (Web)</h3>
-        <p>Abra o brModelo Web para desenhar seu MER:</p>
-        <p><a href="https://brmodeloweb.com/" target="_blank" rel="noopener">brmodeloweb.com</a></p>
-        <ul>
-          <li>Retângulos: entidades</li>
-          <li>Losangos: relacionamentos</li>
-          <li>Elipses: atributos</li>
-          <li>Chaves: primárias e estrangeiras</li>
-        </ul>
-        <figure>
-          <img src="../../../conteudos/images/2-1-er_basics.svg" alt="Formas do MER" style="max-width:100%;" />
-          <figcaption class="note">Formas básicas do MER.</figcaption>
-        </figure>
+      <div class="grid">
+        <div class="box">
+          <h3>brModelo Web</h3>
+          <p>Ferramenta brasileira para modelagem ER:</p>
+          <p><a href="https://brmodeloweb.com/" target="_blank" rel="noopener" style="color:#4f46e5;font-weight:600;">🔗
+              brmodeloweb.com</a></p>
+          <h4>Símbolos do MER:</h4>
+          <ul class="list">
+            <li><strong>Retângulo:</strong> Entidades</li>
+            <li><strong>Losango:</strong> Relacionamentos</li>
+            <li><strong>Elipse:</strong> Atributos</li>
+            <li><strong>Sublinhado:</strong> Chave Primária (PK)</li>
+          </ul>
+        </div>
+        <div class="box">
+          <h3>Passos Básicos</h3>
+          <ol class="list">
+            <li>Acesse o brModelo Web</li>
+            <li>Crie um novo projeto (Conceitual)</li>
+            <li>Adicione entidades (retângulos)</li>
+            <li>Defina atributos (elipses)</li>
+            <li>Conecte com relacionamentos (losangos)</li>
+            <li>Configure cardinalidades (1:1, 1:N, N:N)</li>
+            <li>Exporte como imagem ou PDF</li>
+          </ol>
+        </div>
       </div>
     </section>
 
-
-    <!-- Painel: Boas práticas -->
-    <section class="panel" data-key="boas" aria-label="Boas práticas">
+    <!-- Painel: Canvas Interativo -->
+    <section class="panel" data-key="canvas" aria-label="Canvas">
       <div class="box">
-        <ul>
-          <li>Nomeie entidades e atributos claramente.</li>
-          <li>Evite grupos repetidos e use relacionamentos N:N com tabela associativa.</li>
-          <li>Defina chaves primárias e estrangeiras no modelo lógico.</li>
-          <li>Valide cardinalidades e participação conforme regras do domínio.</li>
+        <h3>Mini-Constructor MER</h3>
+        <p class="note">Clique nos botões e depois clique no canvas para adicionar elementos.</p>
+        <div class="canvas-controls">
+          <button class="canvas-btn" data-tool="entity">+ Entidade</button>
+          <button class="canvas-btn" data-tool="attr">+ Atributo</button>
+          <button class="canvas-btn" data-tool="rel">+ Relacionamento</button>
+          <button class="canvas-btn" data-tool="clear">Limpar</button>
+        </div>
+        <div class="canvas-wrap">
+          <svg class="mer-canvas" id="mer-canvas"></svg>
+        </div>
+        <p class="note">Este é um simulador simplificado. Use brModelo Web para diagramas completos.</p>
+      </div>
+    </section>
+
+    <!-- Painel: Checklist -->
+    <section class="panel" data-key="checklist" aria-label="Checklist">
+      <div class="box">
+        <h3>Checklist de Modelagem</h3>
+        <p class="note">Marque os itens conforme você valida seu modelo:</p>
+        <ul class="checklist" id="checklist">
+          <li><input type="checkbox" data-item="1"><span>Entidades nomeadas claramente (substantivos)</span></li>
+          <li><input type="checkbox" data-item="2"><span>Atributos definidos para cada entidade</span></li>
+          <li><input type="checkbox" data-item="3"><span>Chaves primárias identificadas (sublinhadas)</span></li>
+          <li><input type="checkbox" data-item="4"><span>Relacionamentos conectando entidades</span></li>
+          <li><input type="checkbox" data-item="5"><span>Cardinalidades definidas (1:1, 1:N, N:N)</span></li>
+          <li><input type="checkbox" data-item="6"><span>Participação obrigatória marcada onde necessário</span></li>
+          <li><input type="checkbox" data-item="7"><span>Sem grupos repetidos (colunas autor1, autor2...)</span></li>
+          <li><input type="checkbox" data-item="8"><span>Relacionamentos N:N com tabela associativa</span></li>
         </ul>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:0%;"></div>
+        </div>
+        <div class="progress-text" id="progress-text">0 de 8 itens concluídos</div>
+      </div>
+    </section>
+
+    <!-- Painel: Quiz -->
+    <section class="panel" data-key="quiz" aria-label="Quiz">
+      <div class="box">
+        <h3>Teste seus Conhecimentos</h3>
+
+        <div class="quiz-item" id="q1">
+          <p><strong>1.</strong> No brModelo, qual forma representa relacionamentos?</p>
+          <div class="options">
+            <button class="option-btn" data-i="0">Retângulo</button>
+            <button class="option-btn" data-i="1">Losango</button>
+            <button class="option-btn" data-i="2">Elipse</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="quiz-item" id="q2">
+          <p><strong>2.</strong> Para indicar que um atributo é chave primária, usa-se:</p>
+          <div class="options">
+            <button class="option-btn" data-i="0">Sublinhado</button>
+            <button class="option-btn" data-i="1">Negrito</button>
+            <button class="option-btn" data-i="2">Cor vermelha</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="quiz-item" id="q3">
+          <p><strong>3.</strong> Participação obrigatória significa:</p>
+          <div class="options">
+            <button class="option-btn" data-i="0">Cardinalidade máxima = 1</button>
+            <button class="option-btn" data-i="1">A entidade deve participar (mínimo = 1)</button>
+            <button class="option-btn" data-i="2">Uso de chave estrangeira</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
       </div>
     </section>
   </div>
@@ -77,47 +373,122 @@
       document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.getAttribute('data-key') === key));
     });
 
-    // Mini MER: adicionar itens simples
-    const svg = document.getElementById('svg-mini');
-    const pills = document.querySelectorAll('.pill');
-    function addEntity(name='Entidade', x=100+Math.random()*500, y=200+Math.random()*120) {
-      const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
-      r.setAttribute('class','entity'); r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', 140); r.setAttribute('height', 60); r.setAttribute('rx', 8);
-      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('class','label'); t.setAttribute('x', x+70); t.setAttribute('y', y+35); t.setAttribute('text-anchor','middle'); t.textContent = name;
-      svg.appendChild(r); svg.appendChild(t);
-    }
-    function addAttr(name='atributo', cx=100+Math.random()*500, cy=200+Math.random()*120) {
-      const e = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
-      e.setAttribute('class','attr'); e.setAttribute('cx', cx); e.setAttribute('cy', cy); e.setAttribute('rx', 55); e.setAttribute('ry', 22);
-      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('class','label'); t.setAttribute('x', cx); t.setAttribute('y', cy+4); t.setAttribute('text-anchor','middle'); t.textContent = name;
-      svg.appendChild(e); svg.appendChild(t);
-    }
-    function addRel(name='Rel', x=100+Math.random()*500, y=200+Math.random()*120) {
-      const p = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-      p.setAttribute('class','rel'); p.setAttribute('points',`${x},${y} ${x+40},${y+30} ${x},${y+60} ${x-40},${y+30}`);
-      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('class','label'); t.setAttribute('x', x); t.setAttribute('y', y+34); t.setAttribute('text-anchor','middle'); t.textContent = name;
-      svg.appendChild(p); svg.appendChild(t);
-    }
-    function connect(x1=100+Math.random()*500, y1=200+Math.random()*120, x2=x1+160, y2=y1) {
-      const l = document.createElementNS('http://www.w3.org/2000/svg','line');
-      l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2);
-      l.setAttribute('stroke','#6b7280'); l.setAttribute('stroke-width','2'); svg.appendChild(l);
-    }
-    pills.forEach(p => p.addEventListener('click', () => {
-      const type = p.getAttribute('data-add'); p.classList.add('active'); setTimeout(() => p.classList.remove('active'), 350);
-      if (type === 'entidade') {
-        const name = prompt('Nome da entidade?') || 'Entidade'; addEntity(name);
-      } else if (type === 'atributo') {
-        const name = prompt('Nome do atributo?') || 'atributo'; addAttr(name);
-      } else if (type === 'relacionamento') {
-        const name = prompt('Nome do relacionamento?') || 'Rel'; addRel(name);
-      } else if (type === 'conectar') {
-        connect();
+    // Canvas MER
+    const svg = document.getElementById('mer-canvas');
+    let currentTool = null;
+    let elementCount = 0;
+
+    document.querySelectorAll('.canvas-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tool = btn.dataset.tool;
+        if (tool === 'clear') {
+          svg.innerHTML = '';
+          elementCount = 0;
+          return;
+        }
+        document.querySelectorAll('.canvas-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTool = tool;
+      });
+    });
+
+    svg.addEventListener('click', (e) => {
+      if (!currentTool) return;
+      const rect = svg.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const name = prompt(currentTool === 'entity' ? 'Nome da entidade:' : currentTool === 'attr' ? 'Nome do atributo:' : 'Nome do relacionamento:');
+      if (!name) return;
+      elementCount++;
+
+      if (currentTool === 'entity') {
+        const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        r.setAttribute('class', 'entity');
+        r.setAttribute('x', x - 50);
+        r.setAttribute('y', y - 25);
+        r.setAttribute('width', 100);
+        r.setAttribute('height', 50);
+        r.setAttribute('rx', 6);
+        svg.appendChild(r);
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('class', 'label');
+        t.setAttribute('x', x);
+        t.setAttribute('y', y + 4);
+        t.setAttribute('text-anchor', 'middle');
+        t.textContent = name;
+        svg.appendChild(t);
+      } else if (currentTool === 'attr') {
+        const e2 = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        e2.setAttribute('class', 'attribute');
+        e2.setAttribute('cx', x);
+        e2.setAttribute('cy', y);
+        e2.setAttribute('rx', 45);
+        e2.setAttribute('ry', 20);
+        svg.appendChild(e2);
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('class', 'label');
+        t.setAttribute('x', x);
+        t.setAttribute('y', y + 4);
+        t.setAttribute('text-anchor', 'middle');
+        t.textContent = name;
+        svg.appendChild(t);
+      } else if (currentTool === 'rel') {
+        const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        p.setAttribute('class', 'relationship');
+        p.setAttribute('points', `${x},${y - 25} ${x + 35},${y} ${x},${y + 25} ${x - 35},${y}`);
+        svg.appendChild(p);
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('class', 'label');
+        t.setAttribute('x', x);
+        t.setAttribute('y', y + 4);
+        t.setAttribute('text-anchor', 'middle');
+        t.textContent = name;
+        svg.appendChild(t);
       }
-    }));
+    });
+
+    // Checklist
+    const checklist = document.getElementById('checklist');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const total = checklist.querySelectorAll('input[type="checkbox"]').length;
+
+    function updateProgress() {
+      const checked = checklist.querySelectorAll('input:checked').length;
+      const pct = Math.round((checked / total) * 100);
+      progressFill.style.width = pct + '%';
+      progressText.textContent = `${checked} de ${total} itens concluídos`;
+      checklist.querySelectorAll('li').forEach(li => {
+        const cb = li.querySelector('input');
+        li.querySelector('span').classList.toggle('done', cb.checked);
+      });
+    }
+
+    checklist.addEventListener('change', updateProgress);
+
+    // Quiz
+    const answers = { q1: 1, q2: 0, q3: 1 };
+    const explanations = {
+      q1: 'Losangos representam relacionamentos no MER.',
+      q2: 'Chave primária é indicada por sublinhado.',
+      q3: 'Participação obrigatória: mínimo = 1 (a entidade deve participar).'
+    };
+
+    document.querySelectorAll('.quiz-item').forEach(item => {
+      const id = item.id;
+      const fb = item.querySelector('.feedback');
+      item.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const chosen = Number(btn.dataset.i);
+          const correct = answers[id];
+          item.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct', 'incorrect'));
+          btn.classList.add(chosen === correct ? 'correct' : 'incorrect');
+          fb.textContent = chosen === correct ? `Correto! ✅ ${explanations[id]}` : `Incorreto. ${explanations[id]}`;
+          fb.style.color = chosen === correct ? '#16a34a' : '#dc2626';
+        });
+      });
+    });
   </script>
 </body>
+
 </html>
