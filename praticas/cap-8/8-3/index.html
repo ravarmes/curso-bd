@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 8.3 — Fontes de Dados e Qualidade</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .grid>div {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .issue {
+            background: #fee2e2;
+        }
+
+        .ok {
+            background: #d1fae5;
+        }
+
+        .source-card {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .source-card.bd {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+
+        .source-card.ext {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+
+        .source-card h4 {
+            margin: 0 0 8px;
+        }
+
+        .check {
+            color: var(--good);
+        }
+
+        .warn {
+            color: var(--bad);
+        }
+
+        .quality-bar {
+            height: 20px;
+            border-radius: 10px;
+            margin: 4px 0;
+        }
+
+        .quality-bar.high {
+            background: linear-gradient(90deg, #22c55e, #4ade80);
+        }
+
+        .quality-bar.medium {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+
+        .quality-bar.low {
+            background: linear-gradient(90deg, #ef4444, #f87171);
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 8.3 — Fontes de Dados e Qualidade</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="compare">Comparação</button>
+            <button class="tab" data-key="problemas">Problemas Comuns</button>
+            <button class="tab" data-key="checklist">Checklist</button>
+        </div>
+
+        <!-- Compare -->
+        <section class="panel active" data-key="compare">
+            <div class="box">
+                <h3>BD Interno vs Dados Externos</h3>
+                <div class="grid">
+                    <div class="source-card bd">
+                        <h4>🐘 Banco de Dados Interno</h4>
+                        <ul style="text-align:left;">
+                            <li class="check">✅ Tipos definidos (VARCHAR, INT)</li>
+                            <li class="check">✅ Integridade referencial (FK)</li>
+                            <li class="check">✅ Sem duplicatas (PK únicas)</li>
+                            <li class="check">✅ Constraints validados</li>
+                            <li class="check">✅ Origem conhecida</li>
+                        </ul>
+                        <div class="quality-bar high" style="width:95%;"></div>
+                        <p class="note">Qualidade: Alta</p>
+                    </div>
+                    <div class="source-card ext">
+                        <h4>📥 Dados Externos (Kaggle, APIs)</h4>
+                        <ul style="text-align:left;">
+                            <li class="warn">⚠️ Tipos inconsistentes</li>
+                            <li class="warn">⚠️ Pode ter duplicatas</li>
+                            <li class="warn">⚠️ Valores nulos</li>
+                            <li class="warn">⚠️ Possível viés nos dados</li>
+                            <li class="warn">⚠️ Documentação variável</li>
+                        </ul>
+                        <div class="quality-bar medium" style="width:60%;"></div>
+                        <p class="note">Qualidade: Variável</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Problemas -->
+        <section class="panel" data-key="problemas">
+            <div class="box">
+                <h3>Identificando Problemas de Qualidade</h3>
+                <p class="note">Clique nas linhas para identificar problemas:</p>
+                <table id="quality-table">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>nome</th>
+                            <th>email</th>
+                            <th>idade</th>
+                            <th>cidade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Ana Silva</td>
+                            <td>ana@email.com</td>
+                            <td>25</td>
+                            <td>São Paulo</td>
+                        </tr>
+                        <tr class="issue" data-issue="duplicata">
+                            <td>2</td>
+                            <td>Ana Silva</td>
+                            <td>ana@email.com</td>
+                            <td>25</td>
+                            <td>São Paulo</td>
+                        </tr>
+                        <tr class="issue" data-issue="nulo">
+                            <td>3</td>
+                            <td>Bruno</td>
+                            <td>NULL</td>
+                            <td>NULL</td>
+                            <td>Rio</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Carlos Lima</td>
+                            <td>carlos@email.com</td>
+                            <td>30</td>
+                            <td>Curitiba</td>
+                        </tr>
+                        <tr class="issue" data-issue="outlier">
+                            <td>5</td>
+                            <td>Diana</td>
+                            <td>diana@email.com</td>
+                            <td>150</td>
+                            <td>Salvador</td>
+                        </tr>
+                        <tr class="issue" data-issue="inconsistente">
+                            <td>6</td>
+                            <td>eduardo</td>
+                            <td>EDUARDO@EMAIL.COM</td>
+                            <td>28</td>
+                            <td>belo horizonte</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="issue-feedback" class="box" style="background:#fefce8;display:none;"></div>
+            </div>
+        </section>
+
+        <!-- Checklist -->
+        <section class="panel" data-key="checklist">
+            <div class="box">
+                <h3>Checklist de Validação</h3>
+                <p class="note">Verifique antes de usar dados externos:</p>
+                <div id="checklist"></div>
+                <div style="margin-top:16px;">
+                    <strong>Progresso: <span id="progress">0/6</span></strong>
+                    <div style="background:#e5e7eb;height:10px;border-radius:5px;margin-top:6px;">
+                        <div id="progress-bar"
+                            style="background:var(--accent);height:100%;border-radius:5px;width:0%;transition:width 0.3s;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Issue identification
+        const issues = {
+            duplicata: '⚠️ DUPLICATA: Linha 2 é idêntica à linha 1. Use df.drop_duplicates().',
+            nulo: '⚠️ VALORES NULOS: Email e idade ausentes. Use df.fillna() ou df.dropna().',
+            outlier: '⚠️ OUTLIER: Idade 150 é impossível. Verifique com df.describe() e IQR.',
+            inconsistente: '⚠️ INCONSISTÊNCIA: Capitalização variável. Use df.str.lower() ou .title().'
+        };
+
+        document.querySelectorAll('#quality-table tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                const issue = row.dataset.issue;
+                const fb = document.getElementById('issue-feedback');
+                if (issue) {
+                    fb.textContent = issues[issue];
+                    fb.style.display = 'block';
+                } else {
+                    fb.textContent = '✅ Esta linha parece estar correta.';
+                    fb.style.display = 'block';
+                    fb.style.background = '#d1fae5';
+                }
+            });
+        });
+
+        // Checklist
+        const checks = [
+            'Verificar duplicatas (df.duplicated())',
+            'Verificar valores nulos (df.isnull().sum())',
+            'Verificar tipos de dados (df.dtypes)',
+            'Verificar outliers (df.describe())',
+            'Verificar consistência de formatos',
+            'Verificar documentação/fonte dos dados'
+        ];
+
+        document.getElementById('checklist').innerHTML = checks.map((c, i) => `
+      <label style="display:block;padding:8px;border:1px solid #dde2eb;border-radius:8px;margin:4px 0;cursor:pointer;">
+        <input type="checkbox" data-check="${i}" style="margin-right:8px;">${c}
+      </label>
+    `).join('');
+
+        document.querySelectorAll('[data-check]').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const checked = document.querySelectorAll('[data-check]:checked').length;
+                document.getElementById('progress').textContent = `${checked}/${checks.length}`;
+                document.getElementById('progress-bar').style.width = `${(checked / checks.length) * 100}%`;
+            });
+        });
+    </script>
+</body>
+
+</html>

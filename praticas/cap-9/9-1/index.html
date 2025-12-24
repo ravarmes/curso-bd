@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 9.1 — IA para Modelagem SQL</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .grid>div {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .ty {
+            color: #fdba74;
+        }
+
+        .id {
+            color: #fda4af;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+
+        .flow-step {
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .flow-step.active {
+            border-color: var(--accent);
+            background: #eff6ff;
+        }
+
+        .flow-arrow {
+            color: var(--muted);
+            font-size: 1.5rem;
+        }
+
+        .warn-box {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 9.1 — IA para Modelagem e Geração de SQL</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="fluxo">Fluxo de Trabalho</button>
+            <button class="tab" data-key="simulador">Simulador IA</button>
+            <button class="tab" data-key="validacao">Validação Humana</button>
+        </div>
+
+        <!-- Fluxo -->
+        <section class="panel active" data-key="fluxo">
+            <div class="box">
+                <h3>Fluxo: Requisitos → SQL com IA</h3>
+                <div class="flow">
+                    <div class="flow-step active"><strong>📝 Requisitos</strong>
+                        <p class="note">Descrição textual</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step"><strong>🤖 IA</strong>
+                        <p class="note">Gera artefatos</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step"><strong>📐 MER</strong>
+                        <p class="note">Conceitual</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step"><strong>📊 Lógico</strong>
+                        <p class="note">Tabelas, PKs, FKs</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step"><strong>💾 DDL</strong>
+                        <p class="note">CREATE TABLE</p>
+                    </div>
+                </div>
+                <div class="warn-box">
+                    <strong>⚠️ Importante:</strong> IA acelera a produção, mas validação humana é essencial!
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulador -->
+        <section class="panel" data-key="simulador">
+            <div class="box">
+                <h3>Simulador: Gerar SQL com IA</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Prompt (Requisitos):</h4>
+                        <textarea
+                            id="prompt-input">Crie tabelas para um sistema de biblioteca com livros, autores e empréstimos para alunos.</textarea>
+                        <button class="btn" id="generate-sql">🤖 Gerar SQL</button>
+                    </div>
+                    <div>
+                        <h4>SQL Gerado pela IA:</h4>
+                        <pre id="sql-output">-- Clique em "Gerar SQL"</pre>
+                    </div>
+                </div>
+                <h4 style="margin-top:16px;">Exemplos de Prompts:</h4>
+                <div class="grid">
+                    <button class="btn"
+                        data-prompt="Crie tabelas para uma loja virtual com produtos, categorias e pedidos.">🛒 Loja
+                        Virtual</button>
+                    <button class="btn"
+                        data-prompt="Crie tabelas para um sistema escolar com alunos, turmas e notas.">🏫 Sistema
+                        Escolar</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Validação -->
+        <section class="panel" data-key="validacao">
+            <div class="box">
+                <h3>Checklist de Validação Humana</h3>
+                <p class="note">Após a IA gerar o SQL, verifique:</p>
+                <div id="checklist"></div>
+                <div style="margin-top:16px;">
+                    <strong>Validação: <span id="progress">0/6</span></strong>
+                    <div style="background:#e5e7eb;height:10px;border-radius:5px;margin-top:6px;">
+                        <div id="progress-bar"
+                            style="background:var(--good);height:100%;border-radius:5px;width:0%;transition:width 0.3s;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // SQL Generator
+        const sqlTemplates = {
+            biblioteca: `<span class="kw">CREATE TABLE</span> <span class="id">autor</span> (
+  <span class="id">id</span> <span class="ty">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  <span class="id">nome</span> <span class="ty">VARCHAR(100)</span> <span class="kw">NOT NULL</span>
+);
+
+<span class="kw">CREATE TABLE</span> <span class="id">livro</span> (
+  <span class="id">id</span> <span class="ty">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  <span class="id">titulo</span> <span class="ty">VARCHAR(200)</span> <span class="kw">NOT NULL</span>,
+  <span class="id">autor_id</span> <span class="ty">INTEGER</span> <span class="kw">REFERENCES</span> <span class="id">autor</span>(<span class="id">id</span>)
+);
+
+<span class="kw">CREATE TABLE</span> <span class="id">aluno</span> (
+  <span class="id">id</span> <span class="ty">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  <span class="id">nome</span> <span class="ty">VARCHAR(100)</span> <span class="kw">NOT NULL</span>,
+  <span class="id">matricula</span> <span class="ty">CHAR(11)</span> <span class="kw">UNIQUE</span>
+);
+
+<span class="kw">CREATE TABLE</span> <span class="id">emprestimo</span> (
+  <span class="id">id</span> <span class="ty">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  <span class="id">livro_id</span> <span class="ty">INTEGER</span> <span class="kw">REFERENCES</span> <span class="id">livro</span>(<span class="id">id</span>),
+  <span class="id">aluno_id</span> <span class="ty">INTEGER</span> <span class="kw">REFERENCES</span> <span class="id">aluno</span>(<span class="id">id</span>),
+  <span class="id">data_emp</span> <span class="ty">DATE</span> <span class="kw">DEFAULT CURRENT_DATE</span>
+);`,
+            loja: `<span class="kw">CREATE TABLE</span> <span class="id">categoria</span> (
+  <span class="id">id</span> <span class="ty">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  <span class="id">nome</span> <span class="ty">VARCHAR(50)</span> <span class="kw">NOT NULL</span>
+);
+
+<span class="kw">CREATE TABLE</span> <span class="id">produto</span> (
+  <span class="id">id</span> <span class="ty">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  <span class="id">nome</span> <span class="ty">VARCHAR(100)</span>,
+  <span class="id">preco</span> <span class="ty">NUMERIC(10,2)</span>,
+  <span class="id">categoria_id</span> <span class="ty">INTEGER</span> <span class="kw">REFERENCES</span> <span class="id">categoria</span>(<span class="id">id</span>)
+);`,
+            escola: `<span class="kw">CREATE TABLE</span> <span class="id">turma</span> (
+  <span class="id">id</span> <span class="ty">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  <span class="id">nome</span> <span class="ty">VARCHAR(50)</span>
+);
+
+<span class="kw">CREATE TABLE</span> <span class="id">aluno</span> (
+  <span class="id">id</span> <span class="ty">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  <span class="id">nome</span> <span class="ty">VARCHAR(100)</span>,
+  <span class="id">turma_id</span> <span class="ty">INTEGER</span> <span class="kw">REFERENCES</span> <span class="id">turma</span>(<span class="id">id</span>)
+);`
+        };
+
+        document.getElementById('generate-sql').addEventListener('click', () => {
+            const prompt = document.getElementById('prompt-input').value.toLowerCase();
+            let sql = sqlTemplates.biblioteca;
+            if (prompt.includes('loja') || prompt.includes('produto')) sql = sqlTemplates.loja;
+            else if (prompt.includes('escola') || prompt.includes('nota')) sql = sqlTemplates.escola;
+            document.getElementById('sql-output').innerHTML = sql;
+        });
+
+        document.querySelectorAll('[data-prompt]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('prompt-input').value = btn.dataset.prompt;
+            });
+        });
+
+        // Checklist
+        const checks = [
+            'PKs definidas corretamente (SERIAL/UUID)',
+            'FKs com REFERENCES apropriadas',
+            'Tipos de dados adequados (VARCHAR size)',
+            'NOT NULL onde necessário',
+            'Nomes seguem convenção (snake_case)',
+            'Tabelas normalizadas (sem redundância)'
+        ];
+        document.getElementById('checklist').innerHTML = checks.map((c, i) => `
+      <label style="display:block;padding:8px;border:1px solid #dde2eb;border-radius:8px;margin:4px 0;cursor:pointer;">
+        <input type="checkbox" data-check="${i}" style="margin-right:8px;">${c}
+      </label>
+    `).join('');
+
+        document.querySelectorAll('[data-check]').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const checked = document.querySelectorAll('[data-check]:checked').length;
+                document.getElementById('progress').textContent = `${checked}/${checks.length}`;
+                document.getElementById('progress-bar').style.width = `${(checked / checks.length) * 100}%`;
+            });
+        });
+    </script>
+</body>
+
+</html>

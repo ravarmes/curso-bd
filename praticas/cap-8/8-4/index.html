@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 8.4 — Pré-processamento</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .grid>div {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.8rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .fn {
+            color: #fde68a;
+        }
+
+        .str {
+            color: #86efac;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .null {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .fixed {
+            background: #d1fae5;
+        }
+
+        .technique-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .technique-card h4 {
+            margin: 0 0 8px;
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 8.4 — Pré-processamento e Limpeza</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="fillna">fillna()</button>
+            <button class="tab" data-key="onehot">One-Hot Encoding</button>
+            <button class="tab" data-key="scaling">Scaling</button>
+            <button class="tab" data-key="resumo">Resumo</button>
+        </div>
+
+        <!-- fillna -->
+        <section class="panel active" data-key="fillna">
+            <div class="box">
+                <h3>Tratando Valores Nulos: fillna()</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Antes (com NULL):</h4>
+                        <table id="tbl-before">
+                            <thead>
+                                <tr>
+                                    <th>nome</th>
+                                    <th>idade</th>
+                                    <th>nota</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <p class="note">3 valores nulos detectados</p>
+                    </div>
+                    <div>
+                        <h4>Depois (fillna):</h4>
+                        <table id="tbl-after">
+                            <thead>
+                                <tr>
+                                    <th>nome</th>
+                                    <th>idade</th>
+                                    <th>nota</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <button class="btn" id="apply-fillna">Aplicar fillna()</button>
+                        <div id="fillna-feedback" class="feedback"></div>
+                    </div>
+                </div>
+                <pre
+                    style="margin-top:16px;"><span class="cm"># Opções de tratamento</span>
+df[<span class="str">'idade'</span>].<span class="fn">fillna</span>(df[<span class="str">'idade'</span>].<span class="fn">mean</span>(), inplace=<span class="kw">True</span>)  <span class="cm"># média</span>
+df[<span class="str">'nota'</span>].<span class="fn">fillna</span>(0, inplace=<span class="kw">True</span>)                    <span class="cm"># valor fixo</span>
+df.<span class="fn">dropna</span>()                                            <span class="cm"># remover linhas</span></pre>
+            </div>
+        </section>
+
+        <!-- One-Hot -->
+        <section class="panel" data-key="onehot">
+            <div class="box">
+                <h3>One-Hot Encoding</h3>
+                <p class="note">Transforma variáveis categóricas em colunas binárias (0/1).</p>
+                <div class="grid">
+                    <div>
+                        <h4>Antes:</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>categoria</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Ficção</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>Técnico</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>Ficção</td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>Infantil</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h4>Depois (One-Hot):</h4>
+                        <table id="tbl-onehot">
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>cat_Ficção</th>
+                                    <th>cat_Técnico</th>
+                                    <th>cat_Infantil</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <button class="btn" id="apply-onehot">Aplicar pd.get_dummies()</button>
+                    </div>
+                </div>
+                <pre
+                    style="margin-top:16px;">df = pd.<span class="fn">get_dummies</span>(df, columns=[<span class="str">'categoria'</span>], prefix=<span class="str">'cat'</span>)</pre>
+            </div>
+        </section>
+
+        <!-- Scaling -->
+        <section class="panel" data-key="scaling">
+            <div class="box">
+                <h3>Normalização / Scaling</h3>
+                <div class="grid">
+                    <div class="technique-card">
+                        <h4>Min-Max Scaling</h4>
+                        <p class="note">Escala para [0, 1]</p>
+                        <pre style="font-size:0.75rem;">X' = (X - min) / (max - min)</pre>
+                        <table id="tbl-minmax">
+                            <thead>
+                                <tr>
+                                    <th>Original</th>
+                                    <th>Normalizado</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <button class="btn" id="apply-minmax">Aplicar Min-Max</button>
+                    </div>
+                    <div class="technique-card">
+                        <h4>Z-Score (Standardization)</h4>
+                        <p class="note">Média=0, Desvio=1</p>
+                        <pre style="font-size:0.75rem;">Z = (X - μ) / σ</pre>
+                        <table id="tbl-zscore">
+                            <thead>
+                                <tr>
+                                    <th>Original</th>
+                                    <th>Z-Score</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <button class="btn" id="apply-zscore">Aplicar Z-Score</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumo -->
+        <section class="panel" data-key="resumo">
+            <div class="box">
+                <h3>Pipeline de Pré-processamento</h3>
+                <ol>
+                    <li><strong>Verificar duplicatas:</strong> df.drop_duplicates()</li>
+                    <li><strong>Tratar nulos:</strong> df.fillna() ou df.dropna()</li>
+                    <li><strong>Tratar outliers:</strong> IQR, clip()</li>
+                    <li><strong>Codificar categóricas:</strong> pd.get_dummies() (One-Hot)</li>
+                    <li><strong>Normalizar numéricas:</strong> MinMaxScaler ou StandardScaler</li>
+                </ol>
+                <pre><span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> MinMaxScaler, StandardScaler
+
+scaler = MinMaxScaler()
+df[<span class="str">'preco_norm'</span>] = scaler.<span class="fn">fit_transform</span>(df[[<span class="str">'preco'</span>]])</pre>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // fillna data
+        const dataBefore = [
+            { nome: 'Ana', idade: 25, nota: 8.5 },
+            { nome: 'Bruno', idade: null, nota: 7.0 },
+            { nome: 'Carlos', idade: 30, nota: null },
+            { nome: 'Diana', idade: null, nota: 9.0 }
+        ];
+
+        function renderBefore() {
+            document.querySelector('#tbl-before tbody').innerHTML = dataBefore.map(r =>
+                `<tr><td>${r.nome}</td><td class="${r.idade === null ? 'null' : ''}">${r.idade ?? 'NULL'}</td><td class="${r.nota === null ? 'null' : ''}">${r.nota ?? 'NULL'}</td></tr>`
+            ).join('');
+        }
+        renderBefore();
+
+        document.getElementById('apply-fillna').addEventListener('click', () => {
+            const idades = dataBefore.filter(r => r.idade !== null).map(r => r.idade);
+            const mediaIdade = idades.reduce((a, b) => a + b, 0) / idades.length;
+
+            const dataAfter = dataBefore.map(r => ({
+                nome: r.nome,
+                idade: r.idade ?? Math.round(mediaIdade),
+                nota: r.nota ?? 0
+            }));
+
+            document.querySelector('#tbl-after tbody').innerHTML = dataAfter.map(r =>
+                `<tr><td>${r.nome}</td><td class="fixed">${r.idade}</td><td class="fixed">${r.nota}</td></tr>`
+            ).join('');
+            document.getElementById('fillna-feedback').textContent = `Média da idade: ${mediaIdade.toFixed(0)} - Nulos preenchidos! ✅`;
+            document.getElementById('fillna-feedback').className = 'feedback ok';
+        });
+
+        // One-Hot
+        document.getElementById('apply-onehot').addEventListener('click', () => {
+            const oneHot = [
+                { id: 1, ficcao: 1, tecnico: 0, infantil: 0 },
+                { id: 2, ficcao: 0, tecnico: 1, infantil: 0 },
+                { id: 3, ficcao: 1, tecnico: 0, infantil: 0 },
+                { id: 4, ficcao: 0, tecnico: 0, infantil: 1 }
+            ];
+            document.querySelector('#tbl-onehot tbody').innerHTML = oneHot.map(r =>
+                `<tr class="fixed"><td>${r.id}</td><td>${r.ficcao}</td><td>${r.tecnico}</td><td>${r.infantil}</td></tr>`
+            ).join('');
+        });
+
+        // Scaling
+        const precos = [100, 250, 500, 1000, 2000];
+
+        document.getElementById('apply-minmax').addEventListener('click', () => {
+            const min = Math.min(...precos), max = Math.max(...precos);
+            document.querySelector('#tbl-minmax tbody').innerHTML = precos.map(p =>
+                `<tr><td>${p}</td><td class="fixed">${((p - min) / (max - min)).toFixed(3)}</td></tr>`
+            ).join('');
+        });
+
+        document.getElementById('apply-zscore').addEventListener('click', () => {
+            const mean = precos.reduce((a, b) => a + b, 0) / precos.length;
+            const std = Math.sqrt(precos.reduce((s, x) => s + Math.pow(x - mean, 2), 0) / precos.length);
+            document.querySelector('#tbl-zscore tbody').innerHTML = precos.map(p =>
+                `<tr><td>${p}</td><td class="fixed">${((p - mean) / std).toFixed(3)}</td></tr>`
+            ).join('');
+        });
+    </script>
+</body>
+
+</html>

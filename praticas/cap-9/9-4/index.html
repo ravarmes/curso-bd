@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 9.4 — Tendências e Mercado</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .grid>div {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .btn.selected {
+            background: #dbeafe;
+            border-color: var(--accent);
+        }
+
+        .tech-card {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tech-card:hover {
+            border-color: var(--accent);
+        }
+
+        .tech-card.essential {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .tech-card.trending {
+            border-color: #8b5cf6;
+            background: #f5f3ff;
+        }
+
+        .tech-card h4 {
+            margin: 0 0 8px;
+        }
+
+        .skill-bar {
+            height: 20px;
+            border-radius: 10px;
+            background: #e5e7eb;
+            margin: 4px 0;
+            overflow: hidden;
+        }
+
+        .skill-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .job-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 8px 0;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            margin: 2px;
+            background: #e5e7eb;
+        }
+
+        .tag.hot {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 9.4 — Tendências e Oportunidades no Mercado</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="skills">Skills em Alta</button>
+            <button class="tab" data-key="vagas">Vagas</button>
+            <button class="tab" data-key="autoavaliacao">Autoavaliação</button>
+        </div>
+
+        <!-- Skills -->
+        <section class="panel active" data-key="skills">
+            <div class="box">
+                <h3>Tecnologias em Demanda</h3>
+                <div class="grid" style="grid-template-columns:repeat(4,1fr);">
+                    <div class="tech-card essential">
+                        <h4>🐘 SQL</h4>
+                        <p class="note">Base essencial</p><span class="tag">Obrigatório</span>
+                    </div>
+                    <div class="tech-card essential">
+                        <h4>☁️ Cloud</h4>
+                        <p class="note">AWS, GCP, Azure</p><span class="tag">Em alta</span>
+                    </div>
+                    <div class="tech-card trending">
+                        <h4>🤖 IA/ML</h4>
+                        <p class="note">LLMs, RAG</p><span class="tag hot">🔥 Hot</span>
+                    </div>
+                    <div class="tech-card trending">
+                        <h4>📊 DBaaS</h4>
+                        <p class="note">Supabase, PlanetScale</p><span class="tag hot">🔥 Hot</span>
+                    </div>
+                </div>
+                <h4 style="margin-top:20px;">Demanda de Mercado (2024)</h4>
+                <div style="max-width:500px;">
+                    <p class="note">SQL / PostgreSQL</p>
+                    <div class="skill-bar">
+                        <div class="skill-bar-fill"
+                            style="width:95%;background:linear-gradient(90deg,#3b82f6,#60a5fa);"></div>
+                    </div>
+                    <p class="note">Python / pandas</p>
+                    <div class="skill-bar">
+                        <div class="skill-bar-fill"
+                            style="width:88%;background:linear-gradient(90deg,#10b981,#34d399);"></div>
+                    </div>
+                    <p class="note">Cloud (AWS/GCP)</p>
+                    <div class="skill-bar">
+                        <div class="skill-bar-fill"
+                            style="width:82%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div>
+                    </div>
+                    <p class="note">NoSQL (MongoDB)</p>
+                    <div class="skill-bar">
+                        <div class="skill-bar-fill"
+                            style="width:65%;background:linear-gradient(90deg,#8b5cf6,#a78bfa);"></div>
+                    </div>
+                    <p class="note">IA Generativa / LLM</p>
+                    <div class="skill-bar">
+                        <div class="skill-bar-fill"
+                            style="width:78%;background:linear-gradient(90deg,#ef4444,#f87171);"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vagas -->
+        <section class="panel" data-key="vagas">
+            <div class="box">
+                <h3>Exemplos de Vagas</h3>
+                <div class="job-card">
+                    <h4>🎯 Analista de Dados Jr</h4>
+                    <p class="note">Requisitos:</p>
+                    <span class="tag">SQL</span><span class="tag">Excel</span><span class="tag">Power BI</span><span
+                        class="tag">Python básico</span>
+                </div>
+                <div class="job-card">
+                    <h4>🎯 Engenheiro de Dados</h4>
+                    <p class="note">Requisitos:</p>
+                    <span class="tag">SQL avançado</span><span class="tag">Python</span><span
+                        class="tag hot">AWS/GCP</span><span class="tag hot">Spark</span><span class="tag">ETL</span>
+                </div>
+                <div class="job-card">
+                    <h4>🎯 DBA Cloud</h4>
+                    <p class="note">Requisitos:</p>
+                    <span class="tag">PostgreSQL</span><span class="tag hot">AWS RDS</span><span class="tag">Performance
+                        tuning</span><span class="tag">Backup/Recovery</span>
+                </div>
+                <div class="job-card">
+                    <h4>🎯 ML Engineer</h4>
+                    <p class="note">Requisitos:</p>
+                    <span class="tag">Python</span><span class="tag hot">TensorFlow/PyTorch</span><span
+                        class="tag hot">MLOps</span><span class="tag">SQL</span><span class="tag hot">LLM</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Autoavaliação -->
+        <section class="panel" data-key="autoavaliacao">
+            <div class="box">
+                <h3>Autoavaliação de Habilidades</h3>
+                <p class="note">Clique nas tecnologias que você domina:</p>
+                <div id="skills-check" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+                <div style="margin-top:20px;">
+                    <strong>Seu perfil: <span id="profile">-</span></strong>
+                    <p id="recommendation" class="note"></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Skills check
+        const skills = ['SQL', 'Python', 'PostgreSQL', 'MySQL', 'MongoDB', 'Power BI', 'AWS', 'GCP', 'Docker', 'Git', 'pandas', 'Machine Learning'];
+        document.getElementById('skills-check').innerHTML = skills.map(s =>
+            `<button class="btn" data-skill="${s}">${s}</button>`
+        ).join('');
+
+        document.querySelectorAll('[data-skill]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('selected');
+                updateProfile();
+            });
+        });
+
+        function updateProfile() {
+            const selected = [...document.querySelectorAll('[data-skill].selected')].map(b => b.dataset.skill);
+            const count = selected.length;
+            let profile, recommendation;
+
+            if (count === 0) {
+                profile = 'Iniciante';
+                recommendation = 'Comece aprendendo SQL e PostgreSQL - são a base de tudo!';
+            } else if (count <= 3) {
+                profile = 'Júnior';
+                recommendation = 'Você tem uma boa base. Adicione Python e Power BI para crescer.';
+            } else if (count <= 6) {
+                profile = 'Pleno';
+                recommendation = 'Ótimo progresso! Considere Cloud (AWS/GCP) e ML para se destacar.';
+            } else {
+                profile = 'Sênior';
+                recommendation = 'Perfil completo! Continue acompanhando tendências como LLM e RAG.';
+            }
+
+            document.getElementById('profile').textContent = profile;
+            document.getElementById('recommendation').textContent = recommendation;
+        }
+    </script>
+</body>
+
+</html>

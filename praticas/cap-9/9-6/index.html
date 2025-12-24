@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 9.6 — MLOps</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .grid>div {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .cycle {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0;
+            margin: 20px 0;
+        }
+
+        .cycle-step {
+            width: 120px;
+            height: 120px;
+            border: 3px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin: -10px;
+            background: #fff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cycle-step:nth-child(1) {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+
+        .cycle-step:nth-child(2) {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+
+        .cycle-step:nth-child(3) {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+
+        .cycle-step:nth-child(4) {
+            background: #ede9fe;
+            border-color: #8b5cf6;
+        }
+
+        .cycle-step:nth-child(5) {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+
+        .metric-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .metric-value.warning {
+            color: var(--bad);
+        }
+
+        .metric-value.ok {
+            color: var(--good);
+        }
+
+        .timeline {
+            border-left: 3px solid var(--border);
+            margin-left: 20px;
+            padding-left: 20px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 12px 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -27px;
+            top: 16px;
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 9.6 — MLOps: Ciclo de Vida e Governança</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="ciclo">Ciclo MLOps</button>
+            <button class="tab" data-key="monitoramento">Monitoramento</button>
+            <button class="tab" data-key="governanca">Governança</button>
+        </div>
+
+        <!-- Ciclo -->
+        <section class="panel active" data-key="ciclo">
+            <div class="box">
+                <h3>Ciclo de Vida MLOps</h3>
+                <div class="cycle">
+                    <div class="cycle-step"><strong>📊</strong><span>Dados</span>
+                        <p class="note">Coleta, ETL</p>
+                    </div>
+                    <div class="cycle-step"><strong>🔬</strong><span>Treino</span>
+                        <p class="note">Experimentos</p>
+                    </div>
+                    <div class="cycle-step"><strong>📦</strong><span>Deploy</span>
+                        <p class="note">Produção</p>
+                    </div>
+                    <div class="cycle-step"><strong>📈</strong><span>Monitor</span>
+                        <p class="note">Métricas</p>
+                    </div>
+                    <div class="cycle-step"><strong>🔄</strong><span>Retrain</span>
+                        <p class="note">Atualizar</p>
+                    </div>
+                </div>
+                <p class="note" style="text-align:center;">MLOps é a aplicação de DevOps para Machine Learning:
+                    automação, versionamento e monitoramento contínuo.</p>
+            </div>
+        </section>
+
+        <!-- Monitoramento -->
+        <section class="panel" data-key="monitoramento">
+            <div class="box">
+                <h3>Dashboard de Monitoramento</h3>
+                <div class="grid" style="grid-template-columns:repeat(4,1fr);">
+                    <div class="metric-card">
+                        <p class="note">Acurácia</p>
+                        <div class="metric-value ok" id="metric-acc">94.2%</div>
+                    </div>
+                    <div class="metric-card">
+                        <p class="note">Latência</p>
+                        <div class="metric-value" id="metric-lat">45ms</div>
+                    </div>
+                    <div class="metric-card">
+                        <p class="note">Data Drift</p>
+                        <div class="metric-value warning" id="metric-drift">⚠️ 12%</div>
+                    </div>
+                    <div class="metric-card">
+                        <p class="note">Predições/dia</p>
+                        <div class="metric-value" id="metric-pred">15.2K</div>
+                    </div>
+                </div>
+                <button class="btn" id="simulate-drift">Simular Data Drift</button>
+                <div id="drift-alert" class="box" style="display:none;background:#fee2e2;border-color:#ef4444;">
+                    <strong>⚠️ ALERTA: Data Drift detectado!</strong>
+                    <p class="note">A distribuição dos dados de entrada mudou significativamente. Considere retreinar o
+                        modelo.</p>
+                </div>
+                <h4 style="margin-top:16px;">Histórico de Versões:</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Versão</th>
+                            <th>Data</th>
+                            <th>Acurácia</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>v1.3.0</td>
+                            <td>2024-01-15</td>
+                            <td>94.2%</td>
+                            <td>✅ Produção</td>
+                        </tr>
+                        <tr>
+                            <td>v1.2.1</td>
+                            <td>2024-01-02</td>
+                            <td>92.8%</td>
+                            <td>Arquivado</td>
+                        </tr>
+                        <tr>
+                            <td>v1.2.0</td>
+                            <td>2023-12-20</td>
+                            <td>91.5%</td>
+                            <td>Arquivado</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Governança -->
+        <section class="panel" data-key="governanca">
+            <div class="box">
+                <h3>Princípios de Governança</h3>
+                <div class="grid">
+                    <div class="box">
+                        <h4>🔍 Rastreabilidade</h4>
+                        <ul class="note">
+                            <li>Versionamento de dados e modelos</li>
+                            <li>Log de experimentos (MLflow)</li>
+                            <li>Linhagem de dados</li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <h4>♻️ Reprodutibilidade</h4>
+                        <ul class="note">
+                            <li>Ambientes containerizados (Docker)</li>
+                            <li>Seeds fixas para randomização</li>
+                            <li>Pipelines versionados</li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <h4>🔐 Segurança</h4>
+                        <ul class="note">
+                            <li>Controle de acesso a dados</li>
+                            <li>Criptografia de modelos</li>
+                            <li>Auditoria de uso</li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <h4>📋 Compliance</h4>
+                        <ul class="note">
+                            <li>LGPD / GDPR</li>
+                            <li>Explicabilidade (XAI)</li>
+                            <li>Bias detection</li>
+                        </ul>
+                    </div>
+                </div>
+                <h4 style="margin-top:16px;">Timeline do Projeto:</h4>
+                <div class="timeline">
+                    <div class="timeline-item"><strong>Coleta de Dados</strong><br><span class="note">ETL, validação de
+                            qualidade</span></div>
+                    <div class="timeline-item"><strong>Feature Engineering</strong><br><span class="note">Normalização,
+                            encoding</span></div>
+                    <div class="timeline-item"><strong>Treinamento</strong><br><span class="note">Experimentos,
+                            hypertuning</span></div>
+                    <div class="timeline-item"><strong>Validação</strong><br><span class="note">Testes A/B,
+                            métricas</span></div>
+                    <div class="timeline-item"><strong>Deploy</strong><br><span class="note">CI/CD,
+                            containerização</span></div>
+                    <div class="timeline-item"><strong>Monitoramento</strong><br><span class="note">Drift,
+                            performance</span></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Simulate drift
+        document.getElementById('simulate-drift').addEventListener('click', () => {
+            document.getElementById('metric-drift').textContent = '⚠️ 28%';
+            document.getElementById('metric-acc').textContent = '87.1%';
+            document.getElementById('metric-acc').className = 'metric-value warning';
+            document.getElementById('drift-alert').style.display = 'block';
+        });
+    </script>
+</body>
+
+</html>

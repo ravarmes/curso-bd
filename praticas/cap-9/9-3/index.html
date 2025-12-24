@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 9.3 — NotebookLM e Datasets</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .grid>div {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+
+        .flow-step {
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .flow-arrow {
+            color: var(--muted);
+            font-size: 1.5rem;
+        }
+
+        .sentiment {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .positive {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .negative {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .neutral {
+            background: #e5e7eb;
+            color: #4b5563;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 9.3 — NotebookLM e Datasets de Sentimento</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="fluxo">Fluxo</button>
+            <button class="tab" data-key="dataset">Dataset Sentimento</button>
+            <button class="tab" data-key="simulador">Simulador</button>
+        </div>
+
+        <!-- Fluxo -->
+        <section class="panel active" data-key="fluxo">
+            <div class="box">
+                <h3>Fluxo: Texto → Dataset de Sentimento</h3>
+                <div class="flow">
+                    <div class="flow-step" style="background:#dbeafe;"><strong>📝 Texto</strong>
+                        <p class="note">Transcrição, review</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step" style="background:#ede9fe;"><strong>🤖 NotebookLM</strong>
+                        <p class="note">Análise IA</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step" style="background:#fef3c7;"><strong>🏷️ Labels</strong>
+                        <p class="note">Sentimentos</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step" style="background:#d1fae5;"><strong>📊 Dataset</strong>
+                        <p class="note">texto, label, score</p>
+                    </div>
+                </div>
+                <p class="note" style="text-align:center;">Datasets de sentimento são usados para treinar modelos de
+                    NLP.</p>
+            </div>
+        </section>
+
+        <!-- Dataset -->
+        <section class="panel" data-key="dataset">
+            <div class="box">
+                <h3>Exemplo: Dataset de Sentimento</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>texto</th>
+                            <th>sentimento</th>
+                            <th>score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>"Adorei o livro, recomendo!"</td>
+                            <td><span class="sentiment positive">Positivo</span></td>
+                            <td>0.95</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>"Péssimo atendimento, não volto."</td>
+                            <td><span class="sentiment negative">Negativo</span></td>
+                            <td>0.12</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>"O produto chegou no prazo."</td>
+                            <td><span class="sentiment neutral">Neutro</span></td>
+                            <td>0.55</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>"Excelente! Superou expectativas."</td>
+                            <td><span class="sentiment positive">Positivo</span></td>
+                            <td>0.98</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>"Qualidade ruim, decepcionante."</td>
+                            <td><span class="sentiment negative">Negativo</span></td>
+                            <td>0.08</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h4>Estrutura da Tabela:</h4>
+                <pre>CREATE TABLE sentimento (
+  id SERIAL PRIMARY KEY,
+  texto TEXT NOT NULL,
+  label VARCHAR(10), -- positivo, negativo, neutro
+  score NUMERIC(3,2) -- 0.00 a 1.00
+);</pre>
+            </div>
+        </section>
+
+        <!-- Simulador -->
+        <section class="panel" data-key="simulador">
+            <div class="box">
+                <h3>Simulador: Análise de Sentimento</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Digite um texto:</h4>
+                        <textarea id="text-input">O livro é muito bom e a entrega foi rápida!</textarea>
+                        <button class="btn" id="analyze">🤖 Analisar Sentimento</button>
+                    </div>
+                    <div>
+                        <h4>Resultado:</h4>
+                        <div id="result-box" class="box" style="display:none;">
+                            <p><strong>Sentimento:</strong> <span id="result-label"></span></p>
+                            <p><strong>Score:</strong> <span id="result-score"></span></p>
+                            <p><strong>Palavras-chave:</strong> <span id="result-keywords"></span></p>
+                        </div>
+                        <h4>Dataset gerado:</h4>
+                        <table id="dataset-table">
+                            <thead>
+                                <tr>
+                                    <th>texto</th>
+                                    <th>label</th>
+                                    <th>score</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Simple sentiment analysis
+        const positiveWords = ['bom', 'ótimo', 'excelente', 'adorei', 'recomendo', 'rápida', 'maravilhoso', 'perfeito', 'incrível'];
+        const negativeWords = ['ruim', 'péssimo', 'decepcionante', 'horrível', 'problema', 'lento', 'não gostei', 'terrível'];
+
+        const dataset = [];
+
+        document.getElementById('analyze').addEventListener('click', () => {
+            const text = document.getElementById('text-input').value.toLowerCase();
+
+            let posCount = positiveWords.filter(w => text.includes(w)).length;
+            let negCount = negativeWords.filter(w => text.includes(w)).length;
+
+            let label, score, labelClass;
+            const keywords = [...positiveWords, ...negativeWords].filter(w => text.includes(w));
+
+            if (posCount > negCount) {
+                label = 'Positivo';
+                labelClass = 'positive';
+                score = Math.min(0.95, 0.6 + posCount * 0.1);
+            } else if (negCount > posCount) {
+                label = 'Negativo';
+                labelClass = 'negative';
+                score = Math.max(0.05, 0.4 - negCount * 0.1);
+            } else {
+                label = 'Neutro';
+                labelClass = 'neutral';
+                score = 0.5;
+            }
+
+            document.getElementById('result-box').style.display = 'block';
+            document.getElementById('result-label').innerHTML = `<span class="sentiment ${labelClass}">${label}</span>`;
+            document.getElementById('result-score').textContent = score.toFixed(2);
+            document.getElementById('result-keywords').textContent = keywords.length ? keywords.join(', ') : 'nenhuma detectada';
+
+            // Add to dataset
+            dataset.push({ texto: document.getElementById('text-input').value.slice(0, 40) + '...', label, score: score.toFixed(2) });
+            document.querySelector('#dataset-table tbody').innerHTML = dataset.map(d =>
+                `<tr><td>${d.texto}</td><td><span class="sentiment ${d.label === 'Positivo' ? 'positive' : d.label === 'Negativo' ? 'negative' : 'neutral'}">${d.label}</span></td><td>${d.score}</td></tr>`
+            ).join('');
+        });
+    </script>
+</body>
+
+</html>

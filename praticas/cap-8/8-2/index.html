@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 8.2 — Dataset para ML</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .grid>div {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .fn {
+            color: #fde68a;
+        }
+
+        .str {
+            color: #86efac;
+        }
+
+        .cm {
+            color: #94a3b8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .transform-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .transform-box {
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .transform-box h4 {
+            margin: 0 0 8px;
+        }
+
+        .arrow {
+            font-size: 2rem;
+            color: var(--muted);
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 8.2 — Conceito de Dataset para ML</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="conceito">Conceito</button>
+            <button class="tab" data-key="dataframe">DataFrame</button>
+            <button class="tab" data-key="describe">df.describe()</button>
+        </div>
+
+        <!-- Conceito -->
+        <section class="panel active" data-key="conceito">
+            <div class="box">
+                <h3>Do Relacional ao Vetorial</h3>
+                <p class="note">Dataset traduz a lógica relacional (tabelas normalizadas) para formato vetorial (matriz
+                    numérica) usado em ML.</p>
+                <div class="transform-flow">
+                    <div class="transform-box" style="background:#d1fae5;">
+                        <h4>🗄️ Tabelas</h4>
+                        <p class="note">aluno, livro, emprestimo</p>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="transform-box" style="background:#fef3c7;">
+                        <h4>📊 SELECT/JOIN</h4>
+                        <p class="note">Desnormalização</p>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="transform-box" style="background:#dbeafe;">
+                        <h4>📄 CSV</h4>
+                        <p class="note">Formato tabular</p>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="transform-box" style="background:#ede9fe;">
+                        <h4>🐍 DataFrame</h4>
+                        <p class="note">pandas</p>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="transform-box" style="background:#fee2e2;">
+                        <h4>🔢 Vetores</h4>
+                        <p class="note">Features numéricas</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DataFrame -->
+        <section class="panel" data-key="dataframe">
+            <div class="box">
+                <h3>Simulador: DataFrame</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Código Python:</h4>
+                        <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+df = pd.<span class="fn">read_csv</span>(<span class="str">'emprestimos.csv'</span>)
+<span class="fn">print</span>(df.<span class="fn">head</span>())</pre>
+                        <button class="btn" id="run-head">Executar df.head()</button>
+                    </div>
+                    <div>
+                        <h4>Saída:</h4>
+                        <table id="df-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>titulo</th>
+                                    <th>aluno</th>
+                                    <th>dias</th>
+                                    <th>avaliacao</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <h4 style="margin-top:16px;">Métodos úteis:</h4>
+                <div class="grid" style="grid-template-columns:repeat(4,1fr);">
+                    <div class="stat-card"><code>df.head()</code>
+                        <p class="note">Primeiras linhas</p>
+                    </div>
+                    <div class="stat-card"><code>df.tail()</code>
+                        <p class="note">Últimas linhas</p>
+                    </div>
+                    <div class="stat-card"><code>df.info()</code>
+                        <p class="note">Tipos de dados</p>
+                    </div>
+                    <div class="stat-card"><code>df.shape</code>
+                        <p class="note">Dimensões</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Describe -->
+        <section class="panel" data-key="describe">
+            <div class="box">
+                <h3>Simulador: df.describe()</h3>
+                <p class="note">Estatísticas resumidas para colunas numéricas:</p>
+                <div class="grid">
+                    <div>
+                        <pre><span class="fn">print</span>(df.<span class="fn">describe</span>())</pre>
+                        <button class="btn" id="run-describe">Executar</button>
+                    </div>
+                    <div>
+                        <table id="describe-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>dias</th>
+                                    <th>avaliacao</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="grid" style="grid-template-columns:repeat(4,1fr);margin-top:16px;">
+                    <div class="stat-card">
+                        <div class="value" id="stat-count">-</div>
+                        <p class="note">count</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="stat-mean">-</div>
+                        <p class="note">mean (dias)</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="stat-std">-</div>
+                        <p class="note">std</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="stat-max">-</div>
+                        <p class="note">max</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Data
+        const data = [
+            { titulo: 'Dom Casmurro', aluno: 'Ana', dias: 15, avaliacao: 4.5 },
+            { titulo: '1984', aluno: 'Bruno', dias: 12, avaliacao: 5.0 },
+            { titulo: 'O Pequeno Príncipe', aluno: 'Ana', dias: 8, avaliacao: 4.0 },
+            { titulo: 'Harry Potter', aluno: 'Carlos', dias: 21, avaliacao: 4.8 },
+            { titulo: 'Senhor dos Anéis', aluno: 'Diana', dias: 30, avaliacao: 5.0 }
+        ];
+
+        document.getElementById('run-head').addEventListener('click', () => {
+            document.querySelector('#df-table tbody').innerHTML = data.map((r, i) =>
+                `<tr><td>${i}</td><td>${r.titulo}</td><td>${r.aluno}</td><td>${r.dias}</td><td>${r.avaliacao}</td></tr>`
+            ).join('');
+        });
+
+        document.getElementById('run-describe').addEventListener('click', () => {
+            const dias = data.map(d => d.dias);
+            const aval = data.map(d => d.avaliacao);
+            const mean = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+            const std = arr => Math.sqrt(arr.reduce((s, x) => s + Math.pow(x - mean(arr), 2), 0) / arr.length);
+
+            const stats = [
+                { stat: 'count', dias: dias.length, aval: aval.length },
+                { stat: 'mean', dias: mean(dias).toFixed(2), aval: mean(aval).toFixed(2) },
+                { stat: 'std', dias: std(dias).toFixed(2), aval: std(aval).toFixed(2) },
+                { stat: 'min', dias: Math.min(...dias), aval: Math.min(...aval) },
+                { stat: 'max', dias: Math.max(...dias), aval: Math.max(...aval) }
+            ];
+
+            document.querySelector('#describe-table tbody').innerHTML = stats.map(s =>
+                `<tr><td><strong>${s.stat}</strong></td><td>${s.dias}</td><td>${s.aval}</td></tr>`
+            ).join('');
+
+            document.getElementById('stat-count').textContent = dias.length;
+            document.getElementById('stat-mean').textContent = mean(dias).toFixed(1);
+            document.getElementById('stat-std').textContent = std(dias).toFixed(1);
+            document.getElementById('stat-max').textContent = Math.max(...dias);
+        });
+    </script>
+</body>
+
+</html>

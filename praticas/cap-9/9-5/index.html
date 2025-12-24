@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 9.5 — RAG e pgvector</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .grid>div {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .fn {
+            color: #fde68a;
+        }
+
+        .ty {
+            color: #fdba74;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+
+        .flow-step {
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .flow-arrow {
+            color: var(--muted);
+            font-size: 1.5rem;
+        }
+
+        .highlight {
+            background: #fef3c7;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 60px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .similarity {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .sim-high {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .sim-medium {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .sim-low {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 9.5 — RAG: Recuperação Aumentada por Geração</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="conceito">Conceito RAG</button>
+            <button class="tab" data-key="pgvector">pgvector</button>
+            <button class="tab" data-key="simulador">Busca Similaridade</button>
+        </div>
+
+        <!-- Conceito -->
+        <section class="panel active" data-key="conceito">
+            <div class="box">
+                <h3>O que é RAG?</h3>
+                <p><strong>Retrieval-Augmented Generation</strong>: combina busca em fontes confiáveis com geração
+                    natural da IA.</p>
+                <div class="flow">
+                    <div class="flow-step" style="background:#dbeafe;"><strong>❓ Pergunta</strong>
+                        <p class="note">Usuário</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step" style="background:#ede9fe;"><strong>🔍 Embedding</strong>
+                        <p class="note">Vetorização</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step" style="background:#d1fae5;"><strong>🗄️ pgvector</strong>
+                        <p class="note">Busca similar</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step" style="background:#fef3c7;"><strong>📄 Contexto</strong>
+                        <p class="note">Docs relevantes</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step" style="background:#fee2e2;"><strong>🤖 LLM</strong>
+                        <p class="note">Resposta</p>
+                    </div>
+                </div>
+                <p class="note" style="text-align:center;">RAG reduz alucinações da IA ao basear respostas em dados
+                    reais.</p>
+            </div>
+        </section>
+
+        <!-- pgvector -->
+        <section class="panel" data-key="pgvector">
+            <div class="box">
+                <h3>pgvector: Vetores no PostgreSQL</h3>
+                <pre><span class="cm">-- Habilitar extensão</span>
+<span class="kw">CREATE EXTENSION</span> vector;
+
+<span class="cm">-- Criar tabela com embedding</span>
+<span class="kw">CREATE TABLE</span> documento (
+  id <span class="ty">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  conteudo <span class="ty">TEXT</span>,
+  embedding <span class="ty">VECTOR(1536)</span>  <span class="cm">-- OpenAI ada-002</span>
+);
+
+<span class="cm">-- Busca por similaridade</span>
+<span class="kw">SELECT</span> conteudo,
+       embedding <span class="fn"><-></span> query_embedding <span class="kw">AS</span> distancia
+<span class="kw">FROM</span> documento
+<span class="kw">ORDER BY</span> distancia
+<span class="kw">LIMIT</span> 5;</pre>
+                <h4>Operadores:</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operador</th>
+                            <th>Distância</th>
+                            <th>Uso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>&lt;-&gt;</code></td>
+                            <td>Euclidiana (L2)</td>
+                            <td>Padrão</td>
+                        </tr>
+                        <tr>
+                            <td><code>&lt;#&gt;</code></td>
+                            <td>Produto interno negativo</td>
+                            <td>Cosseno normalizado</td>
+                        </tr>
+                        <tr>
+                            <td><code>&lt;=&gt;</code></td>
+                            <td>Cosseno</td>
+                            <td>Texto/NLP</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Simulador -->
+        <section class="panel" data-key="simulador">
+            <div class="box">
+                <h3>Simulador: Busca por Similaridade</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Sua pergunta:</h4>
+                        <textarea id="query-input">Como funciona o empréstimo de livros?</textarea>
+                        <button class="btn" id="search-btn">🔍 Buscar Documentos Similares</button>
+                    </div>
+                    <div>
+                        <h4>Documentos mais relevantes:</h4>
+                        <table id="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Documento</th>
+                                    <th>Similaridade</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="rag-response" class="box" style="display:none;background:#f0fdf4;">
+                    <h4>🤖 Resposta gerada com RAG:</h4>
+                    <p id="response-text"></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Document database
+        const documents = [
+            { id: 1, content: 'O empréstimo de livros funciona por 15 dias, renovável uma vez.', keywords: ['empréstimo', 'livro', 'dias', 'renovar'] },
+            { id: 2, content: 'Alunos podem emprestar até 3 livros simultaneamente.', keywords: ['aluno', 'emprestar', 'livro'] },
+            { id: 3, content: 'A devolução deve ser feita no balcão da biblioteca.', keywords: ['devolução', 'biblioteca', 'balcão'] },
+            { id: 4, content: 'Multa por atraso: R$ 1,00 por dia por livro.', keywords: ['multa', 'atraso', 'dia'] },
+            { id: 5, content: 'Reservas podem ser feitas online pelo sistema.', keywords: ['reserva', 'online', 'sistema'] }
+        ];
+
+        document.getElementById('search-btn').addEventListener('click', () => {
+            const query = document.getElementById('query-input').value.toLowerCase();
+
+            // Simple similarity based on keyword matching
+            const results = documents.map(doc => {
+                const matches = doc.keywords.filter(k => query.includes(k)).length;
+                const similarity = Math.min(0.99, 0.5 + matches * 0.15 + Math.random() * 0.1);
+                return { ...doc, similarity };
+            }).sort((a, b) => b.similarity - a.similarity).slice(0, 3);
+
+            document.querySelector('#results-table tbody').innerHTML = results.map(r => {
+                const simClass = r.similarity > 0.8 ? 'sim-high' : r.similarity > 0.6 ? 'sim-medium' : 'sim-low';
+                return `<tr><td>${r.content}</td><td><span class="similarity ${simClass}">${r.similarity.toFixed(2)}</span></td></tr>`;
+            }).join('');
+
+            // Generate response
+            document.getElementById('rag-response').style.display = 'block';
+            document.getElementById('response-text').textContent =
+                `Baseado nos documentos encontrados: ${results[0].content} Além disso, ${results[1].content.toLowerCase()}`;
+        });
+    </script>
+</body>
+
+</html>

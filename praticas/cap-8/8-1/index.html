@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 8.1 — BD como Fonte de Datasets</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .grid>div {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .fn {
+            color: #fde68a;
+        }
+
+        .str {
+            color: #86efac;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .pipeline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .pipeline-step {
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            text-align: center;
+        }
+
+        .pipeline-step.active {
+            border-color: var(--accent);
+            background: #eff6ff;
+        }
+
+        .pipeline-arrow {
+            color: var(--muted);
+            font-size: 1.5rem;
+        }
+
+        .csv-preview {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            white-space: pre;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 8.1 — BD como Fonte de Datasets (CSV)</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="pipeline">Pipeline</button>
+            <button class="tab" data-key="export">Exportar CSV</button>
+            <button class="tab" data-key="pandas">Carregar em Python</button>
+        </div>
+
+        <!-- Pipeline -->
+        <section class="panel active" data-key="pipeline">
+            <div class="box">
+                <h3>Pipeline: BD → CSV → Análise</h3>
+                <div class="pipeline">
+                    <div class="pipeline-step active">
+                        <div>🐘</div>
+                        <strong>PostgreSQL</strong>
+                        <p class="note">Dados estruturados</p>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div>📊</div>
+                        <strong>SELECT/JOIN</strong>
+                        <p class="note">Consulta SQL</p>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div>📄</div>
+                        <strong>CSV</strong>
+                        <p class="note">Formato universal</p>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div>🐍</div>
+                        <strong>pandas</strong>
+                        <p class="note">DataFrame</p>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div>🤖</div>
+                        <strong>ML</strong>
+                        <p class="note">Treinamento</p>
+                    </div>
+                </div>
+                <p class="note" style="text-align:center;">O BD garante dados estruturados, validados e com integridade
+                    referencial.</p>
+            </div>
+        </section>
+
+        <!-- Export -->
+        <section class="panel" data-key="export">
+            <div class="box">
+                <h3>Simulador: Exportar para CSV</h3>
+                <div class="grid">
+                    <div>
+                        <h4>1. Consulta SQL:</h4>
+                        <pre><span class="kw">SELECT</span> l.titulo, a.nome <span class="kw">AS</span> aluno,
+       e.data_emprestimo, e.data_devolucao
+<span class="kw">FROM</span> emprestimo e
+<span class="kw">JOIN</span> livro l <span class="kw">ON</span> e.livro_id = l.id
+<span class="kw">JOIN</span> aluno a <span class="kw">ON</span> e.aluno_id = a.id
+<span class="kw">ORDER BY</span> e.data_emprestimo;</pre>
+                        <button class="btn" id="run-query">▶ Executar</button>
+                    </div>
+                    <div>
+                        <h4>Resultado:</h4>
+                        <table id="result-table">
+                            <thead>
+                                <tr>
+                                    <th>titulo</th>
+                                    <th>aluno</th>
+                                    <th>data_emprestimo</th>
+                                    <th>data_devolucao</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div style="margin-top:16px;">
+                    <button class="btn" id="export-csv" disabled>📥 Exportar CSV</button>
+                    <div id="csv-output" class="csv-preview" style="display:none;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pandas -->
+        <section class="panel" data-key="pandas">
+            <div class="box">
+                <h3>Carregar CSV em Python (pandas)</h3>
+                <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># Carregar CSV</span>
+df = pd.<span class="fn">read_csv</span>(<span class="str">'emprestimos.csv'</span>)
+
+<span class="cm"># Explorar dados</span>
+<span class="fn">print</span>(df.<span class="fn">head</span>())        <span class="cm"># Primeiras linhas</span>
+<span class="fn">print</span>(df.<span class="fn">info</span>())        <span class="cm"># Tipos de dados</span>
+<span class="fn">print</span>(df.<span class="fn">describe</span>())    <span class="cm"># Estatísticas</span>
+
+<span class="cm"># Análise</span>
+top_livros = df.<span class="fn">groupby</span>(<span class="str">'titulo'</span>).<span class="fn">size</span>()
+<span class="fn">print</span>(top_livros.<span class="fn">sort_values</span>(ascending=<span class="kw">False</span>))</pre>
+                <h4>Vantagens do BD como fonte:</h4>
+                <ul>
+                    <li>✅ Dados já validados (tipos, constraints)</li>
+                    <li>✅ Integridade referencial garantida</li>
+                    <li>✅ Sem duplicatas (PKs únicas)</li>
+                    <li>✅ JOINs consolidam dados de várias tabelas</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Data
+        const emprestimos = [
+            { titulo: 'Dom Casmurro', aluno: 'Ana Silva', data_emprestimo: '2024-01-10', data_devolucao: '2024-01-25' },
+            { titulo: '1984', aluno: 'Bruno Costa', data_emprestimo: '2024-01-12', data_devolucao: '2024-01-28' },
+            { titulo: 'O Pequeno Príncipe', aluno: 'Ana Silva', data_emprestimo: '2024-01-15', data_devolucao: null },
+            { titulo: 'Harry Potter', aluno: 'Carlos Lima', data_emprestimo: '2024-01-18', data_devolucao: '2024-02-01' },
+            { titulo: 'Dom Casmurro', aluno: 'Diana Reis', data_emprestimo: '2024-01-20', data_devolucao: null }
+        ];
+
+        document.getElementById('run-query').addEventListener('click', () => {
+            document.querySelector('#result-table tbody').innerHTML = emprestimos.map(e =>
+                `<tr><td>${e.titulo}</td><td>${e.aluno}</td><td>${e.data_emprestimo}</td><td>${e.data_devolucao || 'NULL'}</td></tr>`
+            ).join('');
+            document.getElementById('export-csv').disabled = false;
+        });
+
+        document.getElementById('export-csv').addEventListener('click', () => {
+            const header = 'titulo,aluno,data_emprestimo,data_devolucao';
+            const rows = emprestimos.map(e => `${e.titulo},${e.aluno},${e.data_emprestimo},${e.data_devolucao || ''}`);
+            const csv = [header, ...rows].join('\n');
+            document.getElementById('csv-output').textContent = csv;
+            document.getElementById('csv-output').style.display = 'block';
+        });
+    </script>
+</body>
+
+</html>
