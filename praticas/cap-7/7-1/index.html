@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 7.1 — Introdução ao BI</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .fn {
+            color: #fde68a;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .pyramid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .pyramid-level {
+            padding: 16px;
+            text-align: center;
+            font-weight: 600;
+            color: #fff;
+            clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+        }
+
+        .level-knowledge {
+            background: #8b5cf6;
+            width: 50%;
+        }
+
+        .level-info {
+            background: #3b82f6;
+            width: 70%;
+        }
+
+        .level-data {
+            background: #10b981;
+            width: 90%;
+        }
+
+        .chart-bar {
+            height: 24px;
+            border-radius: 4px;
+            margin: 4px 0;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            color: #fff;
+            font-size: 0.85rem;
+        }
+
+        .analytics-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .analytics-card h4 {
+            margin: 0 0 8px;
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 7.1 — Introdução ao Business Intelligence (BI)</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="conceito">Conceito</button>
+            <button class="tab" data-key="analise">Análise Descritiva</button>
+            <button class="tab" data-key="simulador">Simulador BI</button>
+        </div>
+
+        <!-- Conceito -->
+        <section class="panel active" data-key="conceito">
+            <div class="box">
+                <h3>O que é Business Intelligence?</h3>
+                <p>BI transforma <strong>dados brutos</strong> em <strong>informações</strong> para tomada de decisão.
+                </p>
+                <div class="pyramid">
+                    <div class="pyramid-level level-knowledge">📊 Conhecimento/Decisão</div>
+                    <div class="pyramid-level level-info">📈 Informação (Análise)</div>
+                    <div class="pyramid-level level-data">💾 Dados Brutos</div>
+                </div>
+                <div class="grid" style="margin-top:16px;">
+                    <div class="analytics-card">
+                        <h4>Análise Descritiva</h4>
+                        <p class="note">"O que aconteceu?"</p>
+                        <p>Relatórios, dashboards, KPIs</p>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Análise Preditiva</h4>
+                        <p class="note">"O que vai acontecer?"</p>
+                        <p>Machine Learning, tendências</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Análise -->
+        <section class="panel" data-key="analise">
+            <div class="box">
+                <h3>SQL para Análise Descritiva</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Consulta:</h4>
+                        <pre><span class="kw">SELECT</span> livro.titulo,
+       <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total_emprestimos
+<span class="kw">FROM</span> emprestimo
+<span class="kw">JOIN</span> livro <span class="kw">ON</span> emprestimo.livro_id = livro.id
+<span class="kw">GROUP BY</span> livro.titulo
+<span class="kw">ORDER BY</span> total_emprestimos <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> 5;</pre>
+                        <button class="btn" id="run-query">Executar</button>
+                    </div>
+                    <div>
+                        <h4>Resultado: Top 5 Livros</h4>
+                        <table id="tbl-result">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Empréstimos</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulador -->
+        <section class="panel" data-key="simulador">
+            <div class="box">
+                <h3>Mini Dashboard - Biblioteca</h3>
+                <div class="grid" style="grid-template-columns:repeat(3,1fr);">
+                    <div class="analytics-card" style="background:#dbeafe;">
+                        <h4>Total Empréstimos</h4>
+                        <p style="font-size:2rem;font-weight:700;margin:0;">247</p>
+                        <p class="note">este mês</p>
+                    </div>
+                    <div class="analytics-card" style="background:#fef3c7;">
+                        <h4>Livros Ativos</h4>
+                        <p style="font-size:2rem;font-weight:700;margin:0;">42</p>
+                        <p class="note">em empréstimo</p>
+                    </div>
+                    <div class="analytics-card" style="background:#d1fae5;">
+                        <h4>Média Avaliações</h4>
+                        <p style="font-size:2rem;font-weight:700;margin:0;">4.3</p>
+                        <p class="note">⭐⭐⭐⭐</p>
+                    </div>
+                </div>
+                <h4 style="margin-top:20px;">Empréstimos por Categoria</h4>
+                <div id="chart-categories"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Query
+        const livros = [
+            { titulo: 'Dom Casmurro', emprestimos: 45 },
+            { titulo: 'O Senhor dos Anéis', emprestimos: 38 },
+            { titulo: '1984', emprestimos: 32 },
+            { titulo: 'Harry Potter', emprestimos: 28 },
+            { titulo: 'O Pequeno Príncipe', emprestimos: 25 }
+        ];
+
+        document.getElementById('run-query').addEventListener('click', () => {
+            document.querySelector('#tbl-result tbody').innerHTML = livros.map(l =>
+                `<tr><td>${l.titulo}</td><td>${l.emprestimos}</td></tr>`
+            ).join('');
+        });
+
+        // Chart
+        const categorias = [
+            { nome: 'Ficção', valor: 85, cor: '#3b82f6' },
+            { nome: 'Técnico', valor: 62, cor: '#10b981' },
+            { nome: 'Infantil', valor: 48, cor: '#f59e0b' },
+            { nome: 'Clássicos', valor: 35, cor: '#8b5cf6' },
+            { nome: 'Biografias', valor: 17, cor: '#ef4444' }
+        ];
+        const maxVal = Math.max(...categorias.map(c => c.valor));
+        document.getElementById('chart-categories').innerHTML = categorias.map(c => `
+      <div style="display:flex;align-items:center;gap:10px;margin:6px 0;">
+        <span style="width:80px;">${c.nome}</span>
+        <div class="chart-bar" style="width:${(c.valor / maxVal) * 100}%;background:${c.cor};">${c.valor}</div>
+      </div>
+    `).join('');
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 7.2 — Conexão com Power BI</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        .mode-card {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-card:hover {
+            border-color: var(--accent);
+        }
+
+        .mode-card.active {
+            border-color: var(--accent);
+            background: #eff6ff;
+        }
+
+        .mode-card h4 {
+            margin: 0 0 8px;
+            color: var(--accent);
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border-left: 3px solid var(--accent);
+            margin: 10px 0;
+            background: #f8fafc;
+        }
+
+        .step-num {
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .conn-form {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            min-width: 100px;
+            font-weight: 500;
+        }
+
+        .inp {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 7.2 — Conexão com Power BI</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="modos">Modos de Conexão</button>
+            <button class="tab" data-key="passos">Passo a Passo</button>
+            <button class="tab" data-key="simulador">Simulador Conexão</button>
+        </div>
+
+        <!-- Modos -->
+        <section class="panel active" data-key="modos">
+            <div class="box">
+                <h3>Modos de Conexão no Power BI</h3>
+                <p class="note">Clique para selecionar e ver detalhes:</p>
+                <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:16px;">
+                    <div class="mode-card active" data-mode="import">
+                        <h4>📦 Import</h4>
+                        <p class="note">Cópia local dos dados</p>
+                    </div>
+                    <div class="mode-card" data-mode="direct">
+                        <h4>⚡ DirectQuery</h4>
+                        <p class="note">Consulta em tempo real</p>
+                    </div>
+                    <div class="mode-card" data-mode="live">
+                        <h4>🔗 Live Connection</h4>
+                        <p class="note">Conexão ao Analysis Services</p>
+                    </div>
+                </div>
+                <div id="mode-detail" class="box" style="margin-top:16px;"></div>
+            </div>
+        </section>
+
+        <!-- Passos -->
+        <section class="panel" data-key="passos">
+            <div class="box">
+                <h3>Passo a Passo: Conectar ao PostgreSQL</h3>
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div><strong>Abrir Power BI Desktop</strong><br><span class="note">Menu: Página Inicial → Obter
+                            Dados</span></div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div><strong>Selecionar "Banco de Dados PostgreSQL"</strong><br><span class="note">Categoria: Banco
+                            de Dados</span></div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div><strong>Informar conexão</strong><br><span class="note">Servidor: localhost:5432<br>Banco:
+                            biblioteca</span></div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div><strong>Autenticação</strong><br><span class="note">Usuário e senha do PostgreSQL</span></div>
+                </div>
+                <div class="step">
+                    <div class="step-num">5</div>
+                    <div><strong>Selecionar tabelas</strong><br><span class="note">Marque: livro, aluno, emprestimo,
+                            avaliacao</span></div>
+                </div>
+                <div class="step">
+                    <div class="step-num">6</div>
+                    <div><strong>Carregar ou Transformar</strong><br><span class="note">"Carregar" importa direto.
+                            "Transformar" abre Power Query.</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulador -->
+        <section class="panel" data-key="simulador">
+            <div class="box">
+                <h3>Simulador de Conexão</h3>
+                <div class="conn-form">
+                    <div class="form-group">
+                        <label>Servidor:</label>
+                        <input class="inp" id="conn-server" value="localhost">
+                    </div>
+                    <div class="form-group">
+                        <label>Porta:</label>
+                        <input class="inp" id="conn-port" value="5432">
+                    </div>
+                    <div class="form-group">
+                        <label>Banco:</label>
+                        <input class="inp" id="conn-db" value="biblioteca">
+                    </div>
+                    <div class="form-group">
+                        <label>Usuário:</label>
+                        <input class="inp" id="conn-user" value="postgres">
+                    </div>
+                    <div class="form-group">
+                        <label>Senha:</label>
+                        <input class="inp" id="conn-pass" type="password" value="****">
+                    </div>
+                    <button class="btn" id="test-conn">🔌 Testar Conexão</button>
+                    <button class="btn" id="connect">✅ Conectar</button>
+                </div>
+                <div id="conn-feedback" class="feedback"></div>
+                <div id="conn-tables" style="display:none;margin-top:16px;">
+                    <h4>Tabelas disponíveis:</h4>
+                    <label><input type="checkbox" checked> livro</label><br>
+                    <label><input type="checkbox" checked> aluno</label><br>
+                    <label><input type="checkbox" checked> emprestimo</label><br>
+                    <label><input type="checkbox"> avaliacao</label><br>
+                    <label><input type="checkbox"> categoria</label><br>
+                    <button class="btn" id="load-data" style="margin-top:10px;">📥 Carregar Dados</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Modes
+        const modeDetails = {
+            import: '<h4>📦 Import Mode</h4><ul><li>Dados copiados para o arquivo .pbix</li><li>Atualização manual ou agendada</li><li>Melhor performance para relatórios</li><li>Ideal para dados que não mudam frequentemente</li></ul>',
+            direct: '<h4>⚡ DirectQuery</h4><ul><li>Consulta o banco em tempo real</li><li>Dados sempre atualizados</li><li>Mais lento (depende do banco)</li><li>Ideal para dados críticos/tempo real</li></ul>',
+            live: '<h4>🔗 Live Connection</h4><ul><li>Conecta a modelos existentes (SSAS, Power BI Service)</li><li>Não permite editar modelo no Desktop</li><li>Ideal para reutilizar modelos corporativos</li></ul>'
+        };
+
+        function showMode(mode) {
+            document.getElementById('mode-detail').innerHTML = modeDetails[mode];
+            document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('active', c.dataset.mode === mode));
+        }
+        showMode('import');
+
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('click', () => showMode(card.dataset.mode));
+        });
+
+        // Conexão
+        document.getElementById('test-conn').addEventListener('click', () => {
+            document.getElementById('conn-feedback').textContent = '🔄 Testando conexão...';
+            setTimeout(() => {
+                document.getElementById('conn-feedback').textContent = '✅ Conexão bem-sucedida!';
+                document.getElementById('conn-feedback').className = 'feedback ok';
+            }, 1000);
+        });
+
+        document.getElementById('connect').addEventListener('click', () => {
+            document.getElementById('conn-feedback').textContent = '✅ Conectado ao PostgreSQL!';
+            document.getElementById('conn-feedback').className = 'feedback ok';
+            document.getElementById('conn-tables').style.display = 'block';
+        });
+
+        document.getElementById('load-data').addEventListener('click', () => {
+            document.getElementById('conn-feedback').textContent = '📥 Dados carregados com sucesso! 4 tabelas importadas.';
+        });
+    </script>
+</body>
+
+</html>

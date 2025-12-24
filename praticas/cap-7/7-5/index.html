@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 7.5 — API REST do Supabase</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .btn-get {
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+
+        .btn-post {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-right: 8px;
+        }
+
+        .method-get {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .method-post {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .method-patch {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .method-delete {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .url-builder {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 10px;
+            font-family: monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        select.sel,
+        input.inp {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 7.5 — API REST do Supabase (PostgREST)</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="mapeamento">HTTP → SQL</button>
+            <button class="tab" data-key="filtros">Filtros</button>
+            <button class="tab" data-key="simulador">Simulador API</button>
+        </div>
+
+        <!-- Mapeamento -->
+        <section class="panel active" data-key="mapeamento">
+            <div class="box">
+                <h3>Mapeamento HTTP → SQL</h3>
+                <p class="note">O PostgREST traduz automaticamente requisições HTTP em comandos SQL:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Método HTTP</th>
+                            <th>Operação SQL</th>
+                            <th>Exemplo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="method method-get">GET</span></td>
+                            <td>SELECT</td>
+                            <td>/livro → SELECT * FROM livro</td>
+                        </tr>
+                        <tr>
+                            <td><span class="method method-post">POST</span></td>
+                            <td>INSERT</td>
+                            <td>/livro + body → INSERT INTO livro</td>
+                        </tr>
+                        <tr>
+                            <td><span class="method method-patch">PATCH</span></td>
+                            <td>UPDATE</td>
+                            <td>/livro?id=eq.1 + body → UPDATE livro</td>
+                        </tr>
+                        <tr>
+                            <td><span class="method method-delete">DELETE</span></td>
+                            <td>DELETE</td>
+                            <td>/livro?id=eq.1 → DELETE FROM livro</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Filtros -->
+        <section class="panel" data-key="filtros">
+            <div class="box">
+                <h3>Filtros da API (Query Parameters)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operador</th>
+                            <th>Significado</th>
+                            <th>Exemplo URL</th>
+                            <th>SQL Equivalente</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>eq</code></td>
+                            <td>Igual</td>
+                            <td>?id=eq.1</td>
+                            <td>WHERE id = 1</td>
+                        </tr>
+                        <tr>
+                            <td><code>neq</code></td>
+                            <td>Diferente</td>
+                            <td>?status=neq.ativo</td>
+                            <td>WHERE status != 'ativo'</td>
+                        </tr>
+                        <tr>
+                            <td><code>gt / lt</code></td>
+                            <td>Maior / Menor</td>
+                            <td>?preco=gt.100</td>
+                            <td>WHERE preco > 100</td>
+                        </tr>
+                        <tr>
+                            <td><code>gte / lte</code></td>
+                            <td>≥ / ≤</td>
+                            <td>?nota=gte.4</td>
+                            <td>WHERE nota >= 4</td>
+                        </tr>
+                        <tr>
+                            <td><code>like</code></td>
+                            <td>Parcial (case)</td>
+                            <td>?titulo=like.*Potter*</td>
+                            <td>WHERE titulo LIKE '%Potter%'</td>
+                        </tr>
+                        <tr>
+                            <td><code>ilike</code></td>
+                            <td>Parcial (ignore case)</td>
+                            <td>?titulo=ilike.*potter*</td>
+                            <td>WHERE titulo ILIKE '%potter%'</td>
+                        </tr>
+                        <tr>
+                            <td><code>in</code></td>
+                            <td>Lista</td>
+                            <td>?id=in.(1,2,3)</td>
+                            <td>WHERE id IN (1,2,3)</td>
+                        </tr>
+                        <tr>
+                            <td><code>is</code></td>
+                            <td>NULL check</td>
+                            <td>?devolvido=is.null</td>
+                            <td>WHERE devolvido IS NULL</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Simulador -->
+        <section class="panel" data-key="simulador">
+            <div class="box">
+                <h3>Simulador de Requisições API</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Construir Requisição:</h4>
+                        <div>
+                            <label>Tabela: <select class="sel" id="api-table">
+                                    <option>livro</option>
+                                    <option>aluno</option>
+                                    <option>emprestimo</option>
+                                </select></label>
+                        </div>
+                        <div>
+                            <label>Filtro: <select class="sel" id="api-filter">
+                                    <option value="">Nenhum</option>
+                                    <option value="?id=eq.1">id = 1</option>
+                                    <option value="?titulo=ilike.*Dom*">titulo contém 'Dom'</option>
+                                    <option value="?id=in.(1,2,3)">id IN (1,2,3)</option>
+                                </select></label>
+                        </div>
+                        <div>
+                            <label>Select: <input class="inp" id="api-select" value=""
+                                    placeholder="titulo,autor"></label>
+                        </div>
+                        <button class="btn btn-get" id="api-send">🌐 GET Request</button>
+                    </div>
+                    <div>
+                        <h4>URL Gerada:</h4>
+                        <div class="url-builder" id="api-url">GET /rest/v1/livro</div>
+                        <h4>Resposta JSON:</h4>
+                        <pre id="api-response">// Clique em GET Request</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // API Simulator
+        const data = {
+            livro: [
+                { id: 1, titulo: 'Dom Casmurro', autor: 'Machado de Assis' },
+                { id: 2, titulo: '1984', autor: 'George Orwell' },
+                { id: 3, titulo: 'O Pequeno Príncipe', autor: 'Saint-Exupéry' }
+            ],
+            aluno: [
+                { id: 1, nome: 'Ana Silva', email: 'ana@email.com' },
+                { id: 2, nome: 'Bruno Costa', email: 'bruno@email.com' }
+            ],
+            emprestimo: [
+                { id: 1, livro_id: 1, aluno_id: 1, data: '2024-01-15' },
+                { id: 2, livro_id: 2, aluno_id: 2, data: '2024-01-16' }
+            ]
+        };
+
+        function updateUrl() {
+            const table = document.getElementById('api-table').value;
+            const filter = document.getElementById('api-filter').value;
+            const select = document.getElementById('api-select').value;
+            let url = `GET /rest/v1/${table}`;
+            const params = [];
+            if (select) params.push(`select=${select}`);
+            if (filter) url += filter;
+            else if (params.length) url += '?' + params.join('&');
+            document.getElementById('api-url').textContent = url;
+        }
+
+        document.getElementById('api-table').addEventListener('change', updateUrl);
+        document.getElementById('api-filter').addEventListener('change', updateUrl);
+        document.getElementById('api-select').addEventListener('input', updateUrl);
+        updateUrl();
+
+        document.getElementById('api-send').addEventListener('click', () => {
+            const table = document.getElementById('api-table').value;
+            const filter = document.getElementById('api-filter').value;
+            let result = [...data[table]];
+
+            if (filter.includes('id=eq.1')) {
+                result = result.filter(r => r.id === 1);
+            } else if (filter.includes('ilike.*Dom*') || filter.includes('ilike.*dom*')) {
+                result = result.filter(r => r.titulo?.toLowerCase().includes('dom'));
+            } else if (filter.includes('in.(1,2,3)')) {
+                result = result.filter(r => [1, 2, 3].includes(r.id));
+            }
+
+            document.getElementById('api-response').textContent = JSON.stringify(result, null, 2);
+        });
+    </script>
+</body>
+
+</html>

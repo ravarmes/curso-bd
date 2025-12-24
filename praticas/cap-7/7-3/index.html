@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 7.3 — Dashboards e KPIs</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .kpi-card {
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .kpi-card h4 {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .kpi-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+
+        .kpi-card .delta {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .kpi-1 {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        .kpi-2 {
+            background: linear-gradient(135deg, #10b981, #047857);
+        }
+
+        .kpi-3 {
+            background: linear-gradient(135deg, #f59e0b, #b45309);
+        }
+
+        .kpi-4 {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+        }
+
+        .chart-container {
+            height: 200px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            background: #fff;
+            position: relative;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 160px;
+            padding-top: 20px;
+        }
+
+        .bar {
+            width: 40px;
+            background: linear-gradient(to top, #3b82f6, #93c5fd);
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s;
+        }
+
+        .bar-label {
+            text-align: center;
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+
+        .pie-chart {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 20px auto;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 7.3 — Dashboards e Relatórios Visuais</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="dashboard">Dashboard Exemplo</button>
+            <button class="tab" data-key="kpis">Tipos de KPIs</button>
+            <button class="tab" data-key="view">VIEW para BI</button>
+        </div>
+
+        <!-- Dashboard -->
+        <section class="panel active" data-key="dashboard">
+            <div class="box">
+                <h3>📊 Dashboard: Biblioteca Digital</h3>
+                <button class="btn" id="refresh-dash">🔄 Atualizar Dados</button>
+                <div class="dashboard">
+                    <div class="kpi-card kpi-1">
+                        <h4>Total Empréstimos</h4>
+                        <div class="value" id="kpi-emprestimos">1,247</div>
+                        <div class="delta">↑ 12% vs mês anterior</div>
+                    </div>
+                    <div class="kpi-card kpi-2">
+                        <h4>Livros Ativos</h4>
+                        <div class="value" id="kpi-ativos">89</div>
+                        <div class="delta">de 150 no acervo</div>
+                    </div>
+                    <div class="kpi-card kpi-3">
+                        <h4>Avaliação Média</h4>
+                        <div class="value" id="kpi-avaliacao">4.5 ⭐</div>
+                        <div class="delta">baseado em 320 avaliações</div>
+                    </div>
+                    <div class="kpi-card kpi-4">
+                        <h4>Usuários Ativos</h4>
+                        <div class="value" id="kpi-usuarios">156</div>
+                        <div class="delta">↑ 8 novos este mês</div>
+                    </div>
+                </div>
+                <div class="grid">
+                    <div class="chart-container">
+                        <h4 style="margin:0 0 10px;">Empréstimos por Mês</h4>
+                        <div class="bar-chart" id="bar-chart"></div>
+                    </div>
+                    <div class="chart-container">
+                        <h4 style="margin:0 0 10px;">Distribuição por Categoria</h4>
+                        <div class="pie-chart" id="pie-chart"></div>
+                        <div class="chart-legend" id="pie-legend"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- KPIs -->
+        <section class="panel" data-key="kpis">
+            <div class="box">
+                <h3>Tipos de KPIs para Biblioteca</h3>
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#f1f5f9;">
+                            <th style="padding:10px;border:1px solid #dde2eb;">KPI</th>
+                            <th style="padding:10px;border:1px solid #dde2eb;">SQL</th>
+                            <th style="padding:10px;border:1px solid #dde2eb;">Uso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:10px;border:1px solid #dde2eb;">Total Empréstimos</td>
+                            <td style="padding:10px;border:1px solid #dde2eb;"><code>COUNT(*) FROM emprestimo</code>
+                            </td>
+                            <td style="padding:10px;border:1px solid #dde2eb;">Volume de atividade</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px;border:1px solid #dde2eb;">Livros Mais Populares</td>
+                            <td style="padding:10px;border:1px solid #dde2eb;">
+                                <code>GROUP BY livro ORDER BY COUNT DESC</code></td>
+                            <td style="padding:10px;border:1px solid #dde2eb;">Top livros</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px;border:1px solid #dde2eb;">Média Avaliações</td>
+                            <td style="padding:10px;border:1px solid #dde2eb;"><code>AVG(nota) FROM avaliacao</code>
+                            </td>
+                            <td style="padding:10px;border:1px solid #dde2eb;">Satisfação</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px;border:1px solid #dde2eb;">Taxa de Devolução</td>
+                            <td style="padding:10px;border:1px solid #dde2eb;"><code>COUNT(devolvido)/COUNT(*)</code>
+                            </td>
+                            <td style="padding:10px;border:1px solid #dde2eb;">Pontualidade</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- VIEW -->
+        <section class="panel" data-key="view">
+            <div class="box">
+                <h3>CREATE VIEW para Dashboard</h3>
+                <p class="note">Simplifica consultas complexas para o Power BI:</p>
+                <pre
+                    style="background:#1e293b;color:#e2e8f0;padding:12px;border-radius:10px;overflow-x:auto;font-size:0.85rem;"><span style="color:#93c5fd;">CREATE VIEW</span> <span style="color:#fda4af;">vw_dashboard_biblioteca</span> <span style="color:#93c5fd;">AS</span>
+<span style="color:#93c5fd;">SELECT</span> 
+  l.titulo,
+  c.nome <span style="color:#93c5fd;">AS</span> categoria,
+  <span style="color:#fde68a;">COUNT</span>(e.id) <span style="color:#93c5fd;">AS</span> total_emprestimos,
+  <span style="color:#fde68a;">AVG</span>(a.nota) <span style="color:#93c5fd;">AS</span> media_avaliacao
+<span style="color:#93c5fd;">FROM</span> livro l
+<span style="color:#93c5fd;">LEFT JOIN</span> categoria c <span style="color:#93c5fd;">ON</span> l.categoria_id = c.id
+<span style="color:#93c5fd;">LEFT JOIN</span> emprestimo e <span style="color:#93c5fd;">ON</span> e.livro_id = l.id
+<span style="color:#93c5fd;">LEFT JOIN</span> avaliacao a <span style="color:#93c5fd;">ON</span> a.livro_id = l.id
+<span style="color:#93c5fd;">GROUP BY</span> l.id, l.titulo, c.nome;</pre>
+                <p class="note" style="margin-top:12px;">No Power BI: SELECT * FROM vw_dashboard_biblioteca</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Bar Chart
+        const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+        const values = [85, 120, 95, 140, 110, 130];
+        const maxVal = Math.max(...values);
+        document.getElementById('bar-chart').innerHTML = months.map((m, i) => `
+      <div>
+        <div class="bar" style="height:${(values[i] / maxVal) * 140}px;"></div>
+        <div class="bar-label">${m}<br><strong>${values[i]}</strong></div>
+      </div>
+    `).join('');
+
+        // Pie Chart (CSS conic gradient)
+        const categories = [
+            { nome: 'Ficção', valor: 35, cor: '#3b82f6' },
+            { nome: 'Técnico', valor: 25, cor: '#10b981' },
+            { nome: 'Infantil', valor: 20, cor: '#f59e0b' },
+            { nome: 'Clássicos', valor: 15, cor: '#8b5cf6' },
+            { nome: 'Outros', valor: 5, cor: '#94a3b8' }
+        ];
+        let gradient = '', start = 0;
+        categories.forEach(c => {
+            gradient += `${c.cor} ${start}% ${start + c.valor}%, `;
+            start += c.valor;
+        });
+        document.getElementById('pie-chart').style.background = `conic-gradient(${gradient.slice(0, -2)})`;
+        document.getElementById('pie-legend').innerHTML = categories.map(c => `
+      <div class="legend-item"><div class="legend-color" style="background:${c.cor};"></div>${c.nome} (${c.valor}%)</div>
+    `).join('');
+
+        // Refresh
+        document.getElementById('refresh-dash').addEventListener('click', () => {
+            document.getElementById('kpi-emprestimos').textContent = (1200 + Math.floor(Math.random() * 100)).toLocaleString();
+            document.getElementById('kpi-ativos').textContent = 80 + Math.floor(Math.random() * 20);
+            document.getElementById('kpi-usuarios').textContent = 150 + Math.floor(Math.random() * 20);
+        });
+    </script>
+</body>
+
+</html>

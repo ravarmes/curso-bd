@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 7.6 — Frontend Web com API</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .fn {
+            color: #fde68a;
+        }
+
+        .str {
+            color: #86efac;
+        }
+
+        .cm {
+            color: #94a3b8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .cycle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .cycle-item {
+            text-align: center;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: #fff;
+            min-width: 100px;
+        }
+
+        .cycle-item .icon {
+            font-size: 2rem;
+        }
+
+        .cycle-arrow {
+            font-size: 1.5rem;
+            color: var(--muted);
+        }
+
+        .code-editor {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .editor-pane {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .editor-title {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+
+        .preview-pane {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 7.6 — Frontend Web com API do Supabase</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="ciclo">Ciclo de Dados</button>
+            <button class="tab" data-key="codigo">Código fetch()</button>
+            <button class="tab" data-key="simulador">Simulador</button>
+        </div>
+
+        <!-- Ciclo -->
+        <section class="panel active" data-key="ciclo">
+            <div class="box">
+                <h3>Ciclo: Banco → API → Frontend</h3>
+                <div class="cycle">
+                    <div class="cycle-item" style="background:#d1fae5;">
+                        <div class="icon">🐘</div>
+                        <strong>PostgreSQL</strong>
+                        <p class="note">Dados armazenados</p>
+                    </div>
+                    <div class="cycle-arrow">→</div>
+                    <div class="cycle-item" style="background:#fef3c7;">
+                        <div class="icon">⚡</div>
+                        <strong>Supabase API</strong>
+                        <p class="note">PostgREST</p>
+                    </div>
+                    <div class="cycle-arrow">→</div>
+                    <div class="cycle-item" style="background:#dbeafe;">
+                        <div class="icon">🌐</div>
+                        <strong>fetch()</strong>
+                        <p class="note">HTTP Request</p>
+                    </div>
+                    <div class="cycle-arrow">→</div>
+                    <div class="cycle-item" style="background:#ede9fe;">
+                        <div class="icon">📱</div>
+                        <strong>Frontend</strong>
+                        <p class="note">HTML/JS</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Código -->
+        <section class="panel" data-key="codigo">
+            <div class="box">
+                <h3>Código JavaScript com fetch()</h3>
+                <pre><span class="cm">// Configuração</span>
+<span class="kw">const</span> SUPABASE_URL = <span class="str">'https://xxx.supabase.co'</span>;
+<span class="kw">const</span> SUPABASE_KEY = <span class="str">'sua-anon-key'</span>;
+
+<span class="cm">// Função para buscar livros</span>
+<span class="kw">async function</span> <span class="fn">buscarLivros</span>() {
+  <span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">fetch</span>(
+    <span class="str">`${SUPABASE_URL}/rest/v1/livro?select=*`</span>,
+    {
+      headers: {
+        <span class="str">'apikey'</span>: SUPABASE_KEY,
+        <span class="str">'Authorization'</span>: <span class="str">`Bearer ${SUPABASE_KEY}`</span>
+      }
+    }
+  );
+  
+  <span class="kw">const</span> livros = <span class="kw">await</span> response.<span class="fn">json</span>();
+  <span class="kw">return</span> livros;
+}
+
+<span class="cm">// Renderizar na tabela</span>
+<span class="kw">async function</span> <span class="fn">renderizarTabela</span>() {
+  <span class="kw">const</span> livros = <span class="kw">await</span> <span class="fn">buscarLivros</span>();
+  <span class="kw">const</span> tbody = document.<span class="fn">querySelector</span>(<span class="str">'#tabela tbody'</span>);
+  
+  tbody.innerHTML = livros.<span class="fn">map</span>(livro => <span class="str">`
+    &lt;tr&gt;
+      &lt;td&gt;${livro.titulo}&lt;/td&gt;
+      &lt;td&gt;${livro.autor}&lt;/td&gt;
+    &lt;/tr&gt;
+  `</span>).<span class="fn">join</span>(<span class="str">''</span>);
+}</pre>
+            </div>
+        </section>
+
+        <!-- Simulador -->
+        <section class="panel" data-key="simulador">
+            <div class="box">
+                <h3>Simulador: Página Web com API</h3>
+                <div class="code-editor">
+                    <div class="editor-pane">
+                        <div class="editor-title">📄 index.html</div>
+                        <pre style="margin:0;font-size:0.75rem;">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Biblioteca&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;📚 Acervo&lt;/h1&gt;
+  &lt;button id="btn"&gt;Carregar&lt;/button&gt;
+  &lt;table id="tabela"&gt;
+    &lt;thead&gt;
+      &lt;tr&gt;&lt;th&gt;Título&lt;/th&gt;&lt;th&gt;Autor&lt;/th&gt;&lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;&lt;/tbody&gt;
+  &lt;/table&gt;
+  &lt;script src="app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+                    </div>
+                    <div class="preview-pane">
+                        <div class="editor-title">👁️ Preview</div>
+                        <h3 style="margin:0 0 10px;">📚 Acervo</h3>
+                        <button class="btn" id="load-preview">Carregar Livros</button>
+                        <table id="preview-table">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Autor</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <div id="preview-status" class="note"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Preview simulator
+        const livros = [
+            { titulo: 'Dom Casmurro', autor: 'Machado de Assis' },
+            { titulo: '1984', autor: 'George Orwell' },
+            { titulo: 'O Pequeno Príncipe', autor: 'Saint-Exupéry' },
+            { titulo: 'Harry Potter', autor: 'J.K. Rowling' },
+            { titulo: 'O Senhor dos Anéis', autor: 'J.R.R. Tolkien' }
+        ];
+
+        document.getElementById('load-preview').addEventListener('click', () => {
+            document.getElementById('preview-status').textContent = '⏳ Carregando...';
+
+            setTimeout(() => {
+                document.querySelector('#preview-table tbody').innerHTML = livros.map(l =>
+                    `<tr><td>${l.titulo}</td><td>${l.autor}</td></tr>`
+                ).join('');
+                document.getElementById('preview-status').textContent = `✅ ${livros.length} livros carregados via API`;
+            }, 800);
+        });
+    </script>
+</body>
+
+</html>
