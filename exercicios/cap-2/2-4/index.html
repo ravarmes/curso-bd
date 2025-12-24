@@ -1,30 +1,117 @@
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Exercícios 2.4 — Normalização e Entidades Associativas</title>
   <style>
-    :root { --bg:#f6f8fb; --surface:#fff; --border:#dde2eb; --text:#1f2937; --muted:#6b7280; --hover:#e6ecf5; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color:var(--text); background:var(--bg); }
-    main { padding: 14px; }
-    h3 { margin:0 0 10px; }
-    .exercise { border:1px dashed var(--border); border-radius:10px; padding:12px; margin:12px 0; }
-    .options { display:grid; gap:8px; }
-    .option-btn { appearance:none; border:1px solid var(--border); background:var(--surface); padding:10px 12px; border-radius:10px; cursor:pointer; text-align:left; transition: background-color .15s, border-color .15s, box-shadow .15s; }
-    .option-btn:hover { background:var(--hover); }
-    .option-btn:focus { outline:2px solid transparent; box-shadow:0 0 0 3px rgba(94,129,172,.35); }
-    .option-btn.correct { border-color:#2a9d8f; background:rgba(42,157,143,.10); }
-    .option-btn.incorrect { border-color:#e76f51; background:rgba(231,111,81,.10); }
-    .exercise-actions { display:flex; gap:8px; margin-top:8px; }
-    .redo-btn { appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:8px 12px; cursor:pointer; }
-    .redo-btn:hover { background:var(--hover); }
-    .feedback { margin-top:6px; color:var(--muted); }
-    .why { margin-top:6px; }
-    .why summary { cursor:pointer; color:var(--muted); }
-    .explanation { margin-top:6px; }
+    :root {
+      --bg: #f6f8fb;
+      --surface: #fff;
+      --border: #dde2eb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --hover: #e6ecf5;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    main {
+      padding: 14px;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+    }
+
+    .exercise {
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 12px 0;
+    }
+
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .option-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color .15s, border-color .15s, box-shadow .15s;
+    }
+
+    .option-btn:hover {
+      background: var(--hover);
+    }
+
+    .option-btn:focus {
+      outline: 2px solid transparent;
+      box-shadow: 0 0 0 3px rgba(94, 129, 172, .35);
+    }
+
+    .option-btn.correct {
+      border-color: #2a9d8f;
+      background: rgba(42, 157, 143, .10);
+    }
+
+    .option-btn.incorrect {
+      border-color: #e76f51;
+      background: rgba(231, 111, 81, .10);
+    }
+
+    .exercise-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .redo-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .redo-btn:hover {
+      background: var(--hover);
+    }
+
+    .feedback {
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .why {
+      margin-top: 6px;
+    }
+
+    .why summary {
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .explanation {
+      margin-top: 6px;
+    }
   </style>
 </head>
+
 <body>
   <main>
     <h3>Exercícios 2.4 — Normalização e Entidades Associativas</h3>
@@ -33,26 +120,26 @@
   <script>
     const QUESTIONS = [
       {
-        prompt: "Normalização busca...",
-        options: ["Reduzir redundâncias e anomalias de atualização", "Aumentar duplicidade", "Eliminar chaves"],
+        prompt: "Qual o primeiro passo na construção do modelo ER?",
+        options: ["Definir índices e chaves estrangeiras", "Análise de requisitos (entender o que armazenar)", "Criar scripts SQL"],
+        answerIndex: 1,
+        explanation: "O processo começa com análise de requisitos: entender o que armazenar e as operações necessárias sobre os dados."
+      },
+      {
+        prompt: "O que é o 'mini-mundo' na modelagem de dados?",
+        options: ["O banco de dados em si", "Recorte da realidade a ser representada pelo BD", "O software de modelagem"],
+        answerIndex: 1,
+        explanation: "Mini-mundo é o recorte da realidade que delimita entidades, relacionamentos e regras do escopo a ser modelado."
+      },
+      {
+        prompt: "Na sequência típica de construção ER, após identificar entidades, o próximo passo é...",
+        options: ["Definir atributos, chaves e resolver compostos/multivalorados", "Implementar tabelas no SGBD", "Criar backup do banco"],
         answerIndex: 0,
-        explanation: "Normalização organiza atributos e dependências para reduzir redundância e anomalias." 
-      },
-      {
-        prompt: "Entidade associativa em N:M...",
-        options: ["É desnecessária", "Modela o relacionamento com atributos próprios", "Substitui a chave primária"],
-        answerIndex: 1,
-        explanation: "Entidades associativas armazenam pares/chaves compostas e atributos do relacionamento." 
-      },
-      {
-        prompt: "Dependência funcional indica...",
-        options: ["Relação entre entidades", "Determinação de valores de um atributo por outro", "Cardinalidade"],
-        answerIndex: 1,
-        explanation: "Se A determina B, então B depende funcionalmente de A no conjunto de atributos." 
+        explanation: "Após entidades: definir atributos e PKs, resolver compostos/multivalorados. Depois: relacionamentos, cardinalidades e refinamento."
       }
     ];
 
-    function shuffle(arr) { return arr.map(v => ({ v, r: Math.random() })).sort((a,b)=>a.r-b.r).map(o=>o.v); }
+    function shuffle(arr) { return arr.map(v => ({ v, r: Math.random() })).sort((a, b) => a.r - b.r).map(o => o.v); }
 
     function render() {
       const list = document.getElementById('ex-list');
@@ -74,7 +161,7 @@
           btn.addEventListener('click', () => {
             const chosen = Number(btn.getAttribute('data-i'));
             const correct = chosen === q.answerIndex;
-            ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+            ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct', 'incorrect'));
             btn.classList.add(correct ? 'correct' : 'incorrect');
             fb.innerHTML = correct ? `Correto! ✅${q.explanation ? `<div class="explanation">${q.explanation}</div>` : ''}` : `Incorreto. <details class="why"><summary>Por quê?</summary><div class="explanation">${q.explanation || 'Releia os conceitos desta subseção.'}</div></details>`;
           });
@@ -87,7 +174,7 @@
             btn.addEventListener('click', () => {
               const chosen = Number(btn.getAttribute('data-i'));
               const correct = chosen === q.answerIndex;
-              ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+              ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct', 'incorrect'));
               btn.classList.add(correct ? 'correct' : 'incorrect');
               fb.innerHTML = correct ? `Correto! ✅${q.explanation ? `<div class=\"explanation\">${q.explanation}</div>` : ''}` : `Incorreto. <details class=\"why\"><summary>Por quê?</summary><div class=\"explanation\">${q.explanation || 'Releia os conceitos desta subseção.'}</div></details>`;
             });
@@ -100,4 +187,5 @@
     render();
   </script>
 </body>
+
 </html>

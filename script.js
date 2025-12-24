@@ -372,7 +372,80 @@ const chapters = [
       </div>
     `,
     contentUrl: "https://ravarmes.github.io/book-bd/OEBPS/text/cap04_linguagem_sql.html",
-    sections: [],
+    sections: [
+      {
+        id: "4.1",
+        title: "Introdução à SQL e seus Subconjuntos",
+        practiceUrl: "praticas/cap-4/4-1/index.html",
+        practice: `
+          <p>Identifique a qual subconjunto (DDL, DML, DCL, DTL, DQL) pertence cada comando SQL.</p>
+        `,
+        content: `
+          <p>SQL é uma linguagem <strong>declarativa</strong> padronizada (ISO/IEC 9075). Os subconjuntos são: DDL (CREATE, ALTER, DROP), DML (INSERT, UPDATE, DELETE), DQL (SELECT), DCL (GRANT, REVOKE), DTL (COMMIT, ROLLBACK).</p>
+        `,
+        exerciseUrl: "exercicios/cap-4/4-1/index.html",
+      },
+      {
+        id: "4.2",
+        title: "DDL: Criação de Tabelas e Índices",
+        practiceUrl: "praticas/cap-4/4-2/index.html",
+        practice: `
+          <p>Crie tabelas com PK e FK, definindo políticas ON DELETE apropriadas.</p>
+        `,
+        content: `
+          <p>DDL define estruturas. PRIMARY KEY garante unicidade. FOREIGN KEY ... REFERENCES implementa relacionamentos com políticas ON DELETE: CASCADE, RESTRICT, SET NULL.</p>
+        `,
+        exerciseUrl: "exercicios/cap-4/4-2/index.html",
+      },
+      {
+        id: "4.3",
+        title: "DML: Inclusão, Exclusão e Alteração",
+        practiceUrl: "praticas/cap-4/4-3/index.html",
+        practice: `
+          <p>Execute INSERT, UPDATE e DELETE com cuidado ao usar WHERE.</p>
+        `,
+        content: `
+          <p>INSERT INTO ... VALUES adiciona registros. UPDATE ... SET ... WHERE altera. DELETE FROM ... WHERE remove. Sem WHERE, afeta TODAS as linhas!</p>
+        `,
+        exerciseUrl: "exercicios/cap-4/4-3/index.html",
+      },
+      {
+        id: "4.4",
+        title: "Transações: COMMIT, ROLLBACK e SAVEPOINT",
+        practiceUrl: "praticas/cap-4/4-4/index.html",
+        practice: `
+          <p>Crie uma transação com BEGIN, SAVEPOINT, ROLLBACK TO e COMMIT.</p>
+        `,
+        content: `
+          <p>Transações seguem ACID: Atomicidade (tudo ou nada), Consistência, Isolamento, Durabilidade. COMMIT persiste, ROLLBACK desfaz, SAVEPOINT cria pontos de retorno.</p>
+        `,
+        exerciseUrl: "exercicios/cap-4/4-4/index.html",
+      },
+      {
+        id: "4.5",
+        title: "Consultas (DQL) e Ordenações",
+        practiceUrl: "praticas/cap-4/4-5/index.html",
+        practice: `
+          <p>Escreva SELECTs com WHERE, LIKE, IN, BETWEEN e ORDER BY.</p>
+        `,
+        content: `
+          <p>SELECT ... FROM ... WHERE filtra dados. Operadores: =, <>, LIKE '%texto%', IN (...), BETWEEN, IS NULL. ORDER BY ordena (ASC/DESC).</p>
+        `,
+        exerciseUrl: "exercicios/cap-4/4-5/index.html",
+      },
+      {
+        id: "4.6",
+        title: "DCL: Usuários, Papéis e Permissões",
+        practiceUrl: "praticas/cap-4/4-6/index.html",
+        practice: `
+          <p>Crie um ROLE, conceda permissões com GRANT e atribua a um usuário.</p>
+        `,
+        content: `
+          <p>DCL gerencia segurança. GRANT ... TO concede privilégios. REVOKE remove. ROLE agrupa permissões reutilizáveis atribuídas a usuários.</p>
+        `,
+        exerciseUrl: "exercicios/cap-4/4-6/index.html",
+      },
+    ],
   },
   {
     id: "cap-5",

@@ -1,31 +1,125 @@
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Exercícios 3.5 — DDL SQL</title>
   <style>
-    :root { --bg:#f6f8fb; --surface:#fff; --border:#dde2eb; --text:#1f2937; --muted:#6b7280; --hover:#e6ecf5; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color:var(--text); background:var(--bg); }
-    main { padding: 14px; }
-    h3 { margin:0 0 10px; }
-    .exercise { border:1px dashed var(--border); border-radius:10px; padding:12px; margin:12px 0; }
-    .options { display:grid; gap:8px; }
-    .option-btn { appearance:none; border:1px solid var(--border); background:var(--surface); padding:10px 12px; border-radius:10px; cursor:pointer; text-align:left; transition: background-color .15s, border-color .15s, box-shadow .15s; }
-    .option-btn:hover { background:var(--hover); }
-    .option-btn:focus { outline:2px solid transparent; box-shadow:0 0 0 3px rgba(94,129,172,.35); }
-    .option-btn.correct { border-color:#2a9d8f; background:rgba(42,157,143,.10); }
-    .option-btn.incorrect { border-color:#e76f51; background:rgba(231,111,81,.10); }
-    .exercise-actions { display:flex; gap:8px; margin-top:8px; }
-    .redo-btn { appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:8px 12px; cursor:pointer; }
-    .redo-btn:hover { background:var(--hover); }
-    .feedback { margin-top:6px; color:var(--muted); }
-    .why { margin-top:6px; }
-    .why summary { cursor:pointer; color:var(--muted); }
-    .explanation { margin-top:6px; }
-    pre { background:#f1f5f9; border:1px solid var(--border); border-radius:8px; padding:10px; overflow:auto; }
+    :root {
+      --bg: #f6f8fb;
+      --surface: #fff;
+      --border: #dde2eb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --hover: #e6ecf5;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    main {
+      padding: 14px;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+    }
+
+    .exercise {
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 12px 0;
+    }
+
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .option-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color .15s, border-color .15s, box-shadow .15s;
+    }
+
+    .option-btn:hover {
+      background: var(--hover);
+    }
+
+    .option-btn:focus {
+      outline: 2px solid transparent;
+      box-shadow: 0 0 0 3px rgba(94, 129, 172, .35);
+    }
+
+    .option-btn.correct {
+      border-color: #2a9d8f;
+      background: rgba(42, 157, 143, .10);
+    }
+
+    .option-btn.incorrect {
+      border-color: #e76f51;
+      background: rgba(231, 111, 81, .10);
+    }
+
+    .exercise-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .redo-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .redo-btn:hover {
+      background: var(--hover);
+    }
+
+    .feedback {
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .why {
+      margin-top: 6px;
+    }
+
+    .why summary {
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .explanation {
+      margin-top: 6px;
+    }
+
+    pre {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      overflow: auto;
+    }
   </style>
 </head>
+
 <body>
   <main>
     <h3>Exercícios 3.5 — Exportando DDL SQL</h3>
@@ -34,26 +128,26 @@
   <script>
     const QUESTIONS = [
       {
-        prompt: "Fluxo correto para gerar SQL DDL:",
-        options: ["Conceitual → Lógico → SQL DDL", "SQL DDL → Conceitual → Lógico", "Lógico → Conceitual → SQL DDL"],
+        prompt: "Qual o fluxo correto no brModelo para gerar SQL?",
+        options: ["Modelo Conceitual → Modelo Lógico → Gerar SQL DDL", "SQL DDL → Modelo Conceitual", "Modelo Lógico → Modelo Conceitual → SQL DDL"],
         answerIndex: 0,
-        explanation: "Geralmente modelamos ER (conceitual), geramos o modelo lógico (relacional) e então exportamos o DDL SQL."
+        explanation: "No brModelo: criar/validar ER (conceitual), gerar lógico (ícone tabela), depois exportar SQL (ícone banco de dados)."
       },
       {
-        prompt: "Qual comando define a PK no DDL?",
-        options: ["FOREIGN KEY", "PRIMARY KEY", "UNIQUE"],
+        prompt: "No DDL exportado, como a PK é declarada?",
+        options: ["FOREIGN KEY (coluna)", "PRIMARY KEY (coluna)", "UNIQUE (coluna)"],
         answerIndex: 1,
-        explanation: "A PK pode ser definida na criação da tabela ou via ALTER TABLE ... ADD PRIMARY KEY (...)."
+        explanation: "A PK é definida com PRIMARY KEY (coluna) na criação da tabela. Ex: PRIMARY KEY (matricula)."
       },
       {
-        prompt: "Uma FK no DDL é definida com...",
-        options: ["PRIMARY KEY (...) REFERENCES ...", "FOREIGN KEY (...) REFERENCES outra_tabela(...)", "UNIQUE (...) REFERENCES ..."],
+        prompt: "A sintaxe para FK no DDL é...",
+        options: ["PRIMARY KEY (col) REFERENCES tabela", "FOREIGN KEY (col) REFERENCES tabela(pk)", "INDEX (col) REFERENCES tabela"],
         answerIndex: 1,
-        explanation: "A sintaxe típica é FOREIGN KEY (coluna) REFERENCES tabela(pk). Pode-se configurar ON DELETE/UPDATE CASCADE/RESTRICT."
+        explanation: "Sintaxe: FOREIGN KEY (coluna) REFERENCES outra_tabela(pk). Políticas ON DELETE/UPDATE serão vistas no Cap. 4."
       }
     ];
 
-    function shuffle(arr) { return arr.map(v => ({ v, r: Math.random() })).sort((a,b)=>a.r-b.r).map(o=>o.v); }
+    function shuffle(arr) { return arr.map(v => ({ v, r: Math.random() })).sort((a, b) => a.r - b.r).map(o => o.v); }
 
     function render() {
       const list = document.getElementById('ex-list');
@@ -75,7 +169,7 @@
           btn.addEventListener('click', () => {
             const chosen = Number(btn.getAttribute('data-i'));
             const correct = chosen === q.answerIndex;
-            ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+            ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct', 'incorrect'));
             btn.classList.add(correct ? 'correct' : 'incorrect');
             fb.innerHTML = correct ? `Correto! ✅${q.explanation ? `<div class="explanation">${q.explanation}</div>` : ''}` : `Incorreto. <details class="why"><summary>Por quê?</summary><div class="explanation">${q.explanation || 'Releia os conceitos desta subseção.'}</div></details>`;
           });
@@ -88,7 +182,7 @@
             btn.addEventListener('click', () => {
               const chosen = Number(btn.getAttribute('data-i'));
               const correct = chosen === q.answerIndex;
-              ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+              ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct', 'incorrect'));
               btn.classList.add(correct ? 'correct' : 'incorrect');
               fb.innerHTML = correct ? `Correto! ✅${q.explanation ? `<div class=\"explanation\">${q.explanation}</div>` : ''}` : `Incorreto. <details class=\"why\"><summary>Por quê?</summary><div class=\"explanation\">${q.explanation || 'Releia os conceitos desta subseção.'}</div></details>`;
             });
@@ -101,4 +195,5 @@
     render();
   </script>
 </body>
+
 </html>

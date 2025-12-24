@@ -1,30 +1,117 @@
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Exercícios 3.3 — Normalização (1FN, 2FN, 3FN)</title>
   <style>
-    :root { --bg:#f6f8fb; --surface:#fff; --border:#dde2eb; --text:#1f2937; --muted:#6b7280; --hover:#e6ecf5; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif; color:var(--text); background:var(--bg); }
-    main { padding: 14px; }
-    h3 { margin:0 0 10px; }
-    .exercise { border:1px dashed var(--border); border-radius:10px; padding:12px; margin:12px 0; }
-    .options { display:grid; gap:8px; }
-    .option-btn { appearance:none; border:1px solid var(--border); background:var(--surface); padding:10px 12px; border-radius:10px; cursor:pointer; text-align:left; transition: background-color .15s, border-color .15s, box-shadow .15s; }
-    .option-btn:hover { background:var(--hover); }
-    .option-btn:focus { outline:2px solid transparent; box-shadow:0 0 0 3px rgba(94,129,172,.35); }
-    .option-btn.correct { border-color:#2a9d8f; background:rgba(42,157,143,.10); }
-    .option-btn.incorrect { border-color:#e76f51; background:rgba(231,111,81,.10); }
-    .exercise-actions { display:flex; gap:8px; margin-top:8px; }
-    .redo-btn { appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:8px 12px; cursor:pointer; }
-    .redo-btn:hover { background:var(--hover); }
-    .feedback { margin-top:6px; color:var(--muted); }
-    .why { margin-top:6px; }
-    .why summary { cursor:pointer; color:var(--muted); }
-    .explanation { margin-top:6px; }
+    :root {
+      --bg: #f6f8fb;
+      --surface: #fff;
+      --border: #dde2eb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --hover: #e6ecf5;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    main {
+      padding: 14px;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+    }
+
+    .exercise {
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 12px 0;
+    }
+
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .option-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color .15s, border-color .15s, box-shadow .15s;
+    }
+
+    .option-btn:hover {
+      background: var(--hover);
+    }
+
+    .option-btn:focus {
+      outline: 2px solid transparent;
+      box-shadow: 0 0 0 3px rgba(94, 129, 172, .35);
+    }
+
+    .option-btn.correct {
+      border-color: #2a9d8f;
+      background: rgba(42, 157, 143, .10);
+    }
+
+    .option-btn.incorrect {
+      border-color: #e76f51;
+      background: rgba(231, 111, 81, .10);
+    }
+
+    .exercise-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .redo-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .redo-btn:hover {
+      background: var(--hover);
+    }
+
+    .feedback {
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .why {
+      margin-top: 6px;
+    }
+
+    .why summary {
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .explanation {
+      margin-top: 6px;
+    }
   </style>
 </head>
+
 <body>
   <main>
     <h3>Exercícios 3.3 — Normalização (1FN, 2FN, 3FN)</h3>
@@ -33,26 +120,26 @@
   <script>
     const QUESTIONS = [
       {
-        prompt: "A 1FN requer...",
-        options: ["dados atômicos, sem multivalorados", "remoção de dependência transitiva", "uso de chaves substitutas"],
+        prompt: "A 1FN (Primeira Forma Normal) exige...",
+        options: ["Dados atômicos, sem multivalorados", "Remoção de dependência parcial", "Remoção de dependência transitiva"],
         answerIndex: 0,
-        explanation: "1FN exige que cada atributo contenha valores atômicos (sem listas ou grupos repetidos)."
+        explanation: "1FN exige valores atômicos. Ex: 'telefones' e 'autores' multivalorados devem virar tabelas separadas."
       },
       {
-        prompt: "A 2FN corrige...",
-        options: ["dependência parcial em chave composta", "atributos multivalorados", "dependência transitiva"],
+        prompt: "A 2FN elimina dependências de...",
+        options: ["Parte da chave composta (dependência parcial)", "Atributos não-chave entre si", "Valores NULL"],
         answerIndex: 0,
-        explanation: "2FN elimina dependências de parte da chave composta, garantindo que cada atributo não-chave dependa da chave inteira."
+        explanation: "2FN: em chave composta, cada atributo não-chave deve depender da chave INTEIRA, não de parte dela."
       },
       {
-        prompt: "A 3FN remove...",
-        options: ["dependência parcial", "dependência transitiva entre não‑chaves", "dependência funcional da chave"],
-        answerIndex: 1,
-        explanation: "3FN remove dependências transitivas entre atributos não‑chave: um não‑chave não deve depender de outro não‑chave."
+        prompt: "Se 'nome_aluno' depende de 'matricula' (e não da PK 'id_emp'), qual forma normal é violada?",
+        options: ["1FN", "2FN", "3FN"],
+        answerIndex: 2,
+        explanation: "3FN remove dependências transitivas: id_emp → matricula → nome. Cada não-chave deve depender diretamente da PK."
       }
     ];
 
-    function shuffle(arr) { return arr.map(v => ({ v, r: Math.random() })).sort((a,b)=>a.r-b.r).map(o=>o.v); }
+    function shuffle(arr) { return arr.map(v => ({ v, r: Math.random() })).sort((a, b) => a.r - b.r).map(o => o.v); }
 
     function render() {
       const list = document.getElementById('ex-list');
@@ -74,7 +161,7 @@
           btn.addEventListener('click', () => {
             const chosen = Number(btn.getAttribute('data-i'));
             const correct = chosen === q.answerIndex;
-            ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+            ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct', 'incorrect'));
             btn.classList.add(correct ? 'correct' : 'incorrect');
             fb.innerHTML = correct ? `Correto! ✅${q.explanation ? `<div class="explanation">${q.explanation}</div>` : ''}` : `Incorreto. <details class="why"><summary>Por quê?</summary><div class="explanation">${q.explanation || 'Releia os conceitos desta subseção.'}</div></details>`;
           });
@@ -87,7 +174,7 @@
             btn.addEventListener('click', () => {
               const chosen = Number(btn.getAttribute('data-i'));
               const correct = chosen === q.answerIndex;
-              ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct','incorrect'));
+              ex.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct', 'incorrect'));
               btn.classList.add(correct ? 'correct' : 'incorrect');
               fb.innerHTML = correct ? `Correto! ✅${q.explanation ? `<div class=\"explanation\">${q.explanation}</div>` : ''}` : `Incorreto. <details class=\"why\"><summary>Por quê?</summary><div class=\"explanation\">${q.explanation || 'Releia os conceitos desta subseção.'}</div></details>`;
             });
@@ -100,4 +187,5 @@
     render();
   </script>
 </body>
+
 </html>
