@@ -857,7 +857,80 @@ const chapters = [
       </div>
     `,
     contentUrl: "https://ravarmes.github.io/book-bd/OEBPS/text/cap09_ia.html",
-    sections: [],
+    sections: [
+      {
+        id: "9.1",
+        title: "IA para Modelagem e Geração de SQL",
+        practiceUrl: "praticas/cap-9/9-1/index.html",
+        practice: `
+          <p>Use IA para gerar CREATE TABLE a partir de requisitos. Valide e ajuste manualmente.</p>
+        `,
+        content: `
+          <p>IA acelera produção de artefatos (MER, SQL), mas validação humana é essencial. Etapas: Requisitos → Conceitual → Lógico → Físico.</p>
+        `,
+        exerciseUrl: "exercicios/cap-9/9-1/index.html",
+      },
+      {
+        id: "9.2",
+        title: "Prompts para Análise e Relatórios",
+        practiceUrl: "praticas/cap-9/9-2/index.html",
+        practice: `
+          <p>Formule prompts analíticos e veja a IA gerar consultas SQL com agregações.</p>
+        `,
+        content: `
+          <p>Prompts como "Total por categoria" viram SQL com GROUP BY, SUM, COUNT. Fluxo: Pergunta → IA → SQL → Relatório.</p>
+        `,
+        exerciseUrl: "exercicios/cap-9/9-2/index.html",
+      },
+      {
+        id: "9.3",
+        title: "NotebookLM e Datasets de Sentimento",
+        practiceUrl: "praticas/cap-9/9-3/index.html",
+        practice: `
+          <p>Use NotebookLM para gerar dataset de sentimentos a partir de transcrições.</p>
+        `,
+        content: `
+          <p>Qualidade vem de normalização (1FN/2FN/3FN) e integridade (PK/FK). Exportação via SELECT → CSV.</p>
+        `,
+        exerciseUrl: "exercicios/cap-9/9-3/index.html",
+      },
+      {
+        id: "9.4",
+        title: "Tendências e Oportunidades no Mercado",
+        practiceUrl: "praticas/cap-9/9-4/index.html",
+        practice: `
+          <p>Pesquise vagas de dados e identifique tecnologias exigidas (SQL, NoSQL, DBaaS, IA).</p>
+        `,
+        content: `
+          <p>SQL é base. NoSQL, DBaaS (Supabase), arquiteturas cloud-native e integração com IA são diferenciais.</p>
+        `,
+        exerciseUrl: "exercicios/cap-9/9-4/index.html",
+      },
+      {
+        id: "9.5",
+        title: "RAG: Recuperação Aumentada por Geração",
+        practiceUrl: "praticas/cap-9/9-5/index.html",
+        practice: `
+          <p>Configure pgvector e faça busca por similaridade de embeddings.</p>
+        `,
+        content: `
+          <p>RAG: busca em fontes confiáveis + geração natural. pgvector armazena VECTOR(1536). Operador <-> para similaridade.</p>
+        `,
+        exerciseUrl: "exercicios/cap-9/9-5/index.html",
+      },
+      {
+        id: "9.6",
+        title: "MLOps: Ciclo de Vida e Governança",
+        practiceUrl: "praticas/cap-9/9-6/index.html",
+        practice: `
+          <p>Defina pipeline MLOps: versionamento, deploy, monitoramento de drift.</p>
+        `,
+        content: `
+          <p>MLOps: versionamento, implantação, monitoramento, atualização contínua. Governança: rastreabilidade, reprodutibilidade.</p>
+        `,
+        exerciseUrl: "exercicios/cap-9/9-6/index.html",
+      },
+    ],
   },
 ];
 
