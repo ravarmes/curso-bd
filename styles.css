@@ -505,6 +505,15 @@ figcaption {
   transform: scale(1.02);
 }
 
+.zoomable-img {
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+}
+
+.zoomable-img:hover {
+  transform: scale(1.03);
+}
+
 /* Lightbox para infográficos */
 .lightbox-overlay {
   position: fixed;

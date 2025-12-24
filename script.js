@@ -1324,9 +1324,9 @@ function createLightbox() {
 
 const lightbox = createLightbox();
 
-// Delegação de eventos para imagens de infográfico
+// Delegação de eventos para imagens de infográfico e capa
 document.addEventListener('click', (e) => {
-  if (e.target.classList.contains('infographic-img')) {
+  if (e.target.classList.contains('infographic-img') || e.target.classList.contains('zoomable-img')) {
     lightbox.open(e.target.src, e.target.alt);
   }
 });
