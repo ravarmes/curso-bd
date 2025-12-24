@@ -481,7 +481,56 @@ const chapters = [
       </div>
     `,
     contentUrl: "https://ravarmes.github.io/book-bd/OEBPS/text/cap05_consultas_avancadas.html",
-    sections: [],
+    sections: [
+      {
+        id: "5.1",
+        title: "Junções (JOINs) e Relacionamentos",
+        practiceUrl: "praticas/cap-5/5-1/index.html",
+        practice: `
+          <p>Escreva consultas com INNER JOIN, LEFT JOIN e anti-join.</p>
+        `,
+        content: `
+          <p>JOINs recompõem dados normalizados. INNER retorna interseção. LEFT mantém todos da esquerda (NULL se não há correspondência). Anti-join: LEFT JOIN + WHERE pk IS NULL.</p>
+        `,
+        exerciseUrl: "exercicios/cap-5/5-1/index.html",
+      },
+      {
+        id: "5.2",
+        title: "Agregação, GROUP BY e HAVING",
+        practiceUrl: "praticas/cap-5/5-2/index.html",
+        practice: `
+          <p>Use COUNT, SUM, AVG com GROUP BY e filtre grupos com HAVING.</p>
+        `,
+        content: `
+          <p>Funções: COUNT(*), SUM(valor), AVG(nota), MAX, MIN. GROUP BY agrupa antes de agregar. HAVING filtra grupos após (WHERE filtra antes).</p>
+        `,
+        exerciseUrl: "exercicios/cap-5/5-2/index.html",
+      },
+      {
+        id: "5.3",
+        title: "Subconsultas e Operadores Lógicos",
+        practiceUrl: "praticas/cap-5/5-3/index.html",
+        practice: `
+          <p>Crie subconsultas com IN, EXISTS e combine condições com AND, OR, NOT.</p>
+        `,
+        content: `
+          <p>Subconsulta é SELECT aninhado. O interno executa primeiro. Operadores: IN (lista), EXISTS (existência), AND/OR/NOT (lógicos).</p>
+        `,
+        exerciseUrl: "exercicios/cap-5/5-3/index.html",
+      },
+      {
+        id: "5.4",
+        title: "Criando Visões (VIEW)",
+        practiceUrl: "praticas/cap-5/5-4/index.html",
+        practice: `
+          <p>Crie uma VIEW que simplifique uma consulta com JOIN.</p>
+        `,
+        content: `
+          <p>VIEW é SELECT salvo como tabela virtual. Simplifica consultas, favorece reutilização e pode restringir colunas para controlar acesso.</p>
+        `,
+        exerciseUrl: "exercicios/cap-5/5-4/index.html",
+      },
+    ],
   },
   {
     id: "cap-6",
@@ -517,7 +566,68 @@ const chapters = [
       </div>
     `,
     contentUrl: "https://ravarmes.github.io/book-bd/OEBPS/text/cap06_otimizacao.html",
-    sections: [],
+    sections: [
+      {
+        id: "6.1",
+        title: "Modelo Físico e Mapeamento para o SGBD",
+        practiceUrl: "praticas/cap-6/6-1/index.html",
+        practice: `
+          <p>Identifique os três níveis de abstração (Conceitual, Lógico, Físico) em um projeto.</p>
+        `,
+        content: `
+          <p>Modelo físico é o nível mais baixo: tipos exatos (VARCHAR, NUMERIC), CREATE INDEX, políticas ON DELETE. Refina o lógico para implementação.</p>
+        `,
+        exerciseUrl: "exercicios/cap-6/6-1/index.html",
+      },
+      {
+        id: "6.2",
+        title: "Índices: Criação, Tipos e Desempenho",
+        practiceUrl: "praticas/cap-6/6-2/index.html",
+        practice: `
+          <p>Crie índices simples e compostos. Teste com EXPLAIN a diferença de performance.</p>
+        `,
+        content: `
+          <p>Índices aceleram busca (B-tree, GIN). CREATE INDEX idx ON tabela(col). Índice composto favorece consultas na ordem definida.</p>
+        `,
+        exerciseUrl: "exercicios/cap-6/6-2/index.html",
+      },
+      {
+        id: "6.3",
+        title: "Normalização e Desnormalização",
+        practiceUrl: "praticas/cap-6/6-3/index.html",
+        practice: `
+          <p>Compare uma tabela normalizada com sua versão desnormalizada. Identifique trade-offs.</p>
+        `,
+        content: `
+          <p>Normalização minimiza redundância. Desnormalização introduz redundância controlada para performance ou histórico imutável.</p>
+        `,
+        exerciseUrl: "exercicios/cap-6/6-3/index.html",
+      },
+      {
+        id: "6.4",
+        title: "Plano de Execução e Tuning Básico",
+        practiceUrl: "praticas/cap-6/6-4/index.html",
+        practice: `
+          <p>Use EXPLAIN e EXPLAIN ANALYZE para diagnosticar consultas lentas.</p>
+        `,
+        content: `
+          <p>EXPLAIN mostra plano estimado. EXPLAIN ANALYZE executa e mede tempos. VACUUM recupera espaço, ANALYZE atualiza estatísticas.</p>
+        `,
+        exerciseUrl: "exercicios/cap-6/6-4/index.html",
+      },
+      {
+        id: "6.5",
+        title: "Functions, Procedures e Triggers",
+        practiceUrl: "praticas/cap-6/6-5/index.html",
+        practice: `
+          <p>Crie uma Function que calcula, uma Procedure que executa processo, e um Trigger que valida regra.</p>
+        `,
+        content: `
+          <p>Function calcula e retorna (SELECT). Procedure executa processos (CALL). Trigger dispara automaticamente em INSERT/UPDATE/DELETE.</p>
+        `,
+        exerciseUrl: "exercicios/cap-6/6-5/index.html",
+      },
+    ],
   },
   {
     id: "cap-7",
