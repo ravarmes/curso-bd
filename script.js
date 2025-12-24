@@ -663,7 +663,80 @@ const chapters = [
       </div>
     `,
     contentUrl: "https://ravarmes.github.io/book-bd/OEBPS/text/cap07_web_powerbi.html",
-    sections: [],
+    sections: [
+      {
+        id: "7.1",
+        title: "Introdução ao Business Intelligence (BI)",
+        practiceUrl: "praticas/cap-7/7-1/index.html",
+        practice: `
+          <p>Crie um gráfico de empréstimos por aluno para identificar padrões.</p>
+        `,
+        content: `
+          <p>BI opera no Nível de Visão. Análise Descritiva: o que aconteceu? Usa GROUP BY, JOIN, SUM, AVG, COUNT, HAVING.</p>
+        `,
+        exerciseUrl: "exercicios/cap-7/7-1/index.html",
+      },
+      {
+        id: "7.2",
+        title: "Conexão com Power BI",
+        practiceUrl: "praticas/cap-7/7-2/index.html",
+        practice: `
+          <p>Conecte o Power BI ao PostgreSQL e importe as tabelas da Biblioteca.</p>
+        `,
+        content: `
+          <p>Power BI extrai dados via SELECT/JOIN/agregações. Modos: Import (cópia local), DirectQuery (tempo real), Live Connection.</p>
+        `,
+        exerciseUrl: "exercicios/cap-7/7-2/index.html",
+      },
+      {
+        id: "7.3",
+        title: "Dashboards e Relatórios Visuais",
+        practiceUrl: "praticas/cap-7/7-3/index.html",
+        practice: `
+          <p>Crie um dashboard com KPIs: total empréstimos, top livros, média avaliações.</p>
+        `,
+        content: `
+          <p>Dashboard materializa Nível de Visão. KPIs: total empréstimos, livros populares. CREATE VIEW simplifica consultas.</p>
+        `,
+        exerciseUrl: "exercicios/cap-7/7-3/index.html",
+      },
+      {
+        id: "7.4",
+        title: "Publicando no Supabase (DBaaS)",
+        practiceUrl: "praticas/cap-7/7-4/index.html",
+        practice: `
+          <p>Publique o banco da Biblioteca no Supabase e execute uma consulta via SQL Editor.</p>
+        `,
+        content: `
+          <p>DBaaS: banco na nuvem gerenciado. Supabase oferece PostgreSQL + API REST + autenticação. Arquitetura: Dados → Negócio → Apresentação.</p>
+        `,
+        exerciseUrl: "exercicios/cap-7/7-4/index.html",
+      },
+      {
+        id: "7.5",
+        title: "API REST do Supabase (PostgREST)",
+        practiceUrl: "praticas/cap-7/7-5/index.html",
+        practice: `
+          <p>Faça requisições GET com filtros: eq, ilike, in.</p>
+        `,
+        content: `
+          <p>PostgREST traduz HTTP→SQL: GET→SELECT, POST→INSERT. Filtros: eq (exato), ilike (parcial), in (lista).</p>
+        `,
+        exerciseUrl: "exercicios/cap-7/7-5/index.html",
+      },
+      {
+        id: "7.6",
+        title: "Frontend Web com API do Supabase",
+        practiceUrl: "praticas/cap-7/7-6/index.html",
+        practice: `
+          <p>Crie uma página HTML que consome a API com fetch() e exibe dados em tabela.</p>
+        `,
+        content: `
+          <p>fetch() faz requisições HTTP. Headers incluem apikey. res.json() converte resposta. Ciclo: Banco → Supabase → API → Frontend.</p>
+        `,
+        exerciseUrl: "exercicios/cap-7/7-6/index.html",
+      },
+    ],
   },
   {
     id: "cap-8",
