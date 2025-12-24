@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 4.5 — DQL: SELECT e Consultas</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .id {
+            color: #fda4af;
+        }
+
+        .val {
+            color: #86efac;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .highlight {
+            background: #fef3c7;
+        }
+
+        input.inp,
+        select.sel {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 4px;
+        }
+
+        .query-box {
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 4.5 — DQL: Consultas e Ordenações</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="sintaxe">Sintaxe SELECT</button>
+            <button class="tab" data-key="builder">Construtor</button>
+            <button class="tab" data-key="filter">Filtros WHERE</button>
+            <button class="tab" data-key="order">ORDER BY</button>
+        </div>
+
+        <!-- Sintaxe -->
+        <section class="panel active" data-key="sintaxe">
+            <div class="box">
+                <h3>Estrutura do SELECT</h3>
+                <pre><span class="kw">SELECT</span> <span class="id">col1</span>, <span class="id">col2</span>
+<span class="kw">FROM</span> <span class="id">tabela</span>
+<span class="kw">WHERE</span> <span class="id">col1</span> = <span class="val">'valor'</span>
+  <span class="kw">AND</span> <span class="id">col2</span> <span class="kw">LIKE</span> <span class="val">'%texto%'</span>
+  <span class="kw">AND</span> <span class="id">col3</span> <span class="kw">IN</span> (<span class="val">1</span>, <span class="val">2</span>, <span class="val">3</span>)
+  <span class="kw">AND</span> <span class="id">col4</span> <span class="kw">BETWEEN</span> <span class="val">10</span> <span class="kw">AND</span> <span class="val">100</span>
+<span class="kw">ORDER BY</span> <span class="id">col1</span> <span class="kw">ASC</span>;</pre>
+                <p class="note">WHERE filtra linhas. Operadores: =, <>, LIKE, IN, BETWEEN, IS NULL. ORDER BY ordena
+                        ASC/DESC.</p>
+            </div>
+        </section>
+
+        <!-- Builder -->
+        <section class="panel" data-key="builder">
+            <div class="box">
+                <h3>Construtor de SELECT</h3>
+                <div class="grid">
+                    <div>
+                        <label>Colunas: <input class="inp" id="q-cols" value="*" style="width:150px;"></label><br>
+                        <label>FROM: <input class="inp" id="q-from" value="produto" style="width:150px;"></label><br>
+                        <label>WHERE: <input class="inp" id="q-where" value="preco > 100"
+                                style="width:200px;"></label><br>
+                        <label>ORDER BY: <input class="inp" id="q-order" value="nome ASC"
+                                style="width:150px;"></label><br><br>
+                        <button class="btn" id="build-query">Gerar Query</button>
+                    </div>
+                    <div>
+                        <h4>SQL Gerado:</h4>
+                        <div class="query-box" id="query-output">SELECT * FROM produto;</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filter -->
+        <section class="panel" data-key="filter">
+            <div class="box">
+                <h3>Simulador de Filtros WHERE</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Filtros:</h4>
+                        <label>Nome contém: <input class="inp" id="f-nome" placeholder="Ex: note"></label><br>
+                        <label>Preço mínimo: <input class="inp" id="f-min" type="number" value="0"></label><br>
+                        <label>Preço máximo: <input class="inp" id="f-max" type="number" value="10000"></label><br>
+                        <label>Categoria:
+                            <select class="sel" id="f-cat">
+                                <option value="">Todas</option>
+                                <option value="Eletrônicos">Eletrônicos</option>
+                                <option value="Acessórios">Acessórios</option>
+                            </select>
+                        </label><br><br>
+                        <button class="btn" id="apply-filter">Aplicar Filtros</button>
+                        <button class="btn" id="reset-filter">Limpar</button>
+                    </div>
+                    <div>
+                        <h4>Resultado:</h4>
+                        <table id="filter-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Preço</th>
+                                    <th>Categoria</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <div id="filter-query" class="query-box"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Order -->
+        <section class="panel" data-key="order">
+            <div class="box">
+                <h3>Simulador ORDER BY</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Ordenar por:</h4>
+                        <select class="sel" id="o-col">
+                            <option value="id">ID</option>
+                            <option value="nome">Nome</option>
+                            <option value="preco">Preço</option>
+                        </select>
+                        <select class="sel" id="o-dir">
+                            <option value="ASC">ASC (crescente)</option>
+                            <option value="DESC">DESC (decrescente)</option>
+                        </select>
+                        <button class="btn" id="apply-order">Ordenar</button>
+                    </div>
+                    <div>
+                        <h4>Resultado:</h4>
+                        <table id="order-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Preço</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Data
+        const produtos = [
+            { id: 1, nome: 'Notebook Dell', preco: 4500, categoria: 'Eletrônicos' },
+            { id: 2, nome: 'Mouse Logitech', preco: 150, categoria: 'Acessórios' },
+            { id: 3, nome: 'Teclado Mecânico', preco: 350, categoria: 'Acessórios' },
+            { id: 4, nome: 'Monitor LG', preco: 1200, categoria: 'Eletrônicos' },
+            { id: 5, nome: 'Webcam HD', preco: 280, categoria: 'Acessórios' },
+            { id: 6, nome: 'Notebook Lenovo', preco: 3800, categoria: 'Eletrônicos' }
+        ];
+
+        // Builder
+        document.getElementById('build-query').addEventListener('click', () => {
+            const cols = document.getElementById('q-cols').value || '*';
+            const from = document.getElementById('q-from').value || 'tabela';
+            const where = document.getElementById('q-where').value;
+            const order = document.getElementById('q-order').value;
+            let sql = `SELECT ${cols} FROM ${from}`;
+            if (where) sql += ` WHERE ${where}`;
+            if (order) sql += ` ORDER BY ${order}`;
+            document.getElementById('query-output').textContent = sql + ';';
+        });
+
+        // Filter
+        function applyFilter() {
+            const nome = document.getElementById('f-nome').value.toLowerCase();
+            const min = parseFloat(document.getElementById('f-min').value) || 0;
+            const max = parseFloat(document.getElementById('f-max').value) || 999999;
+            const cat = document.getElementById('f-cat').value;
+
+            let filtered = produtos.filter(p => {
+                if (nome && !p.nome.toLowerCase().includes(nome)) return false;
+                if (p.preco < min || p.preco > max) return false;
+                if (cat && p.categoria !== cat) return false;
+                return true;
+            });
+
+            const tbody = document.querySelector('#filter-table tbody');
+            tbody.innerHTML = filtered.map(p => `<tr><td>${p.id}</td><td>${p.nome}</td><td>R$ ${p.preco.toFixed(2)}</td><td>${p.categoria}</td></tr>`).join('');
+
+            // Build query
+            let conditions = [];
+            if (nome) conditions.push(`nome LIKE '%${nome}%'`);
+            if (min > 0) conditions.push(`preco >= ${min}`);
+            if (max < 10000) conditions.push(`preco <= ${max}`);
+            if (cat) conditions.push(`categoria = '${cat}'`);
+            let sql = 'SELECT * FROM produto';
+            if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
+            document.getElementById('filter-query').textContent = sql + ';';
+        }
+
+        document.getElementById('apply-filter').addEventListener('click', applyFilter);
+        document.getElementById('reset-filter').addEventListener('click', () => {
+            document.getElementById('f-nome').value = '';
+            document.getElementById('f-min').value = 0;
+            document.getElementById('f-max').value = 10000;
+            document.getElementById('f-cat').value = '';
+            applyFilter();
+        });
+        applyFilter();
+
+        // Order
+        function applyOrder() {
+            const col = document.getElementById('o-col').value;
+            const dir = document.getElementById('o-dir').value;
+            const sorted = [...produtos].sort((a, b) => {
+                let va = a[col], vb = b[col];
+                if (typeof va === 'string') va = va.toLowerCase();
+                if (typeof vb === 'string') vb = vb.toLowerCase();
+                if (va < vb) return dir === 'ASC' ? -1 : 1;
+                if (va > vb) return dir === 'ASC' ? 1 : -1;
+                return 0;
+            });
+            const tbody = document.querySelector('#order-table tbody');
+            tbody.innerHTML = sorted.map(p => `<tr><td>${p.id}</td><td>${p.nome}</td><td>R$ ${p.preco.toFixed(2)}</td></tr>`).join('');
+        }
+
+        document.getElementById('apply-order').addEventListener('click', applyOrder);
+        applyOrder();
+    </script>
+</body>
+
+</html>

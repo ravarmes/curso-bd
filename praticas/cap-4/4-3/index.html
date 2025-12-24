@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 4.3 — DML: INSERT, UPDATE, DELETE</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --warn: #d97706;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(200px, 1fr) minmax(300px, 1.5fr);
+            gap: 20px;
+        }
+
+        .grid>div {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .warn {
+            color: var(--warn);
+            font-weight: 600;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .btn-danger {
+            border-color: var(--bad);
+            color: var(--bad);
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        .feedback.err {
+            color: var(--bad);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .id {
+            color: #fda4af;
+        }
+
+        .val {
+            color: #86efac;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .deleted {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        .new {
+            background: #ecfdf5;
+        }
+
+        .updated {
+            background: #fef3c7;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            min-width: 80px;
+            font-weight: 500;
+        }
+
+        input.inp {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 180px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 4.3 — DML: Inclusão, Exclusão e Alteração</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="sintaxe">Sintaxe DML</button>
+            <button class="tab" data-key="insert">INSERT</button>
+            <button class="tab" data-key="update">UPDATE</button>
+            <button class="tab" data-key="delete">DELETE</button>
+        </div>
+
+        <!-- Sintaxe -->
+        <section class="panel active" data-key="sintaxe">
+            <div class="box">
+                <h3>Comandos DML</h3>
+                <pre><span class="kw">INSERT INTO</span> <span class="id">tabela</span> (<span class="id">col1</span>, <span class="id">col2</span>)
+<span class="kw">VALUES</span> (<span class="val">'valor1'</span>, <span class="val">'valor2'</span>);
+
+<span class="kw">UPDATE</span> <span class="id">tabela</span>
+<span class="kw">SET</span> <span class="id">col1</span> = <span class="val">'novo_valor'</span>
+<span class="kw">WHERE</span> <span class="id">id</span> = <span class="val">1</span>;
+
+<span class="kw">DELETE FROM</span> <span class="id">tabela</span>
+<span class="kw">WHERE</span> <span class="id">id</span> = <span class="val">1</span>;</pre>
+                <p class="warn">⚠️ CUIDADO: Sem WHERE, UPDATE e DELETE afetam TODAS as linhas!</p>
+            </div>
+        </section>
+
+        <!-- INSERT -->
+        <section class="panel" data-key="insert">
+            <div class="box">
+                <h3>Simulador INSERT</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Novo registro:</h4>
+                        <div class="form-group">
+                            <label>ID:</label>
+                            <input class="inp" id="ins-id" value="4">
+                        </div>
+                        <div class="form-group">
+                            <label>Nome:</label>
+                            <input class="inp" id="ins-nome" value="Novo Produto">
+                        </div>
+                        <div class="form-group">
+                            <label>Preço:</label>
+                            <input class="inp" id="ins-preco" value="99.90">
+                        </div>
+                        <button class="btn" id="exec-insert">Executar INSERT</button>
+                    </div>
+                    <div>
+                        <h4>Tabela: produto</h4>
+                        <table id="tbl-insert">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Preço</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <button class="btn" id="reset-insert">Reset</button>
+                <div id="fb-insert" class="feedback"></div>
+            </div>
+        </section>
+
+        <!-- UPDATE -->
+        <section class="panel" data-key="update">
+            <div class="box">
+                <h3>Simulador UPDATE</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Alterar registro:</h4>
+                        <div class="form-group">
+                            <label>WHERE ID =</label>
+                            <input class="inp" id="upd-id" value="1" style="max-width:80px;">
+                        </div>
+                        <div class="form-group">
+                            <label>SET Nome =</label>
+                            <input class="inp" id="upd-nome" value="Produto Atualizado">
+                        </div>
+                        <button class="btn" id="exec-update">Executar UPDATE</button>
+                        <button class="btn btn-danger" id="exec-update-all">UPDATE SEM WHERE ⚠️</button>
+                    </div>
+                    <div>
+                        <h4>Tabela: produto</h4>
+                        <table id="tbl-update">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Preço</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <button class="btn" id="reset-update">Reset</button>
+                <div id="fb-update" class="feedback"></div>
+            </div>
+        </section>
+
+        <!-- DELETE -->
+        <section class="panel" data-key="delete">
+            <div class="box">
+                <h3>Simulador DELETE</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Excluir registro:</h4>
+                        <div class="form-group">
+                            <label>WHERE ID =</label>
+                            <input class="inp" id="del-id" value="2" style="max-width:80px;">
+                        </div>
+                        <button class="btn" id="exec-delete">Executar DELETE</button>
+                        <button class="btn btn-danger" id="exec-delete-all">DELETE SEM WHERE ⚠️</button>
+                    </div>
+                    <div>
+                        <h4>Tabela: produto</h4>
+                        <table id="tbl-delete">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Preço</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <button class="btn" id="reset-delete">Reset</button>
+                <div id="fb-delete" class="feedback"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Data
+        const initialData = [
+            { id: 1, nome: 'Notebook', preco: 3500.00 },
+            { id: 2, nome: 'Mouse', preco: 89.90 },
+            { id: 3, nome: 'Teclado', preco: 199.90 }
+        ];
+
+        let insertData = [...initialData];
+        let updateData = [...initialData];
+        let deleteData = [...initialData];
+
+        function renderTable(data, tbodyId, highlightNew = null) {
+            const tbody = document.querySelector(`#${tbodyId} tbody`);
+            tbody.innerHTML = data.map(r => `
+        <tr class="${highlightNew === r.id ? 'new' : ''}">
+          <td>${r.id}</td><td>${r.nome}</td><td>R$ ${r.preco.toFixed(2)}</td>
+        </tr>
+      `).join('');
+        }
+
+        // INSERT
+        function resetInsert() { insertData = [...initialData]; renderTable(insertData, 'tbl-insert'); document.getElementById('fb-insert').textContent = ''; }
+        document.getElementById('reset-insert').addEventListener('click', resetInsert);
+        document.getElementById('exec-insert').addEventListener('click', () => {
+            const newRow = {
+                id: parseInt(document.getElementById('ins-id').value),
+                nome: document.getElementById('ins-nome').value,
+                preco: parseFloat(document.getElementById('ins-preco').value) || 0
+            };
+            if (insertData.find(r => r.id === newRow.id)) {
+                document.getElementById('fb-insert').textContent = 'Erro: ID já existe (violação de PK).';
+                document.getElementById('fb-insert').className = 'feedback err';
+                return;
+            }
+            insertData.push(newRow);
+            renderTable(insertData, 'tbl-insert', newRow.id);
+            document.getElementById('fb-insert').textContent = 'INSERT executado com sucesso! ✅';
+            document.getElementById('fb-insert').className = 'feedback ok';
+        });
+        resetInsert();
+
+        // UPDATE
+        function resetUpdate() { updateData = [...initialData]; renderTable(updateData, 'tbl-update'); document.getElementById('fb-update').textContent = ''; }
+        document.getElementById('reset-update').addEventListener('click', resetUpdate);
+        document.getElementById('exec-update').addEventListener('click', () => {
+            const id = parseInt(document.getElementById('upd-id').value);
+            const nome = document.getElementById('upd-nome').value;
+            const found = updateData.find(r => r.id === id);
+            if (!found) {
+                document.getElementById('fb-update').textContent = 'Nenhum registro encontrado com esse ID.';
+                document.getElementById('fb-update').className = 'feedback err';
+                return;
+            }
+            found.nome = nome;
+            renderTable(updateData, 'tbl-update');
+            document.getElementById('fb-update').textContent = 'UPDATE executado: 1 linha alterada. ✅';
+            document.getElementById('fb-update').className = 'feedback ok';
+        });
+        document.getElementById('exec-update-all').addEventListener('click', () => {
+            const nome = document.getElementById('upd-nome').value;
+            updateData.forEach(r => r.nome = nome);
+            renderTable(updateData, 'tbl-update');
+            document.getElementById('fb-update').textContent = `⚠️ UPDATE SEM WHERE: ${updateData.length} linhas alteradas!`;
+            document.getElementById('fb-update').className = 'feedback err';
+        });
+        resetUpdate();
+
+        // DELETE
+        function resetDelete() { deleteData = [...initialData]; renderTable(deleteData, 'tbl-delete'); document.getElementById('fb-delete').textContent = ''; }
+        document.getElementById('reset-delete').addEventListener('click', resetDelete);
+        document.getElementById('exec-delete').addEventListener('click', () => {
+            const id = parseInt(document.getElementById('del-id').value);
+            const idx = deleteData.findIndex(r => r.id === id);
+            if (idx === -1) {
+                document.getElementById('fb-delete').textContent = 'Nenhum registro encontrado com esse ID.';
+                document.getElementById('fb-delete').className = 'feedback err';
+                return;
+            }
+            deleteData.splice(idx, 1);
+            renderTable(deleteData, 'tbl-delete');
+            document.getElementById('fb-delete').textContent = 'DELETE executado: 1 linha removida. ✅';
+            document.getElementById('fb-delete').className = 'feedback ok';
+        });
+        document.getElementById('exec-delete-all').addEventListener('click', () => {
+            const count = deleteData.length;
+            deleteData = [];
+            renderTable(deleteData, 'tbl-delete');
+            document.getElementById('fb-delete').textContent = `⚠️ DELETE SEM WHERE: ${count} linhas removidas! Tabela VAZIA!`;
+            document.getElementById('fb-delete').className = 'feedback err';
+        });
+        resetDelete();
+    </script>
+</body>
+
+</html>

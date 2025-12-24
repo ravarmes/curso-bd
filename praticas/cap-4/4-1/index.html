@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 4.1 — Introdução à SQL</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --accent: #2563eb;
+            --good: #16a34a;
+            --bad: #dc2626;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            background: #eef2ff;
+        }
+
+        .card.correct {
+            background: #ecfdf5;
+            border-color: var(--good);
+        }
+
+        .card.incorrect {
+            background: #fee2e2;
+            border-color: var(--bad);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .badge-ddl {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-dml {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .badge-dql {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .badge-dcl {
+            background: #fce7f3;
+            color: #be185d;
+        }
+
+        .badge-dtl {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        .feedback.err {
+            color: var(--bad);
+        }
+
+        .dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            min-height: 80px;
+            text-align: center;
+            margin: 8px 0;
+        }
+
+        .dropzone.over {
+            background: #eef2ff;
+            border-color: var(--accent);
+        }
+
+        .draggable {
+            display: inline-block;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 4px;
+            background: var(--surface);
+            cursor: grab;
+        }
+
+        .draggable.placed {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 4.1 — Introdução à SQL e seus Subconjuntos</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="overview">Visão Geral</button>
+            <button class="tab" data-key="classify">Classificar Comandos</button>
+            <button class="tab" data-key="drag">Arraste e Solte</button>
+            <button class="tab" data-key="quiz">Quiz</button>
+        </div>
+
+        <!-- Overview -->
+        <section class="panel active" data-key="overview">
+            <div class="box">
+                <h3>Os 5 Subconjuntos da SQL</h3>
+                <div class="grid">
+                    <div class="card">
+                        <span class="badge badge-ddl">DDL</span>
+                        <p><strong>Data Definition Language</strong></p>
+                        <p class="note">CREATE, ALTER, DROP — define estruturas</p>
+                    </div>
+                    <div class="card">
+                        <span class="badge badge-dml">DML</span>
+                        <p><strong>Data Manipulation Language</strong></p>
+                        <p class="note">INSERT, UPDATE, DELETE — manipula dados</p>
+                    </div>
+                    <div class="card">
+                        <span class="badge badge-dql">DQL</span>
+                        <p><strong>Data Query Language</strong></p>
+                        <p class="note">SELECT — consulta dados</p>
+                    </div>
+                    <div class="card">
+                        <span class="badge badge-dcl">DCL</span>
+                        <p><strong>Data Control Language</strong></p>
+                        <p class="note">GRANT, REVOKE — controle de acesso</p>
+                    </div>
+                    <div class="card">
+                        <span class="badge badge-dtl">DTL</span>
+                        <p><strong>Data Transaction Language</strong></p>
+                        <p class="note">COMMIT, ROLLBACK, SAVEPOINT — transações</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Classificar -->
+        <section class="panel" data-key="classify">
+            <div class="box">
+                <h3>Clique no comando para revelar seu subconjunto</h3>
+                <div class="grid" id="classify-grid"></div>
+                <button class="btn" id="reset-classify">Reiniciar</button>
+            </div>
+        </section>
+
+        <!-- Drag and Drop -->
+        <section class="panel" data-key="drag">
+            <div class="box">
+                <h3>Arraste cada comando para o subconjunto correto</h3>
+                <div id="drag-items"></div>
+                <div class="grid">
+                    <div class="dropzone" data-zone="DDL"><strong>DDL</strong></div>
+                    <div class="dropzone" data-zone="DML"><strong>DML</strong></div>
+                    <div class="dropzone" data-zone="DQL"><strong>DQL</strong></div>
+                    <div class="dropzone" data-zone="DCL"><strong>DCL</strong></div>
+                </div>
+                <button class="btn" id="check-drag">Verificar</button>
+                <button class="btn" id="reset-drag">Reiniciar</button>
+                <div id="drag-feedback" class="feedback"></div>
+            </div>
+        </section>
+
+        <!-- Quiz -->
+        <section class="panel" data-key="quiz">
+            <div class="box">
+                <h3>Quiz Rápido</h3>
+                <div id="quiz-items"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Data
+        const commands = [
+            { cmd: 'CREATE TABLE', sub: 'DDL' },
+            { cmd: 'ALTER TABLE', sub: 'DDL' },
+            { cmd: 'DROP TABLE', sub: 'DDL' },
+            { cmd: 'INSERT INTO', sub: 'DML' },
+            { cmd: 'UPDATE', sub: 'DML' },
+            { cmd: 'DELETE FROM', sub: 'DML' },
+            { cmd: 'SELECT', sub: 'DQL' },
+            { cmd: 'GRANT', sub: 'DCL' },
+            { cmd: 'REVOKE', sub: 'DCL' },
+            { cmd: 'COMMIT', sub: 'DTL' },
+            { cmd: 'ROLLBACK', sub: 'DTL' }
+        ];
+
+        // Classify
+        const classifyGrid = document.getElementById('classify-grid');
+        function renderClassify() {
+            classifyGrid.innerHTML = commands.map((c, i) => `
+        <div class="card" data-i="${i}">
+          <code>${c.cmd}</code>
+          <div class="answer" style="display:none;margin-top:8px;">
+            <span class="badge badge-${c.sub.toLowerCase()}">${c.sub}</span>
+          </div>
+        </div>
+      `).join('');
+            classifyGrid.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('click', () => card.querySelector('.answer').style.display = 'block');
+            });
+        }
+        document.getElementById('reset-classify').addEventListener('click', renderClassify);
+        renderClassify();
+
+        // Drag and Drop
+        const dragItems = document.getElementById('drag-items');
+        const dropzones = document.querySelectorAll('.dropzone');
+        const dragFeedback = document.getElementById('drag-feedback');
+        let dragData = [];
+
+        function renderDrag() {
+            const shuffled = [...commands].sort(() => Math.random() - 0.5).slice(0, 6);
+            dragData = shuffled;
+            dragItems.innerHTML = shuffled.map((c, i) => `
+        <span class="draggable" draggable="true" data-i="${i}" data-sub="${c.sub}">${c.cmd}</span>
+      `).join('');
+            dropzones.forEach(z => z.querySelectorAll('.draggable').forEach(d => d.remove()));
+            dragFeedback.textContent = '';
+
+            dragItems.querySelectorAll('.draggable').forEach(el => {
+                el.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text/plain', el.dataset.i);
+                    e.dataTransfer.setData('sub', el.dataset.sub);
+                });
+            });
+        }
+
+        dropzones.forEach(z => {
+            z.addEventListener('dragover', e => { e.preventDefault(); z.classList.add('over'); });
+            z.addEventListener('dragleave', () => z.classList.remove('over'));
+            z.addEventListener('drop', e => {
+                e.preventDefault();
+                z.classList.remove('over');
+                const i = e.dataTransfer.getData('text/plain');
+                const el = dragItems.querySelector(`[data-i="${i}"]`);
+                if (el) {
+                    el.classList.add('placed');
+                    const clone = el.cloneNode(true);
+                    clone.draggable = false;
+                    z.appendChild(clone);
+                }
+            });
+        });
+
+        document.getElementById('check-drag').addEventListener('click', () => {
+            let correct = 0, total = 0;
+            dropzones.forEach(z => {
+                z.querySelectorAll('.draggable').forEach(d => {
+                    total++;
+                    if (d.dataset.sub === z.dataset.zone) {
+                        d.classList.add('correct');
+                        correct++;
+                    } else {
+                        d.classList.add('incorrect');
+                    }
+                });
+            });
+            dragFeedback.textContent = `${correct}/${total} corretos`;
+            dragFeedback.className = 'feedback ' + (correct === total ? 'ok' : 'err');
+        });
+        document.getElementById('reset-drag').addEventListener('click', renderDrag);
+        renderDrag();
+
+        // Quiz
+        const quizItems = document.getElementById('quiz-items');
+        const quizzes = [
+            { q: 'O comando CREATE TABLE pertence a qual subconjunto?', opts: ['DML', 'DDL', 'DQL'], ans: 1 },
+            { q: 'SELECT é classificado como...', opts: ['DML', 'DCL', 'DQL'], ans: 2 },
+            { q: 'GRANT e REVOKE pertencem ao subconjunto...', opts: ['DTL', 'DCL', 'DDL'], ans: 1 }
+        ];
+        quizItems.innerHTML = quizzes.map((quiz, qi) => `
+      <div class="box" style="margin:8px 0;">
+        <p><strong>${qi + 1}.</strong> ${quiz.q}</p>
+        <div class="opts">${quiz.opts.map((o, oi) => `<button class="btn" data-qi="${qi}" data-oi="${oi}">${o}</button>`).join(' ')}</div>
+        <div class="feedback" id="fb-${qi}"></div>
+      </div>
+    `).join('');
+        quizItems.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const qi = parseInt(btn.dataset.qi);
+                const oi = parseInt(btn.dataset.oi);
+                const fb = document.getElementById(`fb-${qi}`);
+                const correct = quizzes[qi].ans === oi;
+                fb.textContent = correct ? 'Correto! ✅' : 'Incorreto. Tente novamente.';
+                fb.className = 'feedback ' + (correct ? 'ok' : 'err');
+            });
+        });
+    </script>
+</body>
+
+</html>

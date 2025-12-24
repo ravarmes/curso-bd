@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 4.2 — DDL: Criação de Tabelas</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        .feedback.err {
+            color: var(--bad);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .id {
+            color: #fda4af;
+        }
+
+        .ty {
+            color: #fdba74;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: monospace;
+        }
+
+        .sel {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 4.2 — DDL: Criação de Tabelas e Índices</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="sintaxe">Sintaxe DDL</button>
+            <button class="tab" data-key="builder">Construtor</button>
+            <button class="tab" data-key="policies">Políticas ON DELETE</button>
+            <button class="tab" data-key="editor">Editor SQL</button>
+        </div>
+
+        <!-- Sintaxe -->
+        <section class="panel active" data-key="sintaxe">
+            <div class="box">
+                <h3>Estrutura do CREATE TABLE</h3>
+                <pre><span class="kw">CREATE TABLE</span> <span class="id">nome_tabela</span> (
+  <span class="id">coluna1</span> <span class="ty">TIPO</span> <span class="kw">PRIMARY KEY</span>,
+  <span class="id">coluna2</span> <span class="ty">VARCHAR(100)</span> <span class="kw">NOT NULL</span>,
+  <span class="id">coluna_fk</span> <span class="ty">INT</span>,
+  <span class="kw">FOREIGN KEY</span> (<span class="id">coluna_fk</span>) <span class="kw">REFERENCES</span> <span class="id">outra_tabela</span>(<span class="id">pk</span>)
+    <span class="kw">ON DELETE CASCADE</span>
+);</pre>
+                <p class="note">PRIMARY KEY garante unicidade. FOREIGN KEY cria relacionamento. ON DELETE define
+                    comportamento ao excluir pai.</p>
+            </div>
+        </section>
+
+        <!-- Construtor -->
+        <section class="panel" data-key="builder">
+            <div class="box">
+                <h3>Construtor de CREATE TABLE</h3>
+                <div class="grid">
+                    <div>
+                        <label>Nome da tabela: <input id="tbl-name" value="produto"
+                                style="padding:6px;border-radius:8px;border:1px solid #dde2eb;"></label><br><br>
+                        <label>Coluna PK: <input id="col-pk" value="id_produto"
+                                style="padding:6px;border-radius:8px;border:1px solid #dde2eb;"></label>
+                        <select class="sel" id="type-pk">
+                            <option>INT</option>
+                            <option>SERIAL</option>
+                            <option>UUID</option>
+                        </select><br><br>
+                        <label>Coluna 2: <input id="col-2" value="nome"
+                                style="padding:6px;border-radius:8px;border:1px solid #dde2eb;"></label>
+                        <select class="sel" id="type-2">
+                            <option>VARCHAR(100)</option>
+                            <option>TEXT</option>
+                            <option>INT</option>
+                        </select><br><br>
+                        <label>FK para: <input id="fk-ref" value="categoria(id_categoria)"
+                                style="padding:6px;border-radius:8px;border:1px solid #dde2eb;"></label>
+                        <select class="sel" id="on-delete">
+                            <option>CASCADE</option>
+                            <option>RESTRICT</option>
+                            <option>SET NULL</option>
+                        </select><br><br>
+                        <button class="btn" id="gen-ddl">Gerar DDL</button>
+                    </div>
+                    <div>
+                        <h4>SQL Gerado:</h4>
+                        <pre id="ddl-output">-- Clique em Gerar DDL</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Policies -->
+        <section class="panel" data-key="policies">
+            <div class="box">
+                <h3>Simulador: ON DELETE Policies</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Tabela Pai: categoria</h4>
+                        <ul id="list-pai"></ul>
+                    </div>
+                    <div>
+                        <h4>Tabela Filha: produto</h4>
+                        <ul id="list-filha"></ul>
+                    </div>
+                </div>
+                <div style="margin-top:10px;">
+                    <label>Excluir categoria: <select class="sel" id="del-cat">
+                            <option value="1">ID 1 - Eletrônicos</option>
+                            <option value="2">ID 2 - Livros</option>
+                        </select></label>
+                    <label>Política: <select class="sel" id="policy">
+                            <option>CASCADE</option>
+                            <option>RESTRICT</option>
+                            <option>SET NULL</option>
+                        </select></label>
+                    <button class="btn" id="exec-del">Executar DELETE</button>
+                    <button class="btn" id="reset-sim">Reset</button>
+                </div>
+                <div id="sim-feedback" class="feedback"></div>
+            </div>
+        </section>
+
+        <!-- Editor -->
+        <section class="panel" data-key="editor">
+            <div class="box">
+                <h3>Escreva seu CREATE TABLE</h3>
+                <textarea id="sql-input" placeholder="CREATE TABLE ..."></textarea>
+                <button class="btn" id="validate-sql">Validar</button>
+                <div id="editor-feedback" class="feedback"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Builder
+        document.getElementById('gen-ddl').addEventListener('click', () => {
+            const tbl = document.getElementById('tbl-name').value || 'tabela';
+            const pk = document.getElementById('col-pk').value || 'id';
+            const typePk = document.getElementById('type-pk').value;
+            const col2 = document.getElementById('col-2').value || 'coluna';
+            const type2 = document.getElementById('type-2').value;
+            const fkRef = document.getElementById('fk-ref').value || 'outra(id)';
+            const onDel = document.getElementById('on-delete').value;
+            const sql = `CREATE TABLE ${tbl} (
+  ${pk} ${typePk} PRIMARY KEY,
+  ${col2} ${type2} NOT NULL,
+  id_categoria INT,
+  FOREIGN KEY (id_categoria) REFERENCES ${fkRef}
+    ON DELETE ${onDel}
+);`;
+            document.getElementById('ddl-output').textContent = sql;
+        });
+
+        // Simulator
+        let state = {
+            categorias: [{ id: 1, nome: 'Eletrônicos' }, { id: 2, nome: 'Livros' }],
+            produtos: [
+                { id: 101, nome: 'Notebook', cat: 1 },
+                { id: 102, nome: 'Mouse', cat: 1 },
+                { id: 103, nome: 'Romance', cat: 2 }
+            ]
+        };
+
+        function renderSim() {
+            document.getElementById('list-pai').innerHTML = state.categorias.map(c => `<li>ID ${c.id}: ${c.nome}</li>`).join('');
+            document.getElementById('list-filha').innerHTML = state.produtos.map(p => `<li>ID ${p.id}: ${p.nome} → cat ${p.cat ?? 'NULL'}</li>`).join('');
+        }
+
+        document.getElementById('exec-del').addEventListener('click', () => {
+            const catId = parseInt(document.getElementById('del-cat').value);
+            const policy = document.getElementById('policy').value;
+            const fb = document.getElementById('sim-feedback');
+            const hasDep = state.produtos.some(p => p.cat === catId);
+
+            if (policy === 'RESTRICT' && hasDep) {
+                fb.textContent = 'RESTRICT: Exclusão bloqueada! Há produtos referenciando esta categoria.';
+                fb.className = 'feedback err';
+                return;
+            }
+
+            if (policy === 'CASCADE') {
+                state.produtos = state.produtos.filter(p => p.cat !== catId);
+                fb.textContent = 'CASCADE: Categoria e produtos dependentes excluídos.';
+            } else if (policy === 'SET NULL') {
+                state.produtos = state.produtos.map(p => p.cat === catId ? { ...p, cat: null } : p);
+                fb.textContent = 'SET NULL: FK dos produtos definida como NULL.';
+            } else {
+                fb.textContent = 'RESTRICT: Exclusão permitida (sem dependentes).';
+            }
+
+            state.categorias = state.categorias.filter(c => c.id !== catId);
+            fb.className = 'feedback ok';
+            renderSim();
+        });
+
+        document.getElementById('reset-sim').addEventListener('click', () => {
+            state = {
+                categorias: [{ id: 1, nome: 'Eletrônicos' }, { id: 2, nome: 'Livros' }],
+                produtos: [
+                    { id: 101, nome: 'Notebook', cat: 1 },
+                    { id: 102, nome: 'Mouse', cat: 1 },
+                    { id: 103, nome: 'Romance', cat: 2 }
+                ]
+            };
+            document.getElementById('sim-feedback').textContent = '';
+            renderSim();
+        });
+        renderSim();
+
+        // Editor
+        document.getElementById('validate-sql').addEventListener('click', () => {
+            const sql = document.getElementById('sql-input').value.toLowerCase();
+            const fb = document.getElementById('editor-feedback');
+            const checks = [
+                sql.includes('create table'),
+                sql.includes('primary key'),
+                sql.includes('not null') || sql.includes('foreign key')
+            ];
+            const passed = checks.filter(Boolean).length;
+            if (passed === 3) {
+                fb.textContent = 'Excelente! ✅ DDL válido com CREATE TABLE, PK e constraints.';
+                fb.className = 'feedback ok';
+            } else {
+                fb.textContent = `Parcial: ${passed}/3 elementos encontrados. Adicione PRIMARY KEY e constraints.`;
+                fb.className = 'feedback err';
+            }
+        });
+    </script>
+</body>
+
+</html>

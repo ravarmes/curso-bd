@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 4.6 — DCL: Usuários e Permissões</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .btn-grant {
+            border-color: var(--good);
+            color: var(--good);
+        }
+
+        .btn-revoke {
+            border-color: var(--bad);
+            color: var(--bad);
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        .feedback.err {
+            color: var(--bad);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .id {
+            color: #fda4af;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        input.inp,
+        select.sel {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 4px;
+        }
+
+        .perm-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            margin: 2px;
+        }
+
+        .perm-select {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .perm-insert {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .perm-update {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .perm-delete {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .perm-all {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .role-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 8px 0;
+            background: #fafafa;
+        }
+
+        .user-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 6px 0;
+            background: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 4.6 — DCL: Usuários, Papéis e Permissões</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="sintaxe">Sintaxe DCL</button>
+            <button class="tab" data-key="simulator">Simulador</button>
+            <button class="tab" data-key="roles">Papéis (Roles)</button>
+            <button class="tab" data-key="quiz">Quiz</button>
+        </div>
+
+        <!-- Sintaxe -->
+        <section class="panel active" data-key="sintaxe">
+            <div class="box">
+                <h3>Comandos DCL</h3>
+                <pre><span class="kw">CREATE USER</span> <span class="id">joao</span> <span class="kw">WITH PASSWORD</span> <span class="id">'senha123'</span>;
+
+<span class="kw">CREATE ROLE</span> <span class="id">leitor</span>;
+<span class="kw">GRANT SELECT ON</span> <span class="id">produto</span> <span class="kw">TO</span> <span class="id">leitor</span>;
+
+<span class="kw">GRANT</span> <span class="id">leitor</span> <span class="kw">TO</span> <span class="id">joao</span>;
+
+<span class="kw">REVOKE SELECT ON</span> <span class="id">produto</span> <span class="kw">FROM</span> <span class="id">joao</span>;</pre>
+                <p class="note">GRANT concede permissões. REVOKE remove. ROLE agrupa permissões reutilizáveis.</p>
+            </div>
+        </section>
+
+        <!-- Simulator -->
+        <section class="panel" data-key="simulator">
+            <div class="box">
+                <h3>Simulador de Permissões</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Ações:</h4>
+                        <select class="sel" id="perm-user">
+                            <option value="joao">joao</option>
+                            <option value="maria">maria</option>
+                            <option value="admin">admin</option>
+                        </select>
+                        <select class="sel" id="perm-action">
+                            <option value="SELECT">SELECT</option>
+                            <option value="INSERT">INSERT</option>
+                            <option value="UPDATE">UPDATE</option>
+                            <option value="DELETE">DELETE</option>
+                            <option value="ALL">ALL PRIVILEGES</option>
+                        </select>
+                        <select class="sel" id="perm-table">
+                            <option value="produto">produto</option>
+                            <option value="cliente">cliente</option>
+                            <option value="pedido">pedido</option>
+                        </select>
+                        <br><br>
+                        <button class="btn btn-grant" id="grant-perm">GRANT</button>
+                        <button class="btn btn-revoke" id="revoke-perm">REVOKE</button>
+                        <button class="btn" id="reset-perm">Reset</button>
+                    </div>
+                    <div>
+                        <h4>Permissões Atuais:</h4>
+                        <div id="perm-list"></div>
+                    </div>
+                </div>
+                <div id="perm-feedback" class="feedback"></div>
+                <div id="sql-output" class="box"
+                    style="background:#1e293b;color:#e2e8f0;font-family:monospace;font-size:0.9rem;"></div>
+            </div>
+        </section>
+
+        <!-- Roles -->
+        <section class="panel" data-key="roles">
+            <div class="box">
+                <h3>Sistema de Papéis (Roles)</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Roles Disponíveis:</h4>
+                        <div class="role-card">
+                            <strong>leitor</strong>
+                            <p class="note">Permissões: SELECT em todas tabelas</p>
+                            <span class="perm-badge perm-select">SELECT</span>
+                        </div>
+                        <div class="role-card">
+                            <strong>editor</strong>
+                            <p class="note">Permissões: SELECT, INSERT, UPDATE</p>
+                            <span class="perm-badge perm-select">SELECT</span>
+                            <span class="perm-badge perm-insert">INSERT</span>
+                            <span class="perm-badge perm-update">UPDATE</span>
+                        </div>
+                        <div class="role-card">
+                            <strong>admin</strong>
+                            <p class="note">Permissões: ALL PRIVILEGES</p>
+                            <span class="perm-badge perm-all">ALL</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>Atribuir Role a Usuário:</h4>
+                        <select class="sel" id="role-user">
+                            <option value="joao">joao</option>
+                            <option value="maria">maria</option>
+                        </select>
+                        <select class="sel" id="role-role">
+                            <option value="leitor">leitor</option>
+                            <option value="editor">editor</option>
+                            <option value="admin">admin</option>
+                        </select>
+                        <button class="btn btn-grant" id="grant-role">GRANT Role</button>
+                        <div id="user-roles"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz -->
+        <section class="panel" data-key="quiz">
+            <div class="box">
+                <h3>Quiz DCL</h3>
+                <div id="quiz-items"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Permissions State
+        let permissions = {
+            joao: [],
+            maria: [],
+            admin: [{ action: 'ALL', table: 'produto' }, { action: 'ALL', table: 'cliente' }, { action: 'ALL', table: 'pedido' }]
+        };
+
+        function renderPerm() {
+            const list = document.getElementById('perm-list');
+            list.innerHTML = Object.entries(permissions).map(([user, perms]) => `
+        <div class="user-card">
+          <strong>${user}</strong><br>
+          ${perms.length ? perms.map(p => `<span class="perm-badge perm-${p.action.toLowerCase()}">${p.action} ON ${p.table}</span>`).join('') : '<span class="note">Sem permissões</span>'}
+        </div>
+      `).join('');
+        }
+
+        document.getElementById('grant-perm').addEventListener('click', () => {
+            const user = document.getElementById('perm-user').value;
+            const action = document.getElementById('perm-action').value;
+            const table = document.getElementById('perm-table').value;
+
+            if (!permissions[user].find(p => p.action === action && p.table === table)) {
+                permissions[user].push({ action, table });
+            }
+
+            document.getElementById('sql-output').textContent = `GRANT ${action} ON ${table} TO ${user};`;
+            document.getElementById('perm-feedback').textContent = `GRANT executado! ✅`;
+            document.getElementById('perm-feedback').className = 'feedback ok';
+            renderPerm();
+        });
+
+        document.getElementById('revoke-perm').addEventListener('click', () => {
+            const user = document.getElementById('perm-user').value;
+            const action = document.getElementById('perm-action').value;
+            const table = document.getElementById('perm-table').value;
+
+            permissions[user] = permissions[user].filter(p => !(p.action === action && p.table === table));
+
+            document.getElementById('sql-output').textContent = `REVOKE ${action} ON ${table} FROM ${user};`;
+            document.getElementById('perm-feedback').textContent = `REVOKE executado! ❌`;
+            document.getElementById('perm-feedback').className = 'feedback err';
+            renderPerm();
+        });
+
+        document.getElementById('reset-perm').addEventListener('click', () => {
+            permissions = { joao: [], maria: [], admin: [{ action: 'ALL', table: 'produto' }, { action: 'ALL', table: 'cliente' }, { action: 'ALL', table: 'pedido' }] };
+            document.getElementById('sql-output').textContent = '';
+            document.getElementById('perm-feedback').textContent = '';
+            renderPerm();
+        });
+
+        renderPerm();
+
+        // Roles
+        let userRoles = { joao: [], maria: [] };
+
+        document.getElementById('grant-role').addEventListener('click', () => {
+            const user = document.getElementById('role-user').value;
+            const role = document.getElementById('role-role').value;
+            if (!userRoles[user].includes(role)) {
+                userRoles[user].push(role);
+            }
+            document.getElementById('user-roles').innerHTML = Object.entries(userRoles).map(([u, roles]) => `
+        <div class="user-card"><strong>${u}</strong>: ${roles.length ? roles.join(', ') : 'nenhum role'}</div>
+      `).join('');
+        });
+
+        // Quiz
+        const quizzes = [
+            { q: 'GRANT SELECT ON produto TO joao faz o quê?', opts: ['Remove permissão', 'Concede leitura em produto para joao', 'Cria usuário joao'], ans: 1 },
+            { q: 'ROLE é usado para...', opts: ['Criar tabelas', 'Agrupar permissões reutilizáveis', 'Executar transações'], ans: 1 },
+            { q: 'REVOKE...', opts: ['Concede permissão', 'Remove permissão', 'Cria role'], ans: 1 }
+        ];
+        document.getElementById('quiz-items').innerHTML = quizzes.map((q, i) => `
+      <div class="box"><p><strong>${i + 1}.</strong> ${q.q}</p>
+      ${q.opts.map((o, j) => `<button class="btn" data-q="${i}" data-o="${j}">${o}</button>`).join('')}
+      <div class="feedback" id="qfb-${i}"></div></div>
+    `).join('');
+        document.querySelectorAll('#quiz-items .btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const qi = parseInt(btn.dataset.q), oi = parseInt(btn.dataset.o);
+                const fb = document.getElementById(`qfb-${qi}`);
+                fb.textContent = quizzes[qi].ans === oi ? 'Correto! ✅' : 'Incorreto.';
+                fb.className = 'feedback ' + (quizzes[qi].ans === oi ? 'ok' : 'err');
+            });
+        });
+    </script>
+</body>
+
+</html>

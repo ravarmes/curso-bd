@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 4.4 — Transações ACID</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --warn: #d97706;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .btn-commit {
+            border-color: var(--good);
+            color: var(--good);
+        }
+
+        .btn-rollback {
+            border-color: var(--bad);
+            color: var(--bad);
+        }
+
+        .btn-savepoint {
+            border-color: var(--warn);
+            color: var(--warn);
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        .feedback.err {
+            color: var(--bad);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .timeline {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .step {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #fafafa;
+            font-size: 0.85rem;
+        }
+
+        .step.active {
+            background: #dbeafe;
+            border-color: var(--accent);
+        }
+
+        .step.committed {
+            background: #d1fae5;
+            border-color: var(--good);
+        }
+
+        .step.rolled {
+            background: #fee2e2;
+            border-color: var(--bad);
+            text-decoration: line-through;
+        }
+
+        .acid-card {
+            text-align: center;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fafafa;
+        }
+
+        .acid-card h4 {
+            margin: 0 0 6px;
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 4.4 — Transações: COMMIT, ROLLBACK e SAVEPOINT</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="acid">ACID</button>
+            <button class="tab" data-key="simulator">Simulador</button>
+            <button class="tab" data-key="savepoint">SAVEPOINT</button>
+            <button class="tab" data-key="quiz">Quiz</button>
+        </div>
+
+        <!-- ACID -->
+        <section class="panel active" data-key="acid">
+            <div class="box">
+                <h3>Propriedades ACID</h3>
+                <div class="grid" style="grid-template-columns:repeat(4,1fr);">
+                    <div class="acid-card">
+                        <h4>A</h4>
+                        <strong>Atomicidade</strong>
+                        <p class="note">Tudo ou nada. Transação completa ou nenhuma alteração.</p>
+                    </div>
+                    <div class="acid-card">
+                        <h4>C</h4>
+                        <strong>Consistência</strong>
+                        <p class="note">BD sempre em estado válido após transação.</p>
+                    </div>
+                    <div class="acid-card">
+                        <h4>I</h4>
+                        <strong>Isolamento</strong>
+                        <p class="note">Transações não interferem entre si.</p>
+                    </div>
+                    <div class="acid-card">
+                        <h4>D</h4>
+                        <strong>Durabilidade</strong>
+                        <p class="note">Dados persistem após COMMIT, mesmo com falhas.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulator -->
+        <section class="panel" data-key="simulator">
+            <div class="box">
+                <h3>Simulador de Transação</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Ações:</h4>
+                        <button class="btn" id="begin">BEGIN</button>
+                        <button class="btn" id="insert1">INSERT (Produto A)</button>
+                        <button class="btn" id="insert2">INSERT (Produto B)</button>
+                        <button class="btn btn-commit" id="commit">COMMIT</button>
+                        <button class="btn btn-rollback" id="rollback">ROLLBACK</button>
+                        <button class="btn" id="sim-reset">Reset</button>
+                    </div>
+                    <div>
+                        <h4>Tabela: produto</h4>
+                        <table id="sim-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <p class="note">Dados em cinza = não confirmados (pending)</p>
+                    </div>
+                </div>
+                <h4>Timeline:</h4>
+                <div class="timeline" id="timeline"></div>
+                <div id="sim-feedback" class="feedback"></div>
+            </div>
+        </section>
+
+        <!-- SAVEPOINT -->
+        <section class="panel" data-key="savepoint">
+            <div class="box">
+                <h3>Simulador SAVEPOINT</h3>
+                <pre><span class="kw">BEGIN</span>;
+<span class="kw">INSERT INTO</span> produto VALUES (1, 'A');
+<span class="kw">SAVEPOINT</span> sp1;
+<span class="kw">INSERT INTO</span> produto VALUES (2, 'B');
+<span class="kw">ROLLBACK TO</span> sp1;  -- Desfaz apenas B
+<span class="kw">COMMIT</span>;           -- Confirma apenas A</pre>
+                <div class="grid">
+                    <div>
+                        <button class="btn" id="sp-begin">BEGIN</button>
+                        <button class="btn" id="sp-ins1">INSERT A</button>
+                        <button class="btn btn-savepoint" id="sp-save">SAVEPOINT sp1</button>
+                        <button class="btn" id="sp-ins2">INSERT B</button>
+                        <button class="btn btn-rollback" id="sp-rollto">ROLLBACK TO sp1</button>
+                        <button class="btn btn-commit" id="sp-commit">COMMIT</button>
+                        <button class="btn" id="sp-reset">Reset</button>
+                    </div>
+                    <div>
+                        <h4>Tabela:</h4>
+                        <table id="sp-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="sp-feedback" class="feedback"></div>
+            </div>
+        </section>
+
+        <!-- Quiz -->
+        <section class="panel" data-key="quiz">
+            <div class="box">
+                <h3>Quiz ACID</h3>
+                <div id="quiz-items"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Simulator
+        let simState = { started: false, pending: [], committed: [], timeline: [] };
+
+        function renderSim() {
+            const tbody = document.querySelector('#sim-table tbody');
+            const all = [...simState.committed, ...simState.pending];
+            tbody.innerHTML = all.map(r => `<tr style="${simState.pending.includes(r) ? 'opacity:0.5;' : ''}"><td>${r.id}</td><td>${r.nome}</td></tr>`).join('');
+            document.getElementById('timeline').innerHTML = simState.timeline.map((t, i) =>
+                `<div class="step ${t.status}">${t.text}</div>`
+            ).join('');
+        }
+
+        function resetSim() {
+            simState = { started: false, pending: [], committed: [], timeline: [] };
+            document.getElementById('sim-feedback').textContent = '';
+            renderSim();
+        }
+
+        document.getElementById('begin').addEventListener('click', () => {
+            simState.started = true;
+            simState.timeline.push({ text: 'BEGIN', status: 'active' });
+            document.getElementById('sim-feedback').textContent = 'Transação iniciada.';
+            renderSim();
+        });
+
+        document.getElementById('insert1').addEventListener('click', () => {
+            if (!simState.started) { document.getElementById('sim-feedback').textContent = 'Execute BEGIN primeiro!'; return; }
+            simState.pending.push({ id: 1, nome: 'Produto A' });
+            simState.timeline.push({ text: 'INSERT A', status: 'active' });
+            renderSim();
+        });
+
+        document.getElementById('insert2').addEventListener('click', () => {
+            if (!simState.started) { document.getElementById('sim-feedback').textContent = 'Execute BEGIN primeiro!'; return; }
+            simState.pending.push({ id: 2, nome: 'Produto B' });
+            simState.timeline.push({ text: 'INSERT B', status: 'active' });
+            renderSim();
+        });
+
+        document.getElementById('commit').addEventListener('click', () => {
+            if (!simState.started) return;
+            simState.committed.push(...simState.pending);
+            simState.pending = [];
+            simState.timeline.forEach(t => t.status = 'committed');
+            simState.timeline.push({ text: 'COMMIT', status: 'committed' });
+            simState.started = false;
+            document.getElementById('sim-feedback').textContent = 'COMMIT: Alterações confirmadas permanentemente! ✅';
+            document.getElementById('sim-feedback').className = 'feedback ok';
+            renderSim();
+        });
+
+        document.getElementById('rollback').addEventListener('click', () => {
+            if (!simState.started) return;
+            simState.pending = [];
+            simState.timeline.forEach(t => { if (t.status === 'active') t.status = 'rolled'; });
+            simState.timeline.push({ text: 'ROLLBACK', status: 'rolled' });
+            simState.started = false;
+            document.getElementById('sim-feedback').textContent = 'ROLLBACK: Todas as alterações desfeitas! ❌';
+            document.getElementById('sim-feedback').className = 'feedback err';
+            renderSim();
+        });
+
+        document.getElementById('sim-reset').addEventListener('click', resetSim);
+        resetSim();
+
+        // SAVEPOINT
+        let spState = { started: false, rows: [], savepoint: null };
+
+        function renderSp() {
+            const tbody = document.querySelector('#sp-table tbody');
+            tbody.innerHTML = spState.rows.map(r => `<tr><td>${r.id}</td><td>${r.nome}</td><td>${r.status}</td></tr>`).join('');
+        }
+
+        document.getElementById('sp-begin').addEventListener('click', () => { spState.started = true; spState.rows = []; document.getElementById('sp-feedback').textContent = 'BEGIN'; renderSp(); });
+        document.getElementById('sp-ins1').addEventListener('click', () => { if (!spState.started) return; spState.rows.push({ id: 1, nome: 'A', status: 'pending' }); renderSp(); });
+        document.getElementById('sp-save').addEventListener('click', () => { spState.savepoint = spState.rows.length; document.getElementById('sp-feedback').textContent = 'SAVEPOINT sp1 criado'; });
+        document.getElementById('sp-ins2').addEventListener('click', () => { if (!spState.started) return; spState.rows.push({ id: 2, nome: 'B', status: 'pending' }); renderSp(); });
+        document.getElementById('sp-rollto').addEventListener('click', () => {
+            if (spState.savepoint != null) {
+                spState.rows = spState.rows.slice(0, spState.savepoint);
+                document.getElementById('sp-feedback').textContent = 'ROLLBACK TO sp1: B desfeito';
+                document.getElementById('sp-feedback').className = 'feedback err';
+                renderSp();
+            }
+        });
+        document.getElementById('sp-commit').addEventListener('click', () => {
+            spState.rows.forEach(r => r.status = 'committed');
+            document.getElementById('sp-feedback').textContent = 'COMMIT: Confirmado! ✅';
+            document.getElementById('sp-feedback').className = 'feedback ok';
+            renderSp();
+        });
+        document.getElementById('sp-reset').addEventListener('click', () => { spState = { started: false, rows: [], savepoint: null }; document.getElementById('sp-feedback').textContent = ''; renderSp(); });
+
+        // Quiz
+        const quizzes = [
+            { q: 'Qual propriedade garante "tudo ou nada"?', opts: ['Consistência', 'Atomicidade', 'Durabilidade'], ans: 1 },
+            { q: 'COMMIT faz o quê?', opts: ['Desfaz alterações', 'Confirma alterações permanentemente', 'Cria savepoint'], ans: 1 },
+            { q: 'ROLLBACK TO sp1...', opts: ['Desfaz tudo', 'Desfaz até o savepoint sp1', 'Confirma até sp1'], ans: 1 }
+        ];
+        document.getElementById('quiz-items').innerHTML = quizzes.map((q, i) => `
+      <div class="box"><p><strong>${i + 1}.</strong> ${q.q}</p>
+      ${q.opts.map((o, j) => `<button class="btn" data-q="${i}" data-o="${j}">${o}</button>`).join('')}
+      <div class="feedback" id="qfb-${i}"></div></div>
+    `).join('');
+        document.querySelectorAll('#quiz-items .btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const qi = parseInt(btn.dataset.q), oi = parseInt(btn.dataset.o);
+                const fb = document.getElementById(`qfb-${qi}`);
+                fb.textContent = quizzes[qi].ans === oi ? 'Correto! ✅' : 'Incorreto.';
+                fb.className = 'feedback ' + (quizzes[qi].ans === oi ? 'ok' : 'err');
+            });
+        });
+    </script>
+</body>
+
+</html>
