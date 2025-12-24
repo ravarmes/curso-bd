@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 6.4 — EXPLAIN e Tuning</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        .feedback.err {
+            color: var(--bad);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .cost {
+            color: #fde68a;
+        }
+
+        .time {
+            color: #86efac;
+        }
+
+        .warn {
+            color: #fda4af;
+        }
+
+        .plan-node {
+            border-left: 3px solid var(--accent);
+            padding: 8px 12px;
+            margin: 8px 0;
+            background: #f8fafc;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .plan-node.slow {
+            border-color: var(--bad);
+            background: #fef2f2;
+        }
+
+        .plan-node.fast {
+            border-color: var(--good);
+            background: #f0fdf4;
+        }
+
+        .metric {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin: 2px;
+            font-size: 0.85rem;
+        }
+
+        .metric-cost {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .metric-rows {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .metric-time {
+            background: #d1fae5;
+            color: #047857;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 6.4 — Plano de Execução e Tuning Básico</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="explain">EXPLAIN</button>
+            <button class="tab" data-key="analyze">EXPLAIN ANALYZE</button>
+            <button class="tab" data-key="diagnostico">Diagnóstico</button>
+            <button class="tab" data-key="manutencao">VACUUM/ANALYZE</button>
+        </div>
+
+        <!-- EXPLAIN -->
+        <section class="panel active" data-key="explain">
+            <div class="box">
+                <h3>EXPLAIN - Plano Estimado</h3>
+                <p class="note">EXPLAIN mostra o plano que o otimizador PRETENDE usar, sem executar a consulta.</p>
+                <div class="grid">
+                    <div>
+                        <h4>Query:</h4>
+                        <pre><span class="kw">EXPLAIN</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> produto
+<span class="kw">WHERE</span> nome = 'Notebook';</pre>
+                        <button class="btn" id="run-explain">Executar EXPLAIN</button>
+                    </div>
+                    <div>
+                        <h4>Plano:</h4>
+                        <div id="explain-output"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ANALYZE -->
+        <section class="panel" data-key="analyze">
+            <div class="box">
+                <h3>EXPLAIN ANALYZE - Execução Real</h3>
+                <p class="note">EXPLAIN ANALYZE executa a consulta e mostra tempos reais (não apenas estimados).</p>
+                <div class="grid">
+                    <div>
+                        <h4>Query:</h4>
+                        <pre><span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> produto
+<span class="kw">WHERE</span> categoria_id = 1;</pre>
+                        <button class="btn" id="run-analyze-seq">Sem Índice</button>
+                        <button class="btn" id="run-analyze-idx">Com Índice</button>
+                    </div>
+                    <div>
+                        <h4>Resultado:</h4>
+                        <div id="analyze-output"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Diagnóstico -->
+        <section class="panel" data-key="diagnostico">
+            <div class="box">
+                <h3>Diagnóstico de Consultas Lentas</h3>
+                <p class="note">Identifique problemas comuns no plano de execução:</p>
+                <div class="grid">
+                    <div class="plan-node slow">
+                        <h4>⚠️ Seq Scan em tabela grande</h4>
+                        <p class="note">Problema: Lendo todas as linhas</p>
+                        <p><strong>Solução:</strong> Criar índice na coluna do WHERE</p>
+                    </div>
+                    <div class="plan-node slow">
+                        <h4>⚠️ Nested Loop com muitas linhas</h4>
+                        <p class="note">Problema: JOIN ineficiente</p>
+                        <p><strong>Solução:</strong> Criar índice na FK ou usar HASH JOIN</p>
+                    </div>
+                    <div class="plan-node slow">
+                        <h4>⚠️ Sort externo (disk)</h4>
+                        <p class="note">Problema: ORDER BY usando disco</p>
+                        <p><strong>Solução:</strong> Aumentar work_mem ou criar índice ordenado</p>
+                    </div>
+                    <div class="plan-node fast">
+                        <h4>✅ Index Scan</h4>
+                        <p class="note">Bom: Usando índice para filtrar</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Manutenção -->
+        <section class="panel" data-key="manutencao">
+            <div class="box">
+                <h3>Comandos de Manutenção</h3>
+                <div class="grid">
+                    <div class="box">
+                        <h4>VACUUM</h4>
+                        <pre><span class="kw">VACUUM</span> produto;</pre>
+                        <p class="note">Recupera espaço de linhas deletadas/atualizadas. Essencial para performance.</p>
+                        <button class="btn" data-cmd="VACUUM">Simular VACUUM</button>
+                    </div>
+                    <div class="box">
+                        <h4>ANALYZE</h4>
+                        <pre><span class="kw">ANALYZE</span> produto;</pre>
+                        <p class="note">Atualiza estatísticas usadas pelo otimizador. Execute após grandes alterações.
+                        </p>
+                        <button class="btn" data-cmd="ANALYZE">Simular ANALYZE</button>
+                    </div>
+                    <div class="box">
+                        <h4>VACUUM ANALYZE</h4>
+                        <pre><span class="kw">VACUUM ANALYZE</span> produto;</pre>
+                        <p class="note">Combina ambos. Recomendado para manutenção regular.</p>
+                        <button class="btn" data-cmd="VACUUM ANALYZE">Simular</button>
+                    </div>
+                    <div class="box">
+                        <h4>REINDEX</h4>
+                        <pre><span class="kw">REINDEX INDEX</span> idx_nome;</pre>
+                        <p class="note">Reconstrói índice corrompido ou inchado.</p>
+                        <button class="btn" data-cmd="REINDEX">Simular REINDEX</button>
+                    </div>
+                </div>
+                <div id="cmd-feedback" class="feedback"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // EXPLAIN
+        document.getElementById('run-explain').addEventListener('click', () => {
+            document.getElementById('explain-output').innerHTML = `
+        <div class="plan-node">
+          <strong>Seq Scan on produto</strong>
+          <span class="metric metric-cost">cost=0.00..125.00</span>
+          <span class="metric metric-rows">rows=5</span>
+          <p class="note">Filter: (nome = 'Notebook')</p>
+        </div>
+        <p class="note">Planning Time: 0.15 ms</p>
+      `;
+        });
+
+        // ANALYZE
+        document.getElementById('run-analyze-seq').addEventListener('click', () => {
+            document.getElementById('analyze-output').innerHTML = `
+        <div class="plan-node slow">
+          <strong>Seq Scan on produto</strong>
+          <span class="metric metric-cost">cost=0.00..1250.00</span>
+          <span class="metric metric-rows">rows=15000</span>
+          <span class="metric metric-time">actual time=0.02..45.3 ms</span>
+          <p class="note">Filter: (categoria_id = 1)</p>
+          <p class="note warn">Rows Removed by Filter: 35000</p>
+        </div>
+        <p><span class="metric metric-time">Execution Time: 48.5 ms</span></p>
+        <p class="note">⚠️ Seq Scan lento! Criar índice em categoria_id.</p>
+      `;
+        });
+
+        document.getElementById('run-analyze-idx').addEventListener('click', () => {
+            document.getElementById('analyze-output').innerHTML = `
+        <div class="plan-node fast">
+          <strong>Index Scan using idx_categoria on produto</strong>
+          <span class="metric metric-cost">cost=0.29..35.50</span>
+          <span class="metric metric-rows">rows=15000</span>
+          <span class="metric metric-time">actual time=0.03..2.1 ms</span>
+          <p class="note">Index Cond: (categoria_id = 1)</p>
+        </div>
+        <p><span class="metric metric-time">Execution Time: 2.8 ms</span></p>
+        <p class="note">✅ Index Scan rápido! ~17x mais rápido.</p>
+      `;
+        });
+
+        // Manutenção
+        document.querySelectorAll('[data-cmd]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const cmd = btn.dataset.cmd;
+                document.getElementById('cmd-feedback').textContent = `${cmd} executado com sucesso! ✅`;
+                document.getElementById('cmd-feedback').className = 'feedback ok';
+            });
+        });
+    </script>
+</body>
+
+</html>

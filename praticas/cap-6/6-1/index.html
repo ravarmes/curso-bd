@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 6.1 — Modelo Físico</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .ty {
+            color: #fdba74;
+        }
+
+        .id {
+            color: #fda4af;
+        }
+
+        .layers {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .layer {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .layer:hover {
+            transform: scale(1.02);
+        }
+
+        .layer.conceitual {
+            background: linear-gradient(135deg, #dbeafe, #eff6ff);
+            border-color: #3b82f6;
+        }
+
+        .layer.logico {
+            background: linear-gradient(135deg, #fef3c7, #fffbeb);
+            border-color: #f59e0b;
+        }
+
+        .layer.fisico {
+            background: linear-gradient(135deg, #d1fae5, #ecfdf5);
+            border-color: #10b981;
+        }
+
+        .layer h4 {
+            margin: 0 0 6px;
+        }
+
+        .arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--muted);
+        }
+
+        .detail {
+            display: none;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        .layer.active .detail {
+            display: block;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 6.1 — Modelo Físico e Mapeamento para o SGBD</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="niveis">Níveis de Abstração</button>
+            <button class="tab" data-key="mapeamento">Mapeamento</button>
+            <button class="tab" data-key="quiz">Quiz</button>
+        </div>
+
+        <!-- Níveis -->
+        <section class="panel active" data-key="niveis">
+            <div class="box">
+                <h3>Três Níveis de Abstração</h3>
+                <p class="note">Clique em cada nível para ver detalhes:</p>
+                <div class="layers">
+                    <div class="layer conceitual" data-level="conceitual">
+                        <h4>📐 Nível Conceitual (MER)</h4>
+                        <p>Entidades, Relacionamentos, Atributos</p>
+                        <div class="detail">
+                            <ul>
+                                <li>Independente de SGBD</li>
+                                <li>Foco no domínio do problema</li>
+                                <li>Ex: Entidade ALUNO com atributos nome, matrícula</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="layer logico" data-level="logico">
+                        <h4>📊 Nível Lógico (Relacional)</h4>
+                        <p>Tabelas, PK, FK, Tipos genéricos</p>
+                        <div class="detail">
+                            <ul>
+                                <li>Independente de SGBD específico</li>
+                                <li>Normalização aplicada</li>
+                                <li>Ex: tabela aluno(id PK, nome, turma_id FK)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="layer fisico" data-level="fisico">
+                        <h4>💾 Nível Físico (SQL DDL)</h4>
+                        <p>Tipos exatos, Índices, Tablespaces</p>
+                        <div class="detail">
+                            <ul>
+                                <li>Específico para o SGBD (PostgreSQL, MySQL...)</li>
+                                <li>CREATE INDEX, CONSTRAINT, políticas ON DELETE</li>
+                                <li>Ex: nome VARCHAR(100) NOT NULL, CREATE INDEX idx_nome</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mapeamento -->
+        <section class="panel" data-key="mapeamento">
+            <div class="box">
+                <h3>Mapeamento Lógico → Físico</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Modelo Lógico:</h4>
+                        <pre>aluno
+  id: inteiro, PK
+  nome: texto(100)
+  email: texto(150), único
+  turma_id: inteiro, FK → turma</pre>
+                    </div>
+                    <div>
+                        <h4>Modelo Físico (PostgreSQL):</h4>
+                        <pre><span class="kw">CREATE TABLE</span> <span class="id">aluno</span> (
+  <span class="id">id</span> <span class="ty">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  <span class="id">nome</span> <span class="ty">VARCHAR(100)</span> <span class="kw">NOT NULL</span>,
+  <span class="id">email</span> <span class="ty">VARCHAR(150)</span> <span class="kw">UNIQUE</span>,
+  <span class="id">turma_id</span> <span class="ty">INTEGER</span>,
+  <span class="kw">CONSTRAINT</span> fk_turma 
+    <span class="kw">FOREIGN KEY</span> (<span class="id">turma_id</span>)
+    <span class="kw">REFERENCES</span> <span class="id">turma</span>(<span class="id">id</span>)
+    <span class="kw">ON DELETE SET NULL</span>
+);
+
+<span class="kw">CREATE INDEX</span> idx_aluno_nome 
+  <span class="kw">ON</span> <span class="id">aluno</span>(<span class="id">nome</span>);</pre>
+                    </div>
+                </div>
+                <h4 style="margin-top:16px;">Decisões do Modelo Físico:</h4>
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#f1f5f9;">
+                            <th style="padding:8px;border:1px solid #dde2eb;">Decisão</th>
+                            <th style="padding:8px;border:1px solid #dde2eb;">Exemplo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:8px;border:1px solid #dde2eb;">Tipo de dado exato</td>
+                            <td style="padding:8px;border:1px solid #dde2eb;">VARCHAR(100), SERIAL, TIMESTAMP</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;border:1px solid #dde2eb;">Índices</td>
+                            <td style="padding:8px;border:1px solid #dde2eb;">CREATE INDEX idx_nome ON aluno(nome)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;border:1px solid #dde2eb;">Políticas de FK</td>
+                            <td style="padding:8px;border:1px solid #dde2eb;">ON DELETE CASCADE / SET NULL / RESTRICT
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;border:1px solid #dde2eb;">Constraints</td>
+                            <td style="padding:8px;border:1px solid #dde2eb;">UNIQUE, CHECK, NOT NULL</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Quiz -->
+        <section class="panel" data-key="quiz">
+            <div class="box">
+                <h3>Quiz - Níveis de Abstração</h3>
+                <div id="quiz-items"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Layers
+        document.querySelectorAll('.layer').forEach(layer => {
+            layer.addEventListener('click', () => {
+                document.querySelectorAll('.layer').forEach(l => l.classList.remove('active'));
+                layer.classList.add('active');
+            });
+        });
+
+        // Quiz
+        const quizzes = [
+            { q: 'CREATE INDEX pertence a qual nível?', opts: ['Conceitual', 'Lógico', 'Físico'], ans: 2 },
+            { q: 'Entidades e Relacionamentos são definidos no nível...', opts: ['Conceitual', 'Lógico', 'Físico'], ans: 0 },
+            { q: 'VARCHAR(100) é decisão de qual nível?', opts: ['Conceitual', 'Lógico', 'Físico'], ans: 2 }
+        ];
+        document.getElementById('quiz-items').innerHTML = quizzes.map((q, i) => `
+      <div class="box"><p><strong>${i + 1}.</strong> ${q.q}</p>
+      ${q.opts.map((o, j) => `<button class="btn" data-q="${i}" data-o="${j}">${o}</button>`).join('')}
+      <div class="feedback" id="qfb-${i}"></div></div>
+    `).join('');
+        document.querySelectorAll('#quiz-items .btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const qi = parseInt(btn.dataset.q), oi = parseInt(btn.dataset.o);
+                const fb = document.getElementById(`qfb-${qi}`);
+                fb.textContent = quizzes[qi].ans === oi ? 'Correto! ✅' : 'Incorreto.';
+                fb.className = 'feedback ' + (quizzes[qi].ans === oi ? 'ok' : 'err');
+            });
+        });
+    </script>
+</body>
+
+</html>

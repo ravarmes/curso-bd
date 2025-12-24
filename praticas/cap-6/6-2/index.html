@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 6.2 — Índices</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        .feedback.err {
+            color: var(--bad);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .id {
+            color: #fda4af;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .perf-bar {
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .perf-slow {
+            background: linear-gradient(90deg, #ef4444, #f87171);
+        }
+
+        .perf-fast {
+            background: linear-gradient(90deg, #22c55e, #4ade80);
+        }
+
+        .index-type {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            background: #fafafa;
+            text-align: center;
+        }
+
+        .index-type h4 {
+            margin: 0 0 6px;
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 6.2 — Índices: Criação, Tipos e Desempenho</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="tipos">Tipos de Índice</button>
+            <button class="tab" data-key="criar">Criar Índice</button>
+            <button class="tab" data-key="perf">Performance</button>
+            <button class="tab" data-key="composto">Índice Composto</button>
+        </div>
+
+        <!-- Tipos -->
+        <section class="panel active" data-key="tipos">
+            <div class="box">
+                <h3>Tipos de Índices</h3>
+                <div class="grid" style="grid-template-columns:repeat(3,1fr);">
+                    <div class="index-type">
+                        <h4>B-Tree</h4>
+                        <p class="note">Padrão. Ideal para =, <,>, BETWEEN</p>
+                        <pre style="font-size:0.75rem;">CREATE INDEX idx
+ON tabela(col);</pre>
+                    </div>
+                    <div class="index-type">
+                        <h4>Hash</h4>
+                        <p class="note">Apenas igualdade (=)</p>
+                        <pre style="font-size:0.75rem;">CREATE INDEX idx
+ON tabela
+USING HASH(col);</pre>
+                    </div>
+                    <div class="index-type">
+                        <h4>GIN</h4>
+                        <p class="note">Arrays, JSONB, Full-text</p>
+                        <pre style="font-size:0.75rem;">CREATE INDEX idx
+ON tabela
+USING GIN(col);</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Criar -->
+        <section class="panel" data-key="criar">
+            <div class="box">
+                <h3>Simulador: Criar Índice</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Tabela: produto (50.000 registros)</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Coluna</th>
+                                    <th>Índice?</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>id (PK)</td>
+                                    <td>✅ Automático</td>
+                                </tr>
+                                <tr>
+                                    <td>nome</td>
+                                    <td id="idx-nome">❌</td>
+                                </tr>
+                                <tr>
+                                    <td>categoria_id</td>
+                                    <td id="idx-cat">❌</td>
+                                </tr>
+                                <tr>
+                                    <td>preco</td>
+                                    <td id="idx-preco">❌</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button class="btn" data-idx="nome">CREATE INDEX ON nome</button>
+                        <button class="btn" data-idx="cat">CREATE INDEX ON categoria_id</button>
+                        <button class="btn" data-idx="preco">CREATE INDEX ON preco</button>
+                    </div>
+                    <div>
+                        <h4>SQL Gerado:</h4>
+                        <pre id="idx-sql">-- Clique para criar índice</pre>
+                        <div id="idx-feedback" class="feedback"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Performance -->
+        <section class="panel" data-key="perf">
+            <div class="box">
+                <h3>Comparação: Com vs Sem Índice</h3>
+                <p class="note">Simule uma consulta SELECT * FROM produto WHERE nome = 'Notebook'</p>
+                <div class="grid">
+                    <div>
+                        <h4>Sem Índice (Seq Scan)</h4>
+                        <button class="btn" id="run-no-idx">Executar</button>
+                        <div id="result-no-idx"></div>
+                    </div>
+                    <div>
+                        <h4>Com Índice (Index Scan)</h4>
+                        <button class="btn" id="run-with-idx">Executar</button>
+                        <div id="result-with-idx"></div>
+                    </div>
+                </div>
+                <div class="box" style="margin-top:16px;">
+                    <h4>EXPLAIN (simulado):</h4>
+                    <pre id="explain-output">-- Clique em Executar para ver o plano</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Composto -->
+        <section class="panel" data-key="composto">
+            <div class="box">
+                <h3>Índice Composto</h3>
+                <pre><span class="kw">CREATE INDEX</span> <span class="id">idx_cat_preco</span>
+<span class="kw">ON</span> <span class="id">produto</span>(<span class="id">categoria_id</span>, <span class="id">preco</span>);</pre>
+                <p class="note">A ordem importa! O índice favorece consultas que filtram na mesma ordem.</p>
+                <div class="grid" style="margin-top:16px;">
+                    <div class="box" style="background:#ecfdf5;">
+                        <h4>✅ Usa o índice:</h4>
+                        <ul class="note">
+                            <li>WHERE categoria_id = 1</li>
+                            <li>WHERE categoria_id = 1 AND preco > 100</li>
+                        </ul>
+                    </div>
+                    <div class="box" style="background:#fee2e2;">
+                        <h4>❌ NÃO usa o índice:</h4>
+                        <ul class="note">
+                            <li>WHERE preco > 100 (sem categoria_id)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Criar índice
+        const indexes = { nome: false, cat: false, preco: false };
+        document.querySelectorAll('[data-idx]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const col = btn.dataset.idx;
+                const colName = col === 'cat' ? 'categoria_id' : col;
+                indexes[col] = true;
+                document.getElementById(`idx-${col}`).textContent = '✅';
+                document.getElementById('idx-sql').textContent = `CREATE INDEX idx_${colName}\nON produto(${colName});`;
+                document.getElementById('idx-feedback').textContent = `Índice criado em ${colName}! ✅`;
+                document.getElementById('idx-feedback').className = 'feedback ok';
+            });
+        });
+
+        // Performance
+        document.getElementById('run-no-idx').addEventListener('click', () => {
+            const time = 1200 + Math.random() * 500;
+            document.getElementById('result-no-idx').innerHTML = `
+        <div class="perf-bar perf-slow" style="width:100%;">${time.toFixed(0)} ms</div>
+        <p class="note">Seq Scan: lê TODAS as 50.000 linhas</p>
+      `;
+            document.getElementById('explain-output').textContent = `Seq Scan on produto  (cost=0.00..1250.00 rows=50000)
+  Filter: (nome = 'Notebook')
+  Rows Removed by Filter: 49995
+Planning Time: 0.1 ms
+Execution Time: ${time.toFixed(2)} ms`;
+        });
+
+        document.getElementById('run-with-idx').addEventListener('click', () => {
+            const time = 5 + Math.random() * 10;
+            document.getElementById('result-with-idx').innerHTML = `
+        <div class="perf-bar perf-fast" style="width:30%;">${time.toFixed(1)} ms</div>
+        <p class="note">Index Scan: vai direto ao registro</p>
+      `;
+            document.getElementById('explain-output').textContent = `Index Scan using idx_nome on produto  (cost=0.29..8.30 rows=5)
+  Index Cond: (nome = 'Notebook')
+Planning Time: 0.2 ms
+Execution Time: ${time.toFixed(2)} ms`;
+        });
+    </script>
+</body>
+
+</html>

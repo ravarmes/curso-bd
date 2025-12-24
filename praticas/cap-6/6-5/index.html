@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 6.5 — Functions, Procedures e Triggers</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .fn {
+            color: #fde68a;
+        }
+
+        .id {
+            color: #fda4af;
+        }
+
+        .str {
+            color: #86efac;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .highlight {
+            background: #fef3c7;
+        }
+
+        .type-card {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .type-card h4 {
+            margin: 0 0 8px;
+            color: var(--accent);
+        }
+
+        .type-card.function {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .type-card.procedure {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .type-card.trigger {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        input.inp {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 80px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 6.5 — Functions, Procedures e Triggers</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="overview">Visão Geral</button>
+            <button class="tab" data-key="function">Function</button>
+            <button class="tab" data-key="procedure">Procedure</button>
+            <button class="tab" data-key="trigger">Trigger</button>
+        </div>
+
+        <!-- Overview -->
+        <section class="panel active" data-key="overview">
+            <div class="box">
+                <h3>Comparação: Function vs Procedure vs Trigger</h3>
+                <div class="grid" style="grid-template-columns:repeat(3,1fr);">
+                    <div class="type-card function">
+                        <h4>📊 Function</h4>
+                        <p><strong>Retorna valor</strong></p>
+                        <p class="note">Usada em SELECT</p>
+                        <pre style="font-size:0.7rem;">SELECT fn_total(10);</pre>
+                    </div>
+                    <div class="type-card procedure">
+                        <h4>⚙️ Procedure</h4>
+                        <p><strong>Executa processo</strong></p>
+                        <p class="note">Chamada com CALL</p>
+                        <pre style="font-size:0.7rem;">CALL sp_processar();</pre>
+                    </div>
+                    <div class="type-card trigger">
+                        <h4>⚡ Trigger</h4>
+                        <p><strong>Automático</strong></p>
+                        <p class="note">Dispara em INSERT/UPDATE/DELETE</p>
+                        <pre style="font-size:0.7rem;">-- Automático!</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Function -->
+        <section class="panel" data-key="function">
+            <div class="box">
+                <h3>Simulador: Function</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Definição:</h4>
+                        <pre><span class="kw">CREATE FUNCTION</span> <span class="fn">fn_desconto</span>(
+  preco <span class="kw">NUMERIC</span>,
+  percentual <span class="kw">NUMERIC</span>
+) <span class="kw">RETURNS NUMERIC AS</span> $$
+<span class="kw">BEGIN</span>
+  <span class="kw">RETURN</span> preco * (1 - percentual/100);
+<span class="kw">END</span>;
+$$ <span class="kw">LANGUAGE</span> plpgsql;</pre>
+                    </div>
+                    <div>
+                        <h4>Uso:</h4>
+                        <pre><span class="kw">SELECT</span> nome, preco,
+       <span class="fn">fn_desconto</span>(preco, 10) <span class="kw">AS</span> preco_com_desconto
+<span class="kw">FROM</span> produto;</pre>
+                        <h4>Teste:</h4>
+                        <label>Preço: <input class="inp" id="fn-preco" value="100" type="number"></label>
+                        <label>Desconto %: <input class="inp" id="fn-desc" value="10" type="number"></label>
+                        <button class="btn" id="run-fn">Calcular</button>
+                        <div id="fn-result" class="feedback"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Procedure -->
+        <section class="panel" data-key="procedure">
+            <div class="box">
+                <h3>Simulador: Procedure</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Definição:</h4>
+                        <pre><span class="kw">CREATE PROCEDURE</span> <span class="fn">sp_atualizar_estoque</span>(
+  p_produto_id <span class="kw">INT</span>,
+  p_quantidade <span class="kw">INT</span>
+) <span class="kw">AS</span> $$
+<span class="kw">BEGIN</span>
+  <span class="kw">UPDATE</span> produto
+  <span class="kw">SET</span> estoque = estoque + p_quantidade
+  <span class="kw">WHERE</span> id = p_produto_id;
+  
+  <span class="kw">INSERT INTO</span> log_estoque
+    (produto_id, qtd, data)
+  <span class="kw">VALUES</span> (p_produto_id, p_quantidade, NOW());
+<span class="kw">END</span>;
+$$ <span class="kw">LANGUAGE</span> plpgsql;</pre>
+                    </div>
+                    <div>
+                        <h4>Uso:</h4>
+                        <pre><span class="kw">CALL</span> <span class="fn">sp_atualizar_estoque</span>(1, 50);</pre>
+                        <h4>Simular:</h4>
+                        <table id="tbl-estoque">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Estoque</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <label>Produto ID: <input class="inp" id="sp-id" value="1" type="number"></label>
+                        <label>Quantidade: <input class="inp" id="sp-qtd" value="20" type="number"></label>
+                        <button class="btn" id="run-sp">CALL sp_atualizar_estoque</button>
+                        <div id="sp-result" class="feedback"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trigger -->
+        <section class="panel" data-key="trigger">
+            <div class="box">
+                <h3>Simulador: Trigger</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Definição:</h4>
+                        <pre><span class="kw">CREATE FUNCTION</span> <span class="fn">fn_validar_preco</span>()
+<span class="kw">RETURNS TRIGGER AS</span> $$
+<span class="kw">BEGIN</span>
+  <span class="kw">IF</span> NEW.preco < 0 <span class="kw">THEN</span>
+    <span class="kw">RAISE EXCEPTION</span> <span class="str">'Preço não pode ser negativo!'</span>;
+  <span class="kw">END IF</span>;
+  <span class="kw">RETURN</span> NEW;
+<span class="kw">END</span>;
+$$ <span class="kw">LANGUAGE</span> plpgsql;
+
+<span class="kw">CREATE TRIGGER</span> <span class="fn">trg_validar_preco</span>
+<span class="kw">BEFORE INSERT OR UPDATE ON</span> produto
+<span class="kw">FOR EACH ROW</span>
+<span class="kw">EXECUTE FUNCTION</span> <span class="fn">fn_validar_preco</span>();</pre>
+                    </div>
+                    <div>
+                        <h4>Teste o Trigger:</h4>
+                        <pre><span class="kw">INSERT INTO</span> produto (nome, preco)
+<span class="kw">VALUES</span> (<span class="str">'Teste'</span>, <span id="trg-preco-display">-50</span>);</pre>
+                        <label>Preço: <input class="inp" id="trg-preco" value="-50" type="number"></label>
+                        <button class="btn" id="run-trg">Executar INSERT</button>
+                        <div id="trg-result" class="feedback"></div>
+                        <h4>Log de Eventos:</h4>
+                        <div id="trg-log" class="box" style="background:#f8fafc;max-height:150px;overflow-y:auto;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Function
+        document.getElementById('run-fn').addEventListener('click', () => {
+            const preco = parseFloat(document.getElementById('fn-preco').value) || 0;
+            const desc = parseFloat(document.getElementById('fn-desc').value) || 0;
+            const result = preco * (1 - desc / 100);
+            document.getElementById('fn-result').textContent = `fn_desconto(${preco}, ${desc}) = R$ ${result.toFixed(2)} ✅`;
+            document.getElementById('fn-result').className = 'feedback ok';
+        });
+
+        // Procedure
+        const estoque = [
+            { id: 1, nome: 'Notebook', qtd: 10 },
+            { id: 2, nome: 'Mouse', qtd: 50 },
+            { id: 3, nome: 'Teclado', qtd: 25 }
+        ];
+
+        function renderEstoque() {
+            document.querySelector('#tbl-estoque tbody').innerHTML = estoque.map(p =>
+                `<tr><td>${p.id}. ${p.nome}</td><td>${p.qtd}</td></tr>`
+            ).join('');
+        }
+        renderEstoque();
+
+        document.getElementById('run-sp').addEventListener('click', () => {
+            const id = parseInt(document.getElementById('sp-id').value);
+            const qtd = parseInt(document.getElementById('sp-qtd').value) || 0;
+            const prod = estoque.find(p => p.id === id);
+            if (!prod) {
+                document.getElementById('sp-result').textContent = 'Produto não encontrado!';
+                document.getElementById('sp-result').className = 'feedback err';
+                return;
+            }
+            prod.qtd += qtd;
+            renderEstoque();
+            document.getElementById('sp-result').textContent = `Estoque atualizado! +${qtd} unidades ✅`;
+            document.getElementById('sp-result').className = 'feedback ok';
+        });
+
+        // Trigger
+        let triggerLog = [];
+        document.getElementById('trg-preco').addEventListener('input', (e) => {
+            document.getElementById('trg-preco-display').textContent = e.target.value;
+        });
+
+        document.getElementById('run-trg').addEventListener('click', () => {
+            const preco = parseFloat(document.getElementById('trg-preco').value);
+            const timestamp = new Date().toLocaleTimeString();
+
+            if (preco < 0) {
+                triggerLog.unshift(`[${timestamp}] ❌ TRIGGER: Preço negativo rejeitado! RAISE EXCEPTION`);
+                document.getElementById('trg-result').textContent = 'ERRO: Preço não pode ser negativo!';
+                document.getElementById('trg-result').className = 'feedback err';
+            } else {
+                triggerLog.unshift(`[${timestamp}] ✅ TRIGGER: Validação OK. INSERT permitido.`);
+                document.getElementById('trg-result').textContent = 'INSERT executado com sucesso! ✅';
+                document.getElementById('trg-result').className = 'feedback ok';
+            }
+
+            document.getElementById('trg-log').innerHTML = triggerLog.map(l => `<div class="note">${l}</div>`).join('');
+        });
+    </script>
+</body>
+
+</html>
