@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 5.4 — VIEWs</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .id {
+            color: #fda4af;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .highlight {
+            background: #fef3c7;
+        }
+
+        .benefit-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            background: #fafafa;
+            text-align: center;
+        }
+
+        .benefit-card h4 {
+            margin: 0 0 6px;
+            color: var(--accent);
+        }
+
+        .view-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 5.4 — Criando Visões (VIEW)</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="conceito">Conceito</button>
+            <button class="tab" data-key="criar">Criar VIEW</button>
+            <button class="tab" data-key="usar">Usar VIEW</button>
+            <button class="tab" data-key="quiz">Quiz</button>
+        </div>
+
+        <!-- Conceito -->
+        <section class="panel active" data-key="conceito">
+            <div class="box">
+                <h3>O que é uma VIEW?</h3>
+                <p>VIEW é uma <strong>consulta salva</strong> como uma tabela virtual. Não armazena dados, apenas a
+                    definição do SELECT.</p>
+                <pre><span class="kw">CREATE VIEW</span> <span class="id">vw_vendas_detalhadas</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span> p.<span class="id">nome</span>, c.<span class="id">categoria</span>, v.<span class="id">valor</span>
+<span class="kw">FROM</span> <span class="id">venda</span> v
+<span class="kw">JOIN</span> <span class="id">produto</span> p <span class="kw">ON</span> v.<span class="id">produto_id</span> = p.<span class="id">id</span>
+<span class="kw">JOIN</span> <span class="id">categoria</span> c <span class="kw">ON</span> p.<span class="id">categoria_id</span> = c.<span class="id">id</span>;</pre>
+
+                <h3 style="margin-top:20px;">Benefícios</h3>
+                <div class="grid" style="grid-template-columns:repeat(3,1fr);">
+                    <div class="benefit-card">
+                        <div class="view-icon">📦</div>
+                        <h4>Simplificação</h4>
+                        <p class="note">Encapsula JOINs complexos</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="view-icon">♻️</div>
+                        <h4>Reutilização</h4>
+                        <p class="note">Evita repetir código SQL</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="view-icon">🔒</div>
+                        <h4>Segurança</h4>
+                        <p class="note">Expõe apenas colunas específicas</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Criar VIEW -->
+        <section class="panel" data-key="criar">
+            <div class="box">
+                <h3>Simulador: Criar VIEW</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Tabelas Base:</h4>
+                        <p class="note"><strong>aluno:</strong> id, nome, turma_id</p>
+                        <p class="note"><strong>turma:</strong> id, nome, sala</p>
+                        <table id="tbl-aluno-view">
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>nome</th>
+                                    <th>turma_id</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <table id="tbl-turma-view">
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>nome</th>
+                                    <th>sala</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h4>Criar VIEW simplificada:</h4>
+                        <pre
+                            id="view-def"><span class="kw">CREATE VIEW</span> <span class="id">vw_alunos_turmas</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span> a.<span class="id">nome</span> <span class="kw">AS</span> aluno,
+       t.<span class="id">nome</span> <span class="kw">AS</span> turma,
+       t.<span class="id">sala</span>
+<span class="kw">FROM</span> <span class="id">aluno</span> a
+<span class="kw">JOIN</span> <span class="id">turma</span> t <span class="kw">ON</span> a.<span class="id">turma_id</span> = t.<span class="id">id</span>;</pre>
+                        <button class="btn" id="create-view">Criar VIEW</button>
+                        <div id="view-feedback" class="feedback"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Usar VIEW -->
+        <section class="panel" data-key="usar">
+            <div class="box">
+                <h3>Usando a VIEW</h3>
+                <div class="grid">
+                    <div>
+                        <h4>VIEW: vw_alunos_turmas</h4>
+                        <p class="note">Após criada, use como uma tabela normal:</p>
+                        <pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="id">vw_alunos_turmas</span>;</pre>
+                        <button class="btn" id="query-view">Consultar VIEW</button>
+                        <button class="btn" id="query-filter">SELECT * WHERE sala = 'Sala 101'</button>
+                    </div>
+                    <div>
+                        <h4>Resultado:</h4>
+                        <table id="result-view">
+                            <thead>
+                                <tr>
+                                    <th>aluno</th>
+                                    <th>turma</th>
+                                    <th>sala</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="box" style="margin-top:16px;background:#f0fdf4;">
+                    <h4>Comparação:</h4>
+                    <div class="grid">
+                        <div>
+                            <p><strong>Sem VIEW (repetitivo):</strong></p>
+                            <pre style="font-size:0.8rem;"><span class="kw">SELECT</span> a.nome, t.nome, t.sala
+<span class="kw">FROM</span> aluno a
+<span class="kw">JOIN</span> turma t <span class="kw">ON</span> a.turma_id = t.id
+<span class="kw">WHERE</span> t.sala = 'Sala 101';</pre>
+                        </div>
+                        <div>
+                            <p><strong>Com VIEW (simples):</strong></p>
+                            <pre style="font-size:0.8rem;"><span class="kw">SELECT</span> * <span class="kw">FROM</span> vw_alunos_turmas
+<span class="kw">WHERE</span> sala = 'Sala 101';</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz -->
+        <section class="panel" data-key="quiz">
+            <div class="box">
+                <h3>Quiz sobre VIEWs</h3>
+                <div id="quiz-items"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Data
+        const alunos = [
+            { id: 1, nome: 'Ana', turma_id: 1 },
+            { id: 2, nome: 'Bruno', turma_id: 2 },
+            { id: 3, nome: 'Carlos', turma_id: 1 },
+            { id: 4, nome: 'Diana', turma_id: 2 }
+        ];
+        const turmas = [
+            { id: 1, nome: 'Banco de Dados', sala: 'Sala 101' },
+            { id: 2, nome: 'Algoritmos', sala: 'Sala 202' }
+        ];
+
+        // Render tables
+        document.querySelector('#tbl-aluno-view tbody').innerHTML = alunos.map(a =>
+            `<tr><td>${a.id}</td><td>${a.nome}</td><td>${a.turma_id}</td></tr>`
+        ).join('');
+        document.querySelector('#tbl-turma-view tbody').innerHTML = turmas.map(t =>
+            `<tr><td>${t.id}</td><td>${t.nome}</td><td>${t.sala}</td></tr>`
+        ).join('');
+
+        // VIEW simulation
+        let viewCreated = false;
+
+        function getViewData(filter = null) {
+            let data = alunos.map(a => {
+                const t = turmas.find(t => t.id === a.turma_id);
+                return { aluno: a.nome, turma: t?.nome, sala: t?.sala };
+            }).filter(r => r.turma);
+            if (filter) data = data.filter(r => r.sala === filter);
+            return data;
+        }
+
+        document.getElementById('create-view').addEventListener('click', () => {
+            viewCreated = true;
+            document.getElementById('view-feedback').textContent = 'VIEW vw_alunos_turmas criada com sucesso! ✅';
+            document.getElementById('view-feedback').className = 'feedback ok';
+        });
+
+        document.getElementById('query-view').addEventListener('click', () => {
+            if (!viewCreated) {
+                alert('Crie a VIEW primeiro!');
+                return;
+            }
+            const data = getViewData();
+            document.querySelector('#result-view tbody').innerHTML = data.map(r =>
+                `<tr class="highlight"><td>${r.aluno}</td><td>${r.turma}</td><td>${r.sala}</td></tr>`
+            ).join('');
+        });
+
+        document.getElementById('query-filter').addEventListener('click', () => {
+            if (!viewCreated) {
+                alert('Crie a VIEW primeiro!');
+                return;
+            }
+            const data = getViewData('Sala 101');
+            document.querySelector('#result-view tbody').innerHTML = data.map(r =>
+                `<tr class="highlight"><td>${r.aluno}</td><td>${r.turma}</td><td>${r.sala}</td></tr>`
+            ).join('');
+        });
+
+        // Quiz
+        const quizzes = [
+            { q: 'Uma VIEW armazena dados físicos?', opts: ['Sim', 'Não, apenas a definição do SELECT'], ans: 1 },
+            { q: 'VIEW pode simplificar JOINs complexos?', opts: ['Sim', 'Não'], ans: 0 },
+            { q: 'Para criar uma VIEW, usa-se...', opts: ['CREATE TABLE...AS', 'CREATE VIEW...AS'], ans: 1 }
+        ];
+        document.getElementById('quiz-items').innerHTML = quizzes.map((q, i) => `
+      <div class="box"><p><strong>${i + 1}.</strong> ${q.q}</p>
+      ${q.opts.map((o, j) => `<button class="btn" data-q="${i}" data-o="${j}">${o}</button>`).join('')}
+      <div class="feedback" id="qfb-${i}"></div></div>
+    `).join('');
+        document.querySelectorAll('#quiz-items .btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const qi = parseInt(btn.dataset.q), oi = parseInt(btn.dataset.o);
+                const fb = document.getElementById(`qfb-${qi}`);
+                fb.textContent = quizzes[qi].ans === oi ? 'Correto! ✅' : 'Incorreto.';
+                fb.className = 'feedback ' + (quizzes[qi].ans === oi ? 'ok' : 'err');
+            });
+        });
+    </script>
+</body>
+
+</html>

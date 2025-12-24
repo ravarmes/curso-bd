@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 5.3 — Subconsultas</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .fn {
+            color: #fde68a;
+        }
+
+        .id {
+            color: #fda4af;
+        }
+
+        .sub {
+            background: #334155;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .highlight {
+            background: #fef3c7;
+        }
+
+        .step {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 8px 0;
+            background: #fafafa;
+        }
+
+        .step.active {
+            background: #dbeafe;
+            border-color: var(--accent);
+        }
+
+        .step-num {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 5.3 — Subconsultas e Operadores Lógicos</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="conceito">Conceito</button>
+            <button class="tab" data-key="in">Operador IN</button>
+            <button class="tab" data-key="exists">EXISTS</button>
+            <button class="tab" data-key="logicos">AND/OR/NOT</button>
+        </div>
+
+        <!-- Conceito -->
+        <section class="panel active" data-key="conceito">
+            <div class="box">
+                <h3>O que é uma Subconsulta?</h3>
+                <p>Uma subconsulta é um SELECT dentro de outro SELECT. O SELECT interno é executado PRIMEIRO.</p>
+                <pre><span class="kw">SELECT</span> <span class="id">nome</span>
+<span class="kw">FROM</span> <span class="id">aluno</span>
+<span class="kw">WHERE</span> <span class="id">turma_id</span> <span class="kw">IN</span> (
+  <span class="sub"><span class="kw">SELECT</span> <span class="id">id</span> <span class="kw">FROM</span> <span class="id">turma</span> <span class="kw">WHERE</span> <span class="id">nome</span> = 'BD'</span>
+);</pre>
+                <div class="step active"><span class="step-num">1</span> Subconsulta interna é executada primeiro →
+                    retorna lista de IDs</div>
+                <div class="step"><span class="step-num">2</span> Consulta externa usa o resultado para filtrar</div>
+            </div>
+        </section>
+
+        <!-- IN -->
+        <section class="panel" data-key="in">
+            <div class="box">
+                <h3>Simulador: Operador IN</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Tabela: produto</h4>
+                        <table id="tbl-produto">
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>nome</th>
+                                    <th>categoria_id</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <h4>Tabela: categoria</h4>
+                        <table id="tbl-categoria">
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>nome</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h4>Query com IN:</h4>
+                        <pre><span class="kw">SELECT</span> <span class="id">nome</span>
+<span class="kw">FROM</span> <span class="id">produto</span>
+<span class="kw">WHERE</span> <span class="id">categoria_id</span> <span class="kw">IN</span> (
+  <span class="sub"><span class="kw">SELECT</span> <span class="id">id</span> <span class="kw">FROM</span> <span class="id">categoria</span>
+   <span class="kw">WHERE</span> <span class="id">nome</span> = 'Eletrônicos'</span>
+);</pre>
+                        <button class="btn" id="exec-in">Executar</button>
+                        <div id="in-steps"></div>
+                        <h4>Resultado:</h4>
+                        <table id="result-in">
+                            <thead>
+                                <tr>
+                                    <th>produto.nome</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EXISTS -->
+        <section class="panel" data-key="exists">
+            <div class="box">
+                <h3>Simulador: EXISTS</h3>
+                <p class="note">EXISTS retorna TRUE se a subconsulta retornar pelo menos um registro.</p>
+                <div class="grid">
+                    <div>
+                        <h4>Tabela: cliente</h4>
+                        <table id="tbl-cliente">
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>nome</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <h4>Tabela: pedido</h4>
+                        <table id="tbl-pedido">
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>cliente_id</th>
+                                    <th>valor</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h4>Query com EXISTS:</h4>
+                        <pre><span class="kw">SELECT</span> c.<span class="id">nome</span>
+<span class="kw">FROM</span> <span class="id">cliente</span> c
+<span class="kw">WHERE EXISTS</span> (
+  <span class="sub"><span class="kw">SELECT</span> 1 <span class="kw">FROM</span> <span class="id">pedido</span> p
+   <span class="kw">WHERE</span> p.<span class="id">cliente_id</span> = c.<span class="id">id</span></span>
+);</pre>
+                        <button class="btn" id="exec-exists">Executar</button>
+                        <p class="note">Retorna clientes que têm pelo menos um pedido.</p>
+                        <h4>Resultado:</h4>
+                        <table id="result-exists">
+                            <thead>
+                                <tr>
+                                    <th>cliente.nome</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lógicos -->
+        <section class="panel" data-key="logicos">
+            <div class="box">
+                <h3>Operadores Lógicos: AND, OR, NOT</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Tabela: produto</h4>
+                        <table id="tbl-produto-log">
+                            <thead>
+                                <tr>
+                                    <th>nome</th>
+                                    <th>preco</th>
+                                    <th>estoque</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h4>Selecione o filtro:</h4>
+                        <button class="btn" data-log="and">preco > 100 AND estoque > 0</button>
+                        <button class="btn" data-log="or">preco > 1000 OR estoque > 10</button>
+                        <button class="btn" data-log="not">NOT (preco > 500)</button>
+                        <div id="log-query" class="box"
+                            style="background:#1e293b;color:#e2e8f0;font-family:monospace;margin-top:10px;"></div>
+                        <h4>Resultado:</h4>
+                        <table id="result-log">
+                            <thead>
+                                <tr>
+                                    <th>nome</th>
+                                    <th>preco</th>
+                                    <th>estoque</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Data
+        const produtos = [
+            { id: 1, nome: 'Notebook', categoria_id: 1, preco: 3500, estoque: 5 },
+            { id: 2, nome: 'Mouse', categoria_id: 2, preco: 80, estoque: 50 },
+            { id: 3, nome: 'Monitor', categoria_id: 1, preco: 1200, estoque: 8 },
+            { id: 4, nome: 'Teclado', categoria_id: 2, preco: 150, estoque: 0 },
+            { id: 5, nome: 'Webcam', categoria_id: 1, preco: 250, estoque: 12 }
+        ];
+        const categorias = [
+            { id: 1, nome: 'Eletrônicos' },
+            { id: 2, nome: 'Acessórios' }
+        ];
+        const clientes = [
+            { id: 1, nome: 'Ana' },
+            { id: 2, nome: 'Bruno' },
+            { id: 3, nome: 'Carlos' }
+        ];
+        const pedidos = [
+            { id: 101, cliente_id: 1, valor: 500 },
+            { id: 102, cliente_id: 1, valor: 300 },
+            { id: 103, cliente_id: 3, valor: 150 }
+        ];
+
+        // Render tables
+        document.querySelector('#tbl-produto tbody').innerHTML = produtos.map(p =>
+            `<tr><td>${p.id}</td><td>${p.nome}</td><td>${p.categoria_id}</td></tr>`
+        ).join('');
+        document.querySelector('#tbl-categoria tbody').innerHTML = categorias.map(c =>
+            `<tr><td>${c.id}</td><td>${c.nome}</td></tr>`
+        ).join('');
+        document.querySelector('#tbl-cliente tbody').innerHTML = clientes.map(c =>
+            `<tr><td>${c.id}</td><td>${c.nome}</td></tr>`
+        ).join('');
+        document.querySelector('#tbl-pedido tbody').innerHTML = pedidos.map(p =>
+            `<tr><td>${p.id}</td><td>${p.cliente_id}</td><td>R$ ${p.valor}</td></tr>`
+        ).join('');
+        document.querySelector('#tbl-produto-log tbody').innerHTML = produtos.map(p =>
+            `<tr><td>${p.nome}</td><td>R$ ${p.preco}</td><td>${p.estoque}</td></tr>`
+        ).join('');
+
+        // IN
+        document.getElementById('exec-in').addEventListener('click', () => {
+            // Step 1: subconsulta
+            const catIds = categorias.filter(c => c.nome === 'Eletrônicos').map(c => c.id);
+            document.getElementById('in-steps').innerHTML = `
+        <div class="step active"><span class="step-num">1</span> Subconsulta retorna: [${catIds.join(', ')}]</div>
+        <div class="step"><span class="step-num">2</span> Filtrar produtos com categoria_id IN (${catIds.join(', ')})</div>
+      `;
+            // Step 2: filtro
+            const result = produtos.filter(p => catIds.includes(p.categoria_id));
+            document.querySelector('#result-in tbody').innerHTML = result.map(p =>
+                `<tr class="highlight"><td>${p.nome}</td></tr>`
+            ).join('');
+        });
+
+        // EXISTS
+        document.getElementById('exec-exists').addEventListener('click', () => {
+            const result = clientes.filter(c => pedidos.some(p => p.cliente_id === c.id));
+            document.querySelector('#result-exists tbody').innerHTML = result.map(c =>
+                `<tr class="highlight"><td>${c.nome}</td></tr>`
+            ).join('');
+        });
+
+        // Lógicos
+        document.querySelectorAll('[data-log]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const op = btn.dataset.log;
+                let result, query;
+                if (op === 'and') {
+                    result = produtos.filter(p => p.preco > 100 && p.estoque > 0);
+                    query = 'WHERE preco > 100 AND estoque > 0';
+                } else if (op === 'or') {
+                    result = produtos.filter(p => p.preco > 1000 || p.estoque > 10);
+                    query = 'WHERE preco > 1000 OR estoque > 10';
+                } else {
+                    result = produtos.filter(p => !(p.preco > 500));
+                    query = 'WHERE NOT (preco > 500)';
+                }
+                document.getElementById('log-query').textContent = query;
+                document.querySelector('#result-log tbody').innerHTML = result.map(p =>
+                    `<tr class="highlight"><td>${p.nome}</td><td>R$ ${p.preco}</td><td>${p.estoque}</td></tr>`
+                ).join('');
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Práticas 5.2 — Agregação e GROUP BY</title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --surface: #fff;
+            --border: #dde2eb;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --good: #16a34a;
+            --bad: #dc2626;
+            --accent: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        main {
+            padding: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface);
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        .btn:hover {
+            background: #eef2ff;
+        }
+
+        .btn.active {
+            background: #dbeafe;
+            border-color: var(--accent);
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .feedback.ok {
+            color: var(--good);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .kw {
+            color: #93c5fd;
+        }
+
+        .fn {
+            color: #fde68a;
+        }
+
+        .id {
+            color: #fda4af;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .highlight {
+            background: #fef3c7;
+        }
+
+        .func-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            background: #fafafa;
+            text-align: center;
+        }
+
+        .func-card h4 {
+            margin: 0 0 6px;
+            color: var(--accent);
+        }
+
+        select.sel {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h2>Práticas 5.2 — Agregação, GROUP BY e HAVING</h2>
+
+        <div class="tabs">
+            <button class="tab active" data-key="funcoes">Funções</button>
+            <button class="tab" data-key="groupby">GROUP BY</button>
+            <button class="tab" data-key="having">HAVING</button>
+            <button class="tab" data-key="builder">Construtor</button>
+        </div>
+
+        <!-- Funções -->
+        <section class="panel active" data-key="funcoes">
+            <div class="box">
+                <h3>Funções de Agregação</h3>
+                <div class="grid" style="grid-template-columns:repeat(5,1fr);">
+                    <div class="func-card">
+                        <h4>COUNT</h4>
+                        <p class="note">Conta registros</p>
+                        <code>COUNT(*)</code>
+                    </div>
+                    <div class="func-card">
+                        <h4>SUM</h4>
+                        <p class="note">Soma valores</p>
+                        <code>SUM(valor)</code>
+                    </div>
+                    <div class="func-card">
+                        <h4>AVG</h4>
+                        <p class="note">Média</p>
+                        <code>AVG(nota)</code>
+                    </div>
+                    <div class="func-card">
+                        <h4>MAX</h4>
+                        <p class="note">Valor máximo</p>
+                        <code>MAX(preco)</code>
+                    </div>
+                    <div class="func-card">
+                        <h4>MIN</h4>
+                        <p class="note">Valor mínimo</p>
+                        <code>MIN(idade)</code>
+                    </div>
+                </div>
+                <div class="box" style="margin-top:16px;">
+                    <h4>Simulador:</h4>
+                    <div class="grid">
+                        <div>
+                            <h4>Tabela: venda</h4>
+                            <table id="tbl-venda">
+                                <thead>
+                                    <tr>
+                                        <th>id</th>
+                                        <th>produto</th>
+                                        <th>valor</th>
+                                        <th>qtd</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <p>Escolha a função:</p>
+                            <button class="btn" data-fn="count">COUNT(*)</button>
+                            <button class="btn" data-fn="sum">SUM(valor)</button>
+                            <button class="btn" data-fn="avg">AVG(valor)</button>
+                            <button class="btn" data-fn="max">MAX(valor)</button>
+                            <button class="btn" data-fn="min">MIN(valor)</button>
+                            <div id="fn-result" class="feedback"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GROUP BY -->
+        <section class="panel" data-key="groupby">
+            <div class="box">
+                <h3>Simulador GROUP BY</h3>
+                <div class="grid">
+                    <div>
+                        <h4>Tabela: venda</h4>
+                        <table id="tbl-venda-gb">
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>categoria</th>
+                                    <th>valor</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h4>Query:</h4>
+                        <pre><span class="kw">SELECT</span> <span class="id">categoria</span>, 
+       <span class="fn">COUNT</span>(*) <span class="kw">AS</span> qtd,
+       <span class="fn">SUM</span>(<span class="id">valor</span>) <span class="kw">AS</span> total
+<span class="kw">FROM</span> <span class="id">venda</span>
+<span class="kw">GROUP BY</span> <span class="id">categoria</span>;</pre>
+                        <button class="btn" id="exec-groupby">Executar GROUP BY</button>
+                        <h4>Resultado:</h4>
+                        <table id="result-gb">
+                            <thead>
+                                <tr>
+                                    <th>categoria</th>
+                                    <th>qtd</th>
+                                    <th>total</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HAVING -->
+        <section class="panel" data-key="having">
+            <div class="box">
+                <h3>Diferença: WHERE vs HAVING</h3>
+                <div class="grid">
+                    <div class="func-card">
+                        <h4>WHERE</h4>
+                        <p>Filtra <strong>ANTES</strong> de agrupar</p>
+                        <p class="note">Aplica-se a linhas individuais</p>
+                    </div>
+                    <div class="func-card">
+                        <h4>HAVING</h4>
+                        <p>Filtra <strong>DEPOIS</strong> de agrupar</p>
+                        <p class="note">Aplica-se a grupos (resultados de agregação)</p>
+                    </div>
+                </div>
+                <div class="box" style="margin-top:16px;">
+                    <h4>Simulador HAVING:</h4>
+                    <pre><span class="kw">SELECT</span> <span class="id">categoria</span>, <span class="fn">SUM</span>(<span class="id">valor</span>) <span class="kw">AS</span> total
+<span class="kw">FROM</span> <span class="id">venda</span>
+<span class="kw">GROUP BY</span> <span class="id">categoria</span>
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(<span class="id">valor</span>) > <span id="having-val">500</span>;</pre>
+                    <label>HAVING SUM(valor) > <input type="number" id="having-input" value="500"
+                            style="width:80px;padding:6px;border-radius:8px;border:1px solid #dde2eb;"></label>
+                    <button class="btn" id="exec-having">Executar</button>
+                    <table id="result-having">
+                        <thead>
+                            <tr>
+                                <th>categoria</th>
+                                <th>total</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Builder -->
+        <section class="panel" data-key="builder">
+            <div class="box">
+                <h3>Construtor de Consulta Agregada</h3>
+                <div class="grid">
+                    <div>
+                        <label>Função: <select class="sel" id="b-fn">
+                                <option>COUNT</option>
+                                <option>SUM</option>
+                                <option>AVG</option>
+                                <option>MAX</option>
+                                <option>MIN</option>
+                            </select></label><br><br>
+                        <label>Coluna: <select class="sel" id="b-col">
+                                <option>*</option>
+                                <option>valor</option>
+                                <option>qtd</option>
+                            </select></label><br><br>
+                        <label>GROUP BY: <select class="sel" id="b-group">
+                                <option value="">Nenhum</option>
+                                <option>categoria</option>
+                                <option>produto</option>
+                            </select></label><br><br>
+                        <label>HAVING > <input type="number" id="b-having" value=""
+                                style="width:80px;padding:6px;border-radius:8px;border:1px solid #dde2eb;"
+                                placeholder="Ex: 100"></label><br><br>
+                        <button class="btn" id="build-query">Gerar Query</button>
+                    </div>
+                    <div>
+                        <h4>SQL Gerado:</h4>
+                        <pre id="builder-output">SELECT COUNT(*) FROM venda;</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Tabs
+        document.querySelector('.tabs').addEventListener('click', e => {
+            const btn = e.target.closest('.tab'); if (!btn) return;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+            document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.key === btn.dataset.key));
+        });
+
+        // Data
+        const vendas = [
+            { id: 1, produto: 'Notebook', categoria: 'Eletrônicos', valor: 3500, qtd: 1 },
+            { id: 2, produto: 'Mouse', categoria: 'Acessórios', valor: 150, qtd: 3 },
+            { id: 3, produto: 'Teclado', categoria: 'Acessórios', valor: 250, qtd: 2 },
+            { id: 4, produto: 'Monitor', categoria: 'Eletrônicos', valor: 1200, qtd: 1 },
+            { id: 5, produto: 'Cabo HDMI', categoria: 'Acessórios', valor: 50, qtd: 5 },
+            { id: 6, produto: 'SSD', categoria: 'Eletrônicos', valor: 400, qtd: 2 }
+        ];
+
+        function renderVendas(id, cols) {
+            document.querySelector(`#${id} tbody`).innerHTML = vendas.map(v =>
+                `<tr>${cols.map(c => `<td>${v[c]}</td>`).join('')}</tr>`
+            ).join('');
+        }
+
+        renderVendas('tbl-venda', ['id', 'produto', 'valor', 'qtd']);
+        renderVendas('tbl-venda-gb', ['id', 'categoria', 'valor']);
+
+        // Funções
+        document.querySelectorAll('[data-fn]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const fn = btn.dataset.fn;
+                let result;
+                if (fn === 'count') result = vendas.length;
+                else if (fn === 'sum') result = vendas.reduce((a, v) => a + v.valor, 0);
+                else if (fn === 'avg') result = (vendas.reduce((a, v) => a + v.valor, 0) / vendas.length).toFixed(2);
+                else if (fn === 'max') result = Math.max(...vendas.map(v => v.valor));
+                else if (fn === 'min') result = Math.min(...vendas.map(v => v.valor));
+                document.getElementById('fn-result').textContent = `Resultado: ${result}`;
+                document.getElementById('fn-result').className = 'feedback ok';
+            });
+        });
+
+        // GROUP BY
+        document.getElementById('exec-groupby').addEventListener('click', () => {
+            const groups = {};
+            vendas.forEach(v => {
+                if (!groups[v.categoria]) groups[v.categoria] = { qtd: 0, total: 0 };
+                groups[v.categoria].qtd++;
+                groups[v.categoria].total += v.valor;
+            });
+            document.querySelector('#result-gb tbody').innerHTML = Object.entries(groups).map(([cat, data]) =>
+                `<tr class="highlight"><td>${cat}</td><td>${data.qtd}</td><td>R$ ${data.total.toFixed(2)}</td></tr>`
+            ).join('');
+        });
+
+        // HAVING
+        document.getElementById('exec-having').addEventListener('click', () => {
+            const threshold = parseFloat(document.getElementById('having-input').value) || 0;
+            document.getElementById('having-val').textContent = threshold;
+            const groups = {};
+            vendas.forEach(v => {
+                if (!groups[v.categoria]) groups[v.categoria] = 0;
+                groups[v.categoria] += v.valor;
+            });
+            const filtered = Object.entries(groups).filter(([, total]) => total > threshold);
+            document.querySelector('#result-having tbody').innerHTML = filtered.map(([cat, total]) =>
+                `<tr class="highlight"><td>${cat}</td><td>R$ ${total.toFixed(2)}</td></tr>`
+            ).join('');
+        });
+
+        // Builder
+        document.getElementById('build-query').addEventListener('click', () => {
+            const fn = document.getElementById('b-fn').value;
+            const col = document.getElementById('b-col').value;
+            const group = document.getElementById('b-group').value;
+            const having = document.getElementById('b-having').value;
+
+            let sql = `SELECT ${group ? group + ', ' : ''}${fn}(${col}) AS resultado\nFROM venda`;
+            if (group) sql += `\nGROUP BY ${group}`;
+            if (having && group) sql += `\nHAVING ${fn}(${col}) > ${having}`;
+            sql += ';';
+
+            document.getElementById('builder-output').textContent = sql;
+        });
+    </script>
+</body>
+
+</html>
