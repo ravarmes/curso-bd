@@ -470,6 +470,13 @@ figcaption {
   font-size: 1.05rem;
 }
 
+/* Slides - mesma largura do infográfico */
+.slides-iframe {
+  display: block;
+  max-width: 80%;
+  margin: 0 auto;
+}
+
 /* Infográficos */
 .infographic-container {
   text-align: center;
