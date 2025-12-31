@@ -1334,6 +1334,17 @@ document.addEventListener('click', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
   buildSidebar();
   renderFromHash();
+
+  // Exibir nome do usuário logado
+  if (typeof getUser === 'function') {
+    const user = getUser();
+    if (user && user.nome) {
+      const userNameEl = document.getElementById('user-name');
+      if (userNameEl) {
+        userNameEl.textContent = `Olá, ${user.nome.split(' ')[0]}!`;
+      }
+    }
+  }
 });
 
 /*

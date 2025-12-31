@@ -37,12 +37,24 @@
         <button id="collapse-sidebar-btn" class="collapse-btn" aria-controls="sidebar" aria-expanded="true">Esconder
           barra</button>
         <h2 id="chapter-title" class="chapter-title">Selecione um capítulo</h2>
+        <!-- Usuário e logout -->
+        <div class="user-area">
+          <span id="user-name" class="user-name"></span>
+          <button id="logout-btn" class="logout-btn" onclick="logout()">Sair</button>
+        </div>
       </header>
 
       <!-- Conteúdo dinâmico do capítulo (abas: Infográficos | Slides | Conteúdos | Exercícios | Podcasts | Práticas | Vídeos) -->
       <article id="content" class="content" aria-live="polite"></article>
     </main>
   </div>
+
+  <!-- Autenticação -->
+  <script src="auth.js"></script>
+  <script>
+    // Verifica autenticação antes de carregar o conteúdo
+    requireAuth();
+  </script>
 
   <!-- Lógica de navegação e renderização -->
   <script src="script.js"></script>
